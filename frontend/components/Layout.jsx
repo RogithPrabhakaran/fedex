@@ -1,16 +1,8 @@
 
 import React from 'react';
-import { User, UserRole } from '../types';
+import { UserRole } from '../types';
 
-interface LayoutProps {
-  user: User;
-  children: React.ReactNode;
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-  onLogout: () => void;
-}
-
-const Layout: React.FC<LayoutProps> = ({ user, children, activeTab, setActiveTab, onLogout }) => {
+const Layout = ({ user, children, activeTab, setActiveTab, onLogout }) => {
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden">
       {/* Header */}

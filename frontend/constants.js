@@ -1,7 +1,7 @@
 
-import { Customer, CustomerStatus, EmailTemplate, UserRole } from './types';
+import { CustomerStatus } from './types';
 
-export const MOCK_CUSTOMERS: Customer[] = [
+export const MOCK_CUSTOMERS = [
   {
     id: '1',
     name: 'Acme Logistics Corp',
@@ -84,7 +84,7 @@ export const MOCK_CUSTOMERS: Customer[] = [
   }
 ];
 
-export const EMAIL_TEMPLATES: EmailTemplate[] = [
+export const EMAIL_TEMPLATES = [
   {
     id: 'tpl_1',
     name: 'Q3 Shipping Update',

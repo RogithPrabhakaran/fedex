@@ -1,35 +1,13 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { Customer, CustomerStatus, User, ActionType, DcaAction } from '../types';
-import { apiService } from '../services/apiService';
+import React, { useState, useMemo } from 'react';
+import { CustomerStatus } from '../types';
+import { MOCK_CUSTOMERS } from '../constants';
 
-interface AgencyDashboardProps {
-  user: User;
-}
-
-const AgencyDashboard: React.FC<AgencyDashboardProps> = ({ user }) => {
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [selectedCase, setSelectedCase] = useState<Customer | null>(null);
+const AgencyDashboard = ({ user }) => {
+  const [customers, setCustomers] = useState(MOCK_CUSTOMERS);
+  const [selectedCase, setSelectedCase] = useState(null);
   const [actionNotes, setActionNotes] = useState('');
-  const [actionType, setActionType] = useState<ActionType>('CALL');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    loadCustomers();
-  }, []);
-
-  const loadCustomers = async () => {
-    try {
-      setIsLoading(true);
-      const data = await apiService.getCustomers();
-      setCustomers(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load customers');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [actionType, setActionType] = useState('CALL');
 
   // DCA Agents only see customers assigned to them or those that are defaulted
   const myCases = useMemo(() => {
@@ -40,53 +18,35 @@ const AgencyDashboard: React.FC<AgencyDashboardProps> = ({ user }) => {
     );
   }, [customers, user.agencyId]);
 
-  const handleLogAction = async (e: React.FormEvent) => {
+  const handleLogAction = (e) => {
     e.preventDefault();
     if (!selectedCase || !actionNotes.trim()) return;
 
-    try {
-      const newAction = await apiService.createAction(selectedCase.id, {
-        type: actionType,
-        notes: actionNotes,
-        performedBy: user.name
-      });
+    const newAction = {
+      id: Math.random().toString(36).substr(2, 9),
+      type: actionType,
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      notes: actionNotes,
+      performedBy: user.name
+    };
 
-      const updatedCase = {
-        ...selectedCase,
-        actions: [newAction, ...selectedCase.actions],
-        lastUpdated: new Date().toISOString()
-      };
+    const updatedCase = {
+      ...selectedCase,
+      actions: [newAction, ...selectedCase.actions],
+      lastUpdated: newAction.date
+    };
 
-      setCustomers(prev => prev.map(c => c.id === selectedCase.id ? updatedCase : c));
-      setSelectedCase(updatedCase);
-      setActionNotes('');
-    } catch (err: any) {
-      setError(err.message || 'Failed to log action');
-    }
+    setCustomers(prev => prev.map(c => c.id === selectedCase.id ? updatedCase : c));
+    setSelectedCase(updatedCase);
+    setActionNotes('');
   };
 
-  const updateStatus = (status: CustomerStatus) => {
+  const updateStatus = (status) => {
     if (!selectedCase) return;
     const updatedCase = { ...selectedCase, status };
     setCustomers(prev => prev.map(c => c.id === selectedCase.id ? updatedCase : c));
     setSelectedCase(updatedCase);
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-white">Loading...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-        {error}
-      </div>
-    );
-  }
 
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-background-dark">
@@ -156,7 +116,7 @@ const AgencyDashboard: React.FC<AgencyDashboardProps> = ({ user }) => {
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Update Case Status</label>
                 <select 
                   value={selectedCase.status}
-                  onChange={(e) => updateStatus(e.target.value as CustomerStatus)}
+                  onChange={(e) => updateStatus(e.target.value)}
                   className="bg-surface-dark border-surface-border rounded-xl text-white font-bold px-6 py-3 focus:ring-primary focus:border-primary"
                 >
                   <option value={CustomerStatus.DEFAULTED}>Defaulted</option>

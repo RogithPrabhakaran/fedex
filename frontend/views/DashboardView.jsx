@@ -1,35 +1,17 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { Customer, CustomerStatus } from '../types';
-import { apiService } from '../services/apiService';
+import React, { useState, useMemo } from 'react';
+import { CustomerStatus } from '../types';
+import { MOCK_CUSTOMERS } from '../constants';
 import CustomerTable from '../components/CustomerTable';
 import { geminiService } from '../services/geminiService';
 
-const DashboardView: React.FC = () => {
-  const [customers, setCustomers] = useState<Customer[]>([]);
+const DashboardView = () => {
+  const [customers, setCustomers] = useState(MOCK_CUSTOMERS);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [editingCustomer, setEditingCustomer] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [aiInsight, setAiInsight] = useState<{ strategy: string; reasoning: string; priority: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    loadCustomers();
-  }, []);
-
-  const loadCustomers = async () => {
-    try {
-      setIsLoading(true);
-      const data = await apiService.getCustomers();
-      setCustomers(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load customers');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [aiInsight, setAiInsight] = useState(null);
 
   const filteredCustomers = useMemo(() => {
     return customers.filter(c => 
@@ -45,7 +27,7 @@ const DashboardView: React.FC = () => {
     return { totalDebt, highProb, dcaCount };
   }, [customers]);
 
-  const handleToggleSelect = (id: string) => {
+  const handleToggleSelect = (id) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
   };
 
@@ -53,7 +35,7 @@ const DashboardView: React.FC = () => {
     setSelectedIds(prev => prev.length === filteredCustomers.length ? [] : filteredCustomers.map(c => c.id));
   };
 
-  const handleEdit = async (customer: Customer) => {
+  const handleEdit = async (customer) => {
     setEditingCustomer(customer);
     setAiInsight(null);
     setIsAnalyzing(true);
@@ -67,39 +49,16 @@ const DashboardView: React.FC = () => {
     }
   };
 
-  const saveEdit = async (e: React.FormEvent) => {
+  const saveEdit = (e) => {
     e.preventDefault();
     if (editingCustomer) {
-      try {
-        const updatedCustomer = await apiService.updateCustomer(editingCustomer.id, editingCustomer);
-        setCustomers(prev => prev.map(c => c.id === editingCustomer.id ? updatedCustomer : c));
-        setEditingCustomer(null);
-      } catch (err: any) {
-        setError(err.message || 'Failed to update customer');
-      }
+      setCustomers(prev => prev.map(c => c.id === editingCustomer.id ? editingCustomer : c));
+      setEditingCustomer(null);
     }
   };
 
   return (
     <div className="flex flex-col gap-8 p-4 md:p-10 max-w-[1600px] mx-auto w-full">
-      {error && (
-        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-          {error}
-          <button 
-            onClick={() => setError('')} 
-            className="ml-2 text-red-300 hover:text-red-100"
-          >
-            ×
-          </button>
-        </div>
-      )}
-
-      {isLoading ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="text-white">Loading customers...</div>
-        </div>
-      ) : (
-        <>
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex flex-col gap-2">
@@ -252,7 +211,7 @@ const DashboardView: React.FC = () => {
                   <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Global Status</label>
                   <select 
                     value={editingCustomer.status}
-                    onChange={(e) => setEditingCustomer({...editingCustomer, status: e.target.value as CustomerStatus})}
+                    onChange={(e) => setEditingCustomer({...editingCustomer, status: e.target.value})}
                     className="w-full rounded-xl border border-surface-border bg-[#111418] px-4 py-3 text-white focus:border-primary"
                   >
                     {Object.values(CustomerStatus).map(s => <option key={s}>{s}</option>)}
@@ -277,8 +236,6 @@ const DashboardView: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
-        </>
       )}
     </div>
   );

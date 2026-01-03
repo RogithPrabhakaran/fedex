@@ -1,16 +1,8 @@
 
 import React from 'react';
-import { Customer, CustomerStatus } from '../types';
+import { CustomerStatus } from '../types';
 
-interface CustomerTableProps {
-  customers: Customer[];
-  selectedIds: string[];
-  onToggleSelect: (id: string) => void;
-  onToggleAll: () => void;
-  onEdit: (customer: Customer) => void;
-}
-
-const getStatusStyles = (status: CustomerStatus) => {
+const getStatusStyles = (status) => {
   switch (status) {
     case CustomerStatus.ACTIVE:
       return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
@@ -27,7 +19,7 @@ const getStatusStyles = (status: CustomerStatus) => {
   }
 };
 
-const CustomerTable: React.FC<CustomerTableProps> = ({ 
+const CustomerTable = ({ 
   customers, 
   selectedIds, 
   onToggleSelect, 
