@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head><title>FedEx DCA Manager</title></head>
+<body style="font-family:Arial;padding:20px">
+<h1>FedEx DCA Manager Pro</h1>
+<p>✅ Backend running at: <a href="http://localhost:5000/api/health">http://localhost:5000</a></p>
+<button onclick="test()">Test Backend</button>
+<div id="result"></div>
+<script>
+async function test() {
+  try {
+    const res = await fetch('http://localhost:5000/api/health');
+    const data = await res.json();
+    document.getElementById('result').innerHTML = '✅ Backend Status: ' + data.status;
+  } catch(e) {
+    document.getElementById('result').innerHTML = '❌ Start backend first: cd backend && npm run dev';
+  }
+}
+</script>
+</body>
+</html>

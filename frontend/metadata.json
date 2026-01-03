@@ -1,0 +1,9 @@
+
+{
+  "name": "FedEx DCA Manager Pro",
+  "description": "A comprehensive Debt Collection Agency management solution for FedEx, featuring AI-driven recovery predictions, automated campaigns, and structured case management.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
