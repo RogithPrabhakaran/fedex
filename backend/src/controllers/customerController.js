@@ -1,5 +1,6 @@
 const { Customer, DcaAction } = require('../models');
 const { Op } = require('sequelize');
+const Joi = require('joi');
 
 const customerController = {
   async getAllCustomers(req, res) {
@@ -117,6 +118,58 @@ const customerController = {
 
       const customer = await Customer.findByPk(req.params.id);
       res.json(customer);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  // Bulk-assign a list of customers to a DCA agency
+  async assignToDcaBulk(req, res) {
+    try {
+      const schema = Joi.object({
+        customerIds: Joi.array().items(Joi.string()).min(1).required(),
+        dcaId: Joi.string().required()
+      });
+
+      const { error, value } = schema.validate(req.body);
+      if (error) return res.status(400).json({ error: error.details[0].message });
+
+      const { customerIds, dcaId } = value;
+
+      const [updatedCount] = await Customer.update(
+        { assignedToDcaId: dcaId, status: 'Review' },
+        { where: { id: customerIds } }
+      );
+
+      if (!updatedCount) {
+        return res.status(404).json({ error: 'No customers were updated' });
+      }
+
+      const updatedCustomers = await Customer.findAll({ where: { id: customerIds } });
+      res.json({ updatedCount, updatedCustomers });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  // Return customers that are assigned to an external DCA (optional ?dcaId=agency)
+  async getAssignedCustomers(req, res) {
+    try {
+      const { dcaId } = req.query;
+      const where = { assignedToDcaId: { [Op.ne]: null } };
+      if (dcaId) where.assignedToDcaId = dcaId;
+
+      const customers = await Customer.findAll({
+        where,
+        include: [{
+          model: DcaAction,
+          as: 'actions',
+          order: [['date', 'DESC']],
+        }],
+        order: [['updatedAt', 'DESC']],
+      });
+
+      res.json(customers);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

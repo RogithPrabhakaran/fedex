@@ -1,13 +1,28 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { CustomerStatus } from '../types';
-import { MOCK_CUSTOMERS } from '../constants';
+import { customerService } from '../services/customerService';
 
 const AgencyDashboard = ({ user }) => {
-  const [customers, setCustomers] = useState(MOCK_CUSTOMERS);
+  const [customers, setCustomers] = useState([]);
   const [selectedCase, setSelectedCase] = useState(null);
   const [actionNotes, setActionNotes] = useState('');
   const [actionType, setActionType] = useState('CALL');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      try {
+        const data = await customerService.fetchAll();
+        setCustomers(data);
+      } catch (err) {
+        console.error('Failed to load customers', err);
+      } finally { setLoading(false); }
+    };
+
+    load();
+  }, []);
 
   // DCA Agents only see customers assigned to them or those that are defaulted
   const myCases = useMemo(() => {
@@ -18,34 +33,40 @@ const AgencyDashboard = ({ user }) => {
     );
   }, [customers, user.agencyId]);
 
-  const handleLogAction = (e) => {
+  const handleLogAction = async (e) => {
     e.preventDefault();
     if (!selectedCase || !actionNotes.trim()) return;
 
     const newAction = {
-      id: Math.random().toString(36).substr(2, 9),
       type: actionType,
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       notes: actionNotes,
       performedBy: user.name
     };
 
-    const updatedCase = {
-      ...selectedCase,
-      actions: [newAction, ...selectedCase.actions],
-      lastUpdated: newAction.date
-    };
-
-    setCustomers(prev => prev.map(c => c.id === selectedCase.id ? updatedCase : c));
-    setSelectedCase(updatedCase);
-    setActionNotes('');
+    try {
+      const saved = await customerService.addAction(selectedCase.id, newAction);
+      // refresh the customer actions
+      const refreshed = await customerService.fetchById(selectedCase.id);
+      setCustomers(prev => prev.map(c => c.id === selectedCase.id ? refreshed : c));
+      setSelectedCase(refreshed);
+      setActionNotes('');
+    } catch (err) {
+      console.error('Failed to log action', err);
+      alert(err.body?.error || err.message || 'Failed to log action');
+    }
   };
 
-  const updateStatus = (status) => {
+  const updateStatus = async (status) => {
     if (!selectedCase) return;
-    const updatedCase = { ...selectedCase, status };
-    setCustomers(prev => prev.map(c => c.id === selectedCase.id ? updatedCase : c));
-    setSelectedCase(updatedCase);
+    try {
+      const updated = await customerService.updateCustomer(selectedCase.id, { ...selectedCase, status });
+      setCustomers(prev => prev.map(c => c.id === selectedCase.id ? updated : c));
+      setSelectedCase(updated);
+    } catch (err) {
+      console.error('Failed to update status', err);
+      alert(err.body?.error || err.message || 'Update failed');
+    }
   };
 
   return (

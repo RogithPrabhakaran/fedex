@@ -23,6 +23,8 @@ if [ ! -f .env ]; then
     cp .env .env.backup 2>/dev/null || true
     echo "Please configure your .env file with database and email settings."
     echo "Default database name: fedex_dca_db"
+    echo "If you will use the Python model predictor, install Python dependencies:"
+    echo "  pip install joblib pandas numpy scikit-learn"
 fi
 
 echo "✅ Setup complete!"

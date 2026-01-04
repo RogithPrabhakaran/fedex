@@ -1,17 +1,34 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { CustomerStatus } from '../types';
-import { MOCK_CUSTOMERS } from '../constants';
 import CustomerTable from '../components/CustomerTable';
 import { geminiService } from '../services/geminiService';
+import { customerService } from '../services/customerService';
+import { modelService } from '../services/modelService';
 
 const DashboardView = () => {
-  const [customers, setCustomers] = useState(MOCK_CUSTOMERS);
+  const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIds, setSelectedIds] = useState([]);
   const [editingCustomer, setEditingCustomer] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiInsight, setAiInsight] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      try {
+        const data = await customerService.fetchAll();
+        setCustomers(data);
+      } catch (err) {
+        console.error('Failed to load customers', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   const filteredCustomers = useMemo(() => {
     return customers.filter(c => 
@@ -21,8 +38,8 @@ const DashboardView = () => {
   }, [customers, searchTerm]);
 
   const stats = useMemo(() => {
-    const totalDebt = customers.reduce((acc, c) => acc + c.totalDebt, 0);
-    const highProb = customers.filter(c => c.repaymentProbability > 70).reduce((acc, c) => acc + c.totalDebt, 0);
+    const totalDebt = customers.reduce((acc, c) => acc + (Number(c.totalDebt) || 0), 0);
+    const highProb = customers.filter(c => (c.repaymentProbability || 0) > 70).reduce((acc, c) => acc + (Number(c.totalDebt) || 0), 0);
     const dcaCount = customers.filter(c => !!c.assignedToDcaId).length;
     return { totalDebt, highProb, dcaCount };
   }, [customers]);
@@ -44,16 +61,51 @@ const DashboardView = () => {
       setAiInsight(insight);
     } catch (error) {
       console.error("AI Insight failed", error);
+    }
+
+    // call our propensity model to update repaymentProbability
+    try {
+      // build model input from customer fields (best-effort mapping)
+      const modelInput = {
+        invoice_amount: Number(customer.totalDebt) || 0,
+        payment_terms_days: 30,
+        service_type: 'GROUND',
+        recent_shipments_30d: 0,
+        recent_shipments_90d: 0,
+        ontime_delivery_rate_hist: 0.9,
+        delivery_exceptions_90d: 0,
+        past_due_ratio_hist: Math.min(1, (customer.daysOverdue || 0) / 120),
+        dispute_rate_hist: 0,
+        reminder_count: 0,
+        credit_tier: 'MEDIUM_RISK',
+        credit_limit: Number(customer.creditLimit) || 0,
+        outstanding_balance: Number(customer.totalDebt) || 0,
+        utilization_at_invoice: 0
+      };
+
+      const pred = await modelService.predict(modelInput);
+      if (pred?.success) {
+        const pct = Math.round(pred.risk_score * 100);
+        setEditingCustomer(prev => ({ ...prev, repaymentProbability: pct, __modelPrediction: pred }));
+      }
+    } catch (err) {
+      console.error('Model prediction failed', err);
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  const saveEdit = (e) => {
+  const saveEdit = async (e) => {
     e.preventDefault();
     if (editingCustomer) {
-      setCustomers(prev => prev.map(c => c.id === editingCustomer.id ? editingCustomer : c));
-      setEditingCustomer(null);
+      try {
+        const updated = await customerService.updateCustomer(editingCustomer.id, editingCustomer);
+        setCustomers(prev => prev.map(c => c.id === updated.id ? updated : c));
+        setEditingCustomer(null);
+      } catch (err) {
+        console.error('Failed to save customer', err);
+        alert(err.body?.error || err.message || 'Save failed');
+      }
     }
   };
 
@@ -70,7 +122,20 @@ const DashboardView = () => {
           <p className="text-slate-400 text-lg">Tracking performance and Agency progress for all outstanding accounts.</p>
         </div>
         <div className="flex gap-4">
-           <button className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-white font-black shadow-xl shadow-primary/20 hover:bg-blue-600 transition-all">
+           <button onClick={async () => {
+             if (selectedIds.length === 0) return alert('No customers selected');
+             try {
+               // use bulk assign endpoint
+               await customerService.assignToDcaBulk(selectedIds, 'agency_alpha');
+               const refreshed = await customerService.fetchAll();
+               setCustomers(refreshed);
+               setSelectedIds([]);
+               alert('Assigned selected customers to agency_alpha (bulk)');
+             } catch (err) {
+               console.error('Bulk assign failed', err);
+               alert(err.body?.error || err.message || 'Assign failed');
+             }
+           }} className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-white font-black shadow-xl shadow-primary/20 hover:bg-blue-600 transition-all">
             <span className="material-symbols-outlined">send_to_mobile</span>
             Assign to Agency
           </button>
@@ -144,6 +209,13 @@ const DashboardView = () => {
               <div>
                 <h3 className="text-2xl font-black text-white">{editingCustomer.name}</h3>
                 <p className="text-slate-400 font-mono text-sm">Account Tracking: {editingCustomer.accountId}</p>
+                {editingCustomer.__modelPrediction && (
+                  <div className="mt-2 text-sm text-slate-400 flex items-center gap-3">
+                    <span className="text-[13px]">Model:</span>
+                    <span className="bg-[#0b1220] px-3 py-1 rounded-md font-bold text-white">{editingCustomer.__modelPrediction?.risk_score ? Math.round(editingCustomer.__modelPrediction.risk_score*100) + '%' : ''}</span>
+                    <span className="text-xs text-slate-500">{editingCustomer.__modelPrediction?.risk_category}</span>
+                  </div>
+                )}
               </div>
               <button 
                 onClick={() => setEditingCustomer(null)}

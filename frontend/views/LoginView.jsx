@@ -1,10 +1,13 @@
 
 import React, { useState } from 'react';
 import { UserRole } from '../types';
+import { authService } from '../services/authService';
 
 const LoginView = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background-dark">
@@ -39,7 +42,22 @@ const LoginView = ({ onLogin }) => {
             <p className="text-slate-400 text-lg">Sign in to access your management portal.</p>
           </div>
 
-          <form className="flex flex-col gap-6" onSubmit={(e) => { e.preventDefault(); onLogin(UserRole.FEDEX_ADMIN); }}>
+          <form className="flex flex-col gap-6" onSubmit={async (e) => {
+              e.preventDefault();
+              setError(null);
+              setLoading(true);
+              try {
+                const data = await authService.login(email, password);
+                localStorage.setItem('dca_token', data.token);
+                localStorage.setItem('dca_user', JSON.stringify(data.user));
+                onLogin(data.user, data.token);
+              } catch (err) {
+                console.error(err);
+                setError(err.body?.error || err.message || 'Login failed');
+              } finally {
+                setLoading(false);
+              }
+            }}>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-bold text-slate-300 uppercase tracking-wider">Email Address</label>
               <div className="relative group">
@@ -71,11 +89,13 @@ const LoginView = ({ onLogin }) => {
               </div>
             </div>
 
+            {error && <div className="text-sm text-red-400 font-bold">{error}</div>}
             <button 
               type="submit"
-              className="mt-4 w-full rounded-xl bg-primary py-4 text-lg font-black text-white shadow-xl shadow-primary/20 hover:bg-blue-600 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              disabled={loading}
+              className="mt-4 w-full rounded-xl bg-primary py-4 text-lg font-black text-white shadow-xl shadow-primary/20 hover:bg-blue-600 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-60"
             >
-              Sign In
+              {loading ? 'Signing In...' : 'Sign In'}
               <span className="material-symbols-outlined">arrow_forward</span>
             </button>
           </form>
@@ -88,14 +108,36 @@ const LoginView = ({ onLogin }) => {
 
           <div className="grid grid-cols-2 gap-4">
             <button 
-              onClick={() => onLogin(UserRole.FEDEX_ADMIN)}
+              onClick={async () => {
+                setError(null);
+                setLoading(true);
+                try {
+                  const data = await authService.login('admin@fedex.com', 'password123');
+                  localStorage.setItem('dca_token', data.token);
+                  localStorage.setItem('dca_user', JSON.stringify(data.user));
+                  onLogin(data.user, data.token);
+                } catch (err) {
+                  setError(err.body?.error || err.message || 'Login failed');
+                } finally { setLoading(false); }
+              }}
               className="flex items-center justify-center gap-2 p-4 rounded-xl border border-surface-border bg-surface-dark hover:border-primary transition-all text-white font-bold"
             >
               <span className="material-symbols-outlined text-primary">corporate_fare</span>
               FedEx Admin
             </button>
             <button 
-              onClick={() => onLogin(UserRole.DCA_AGENT)}
+              onClick={async () => {
+                setError(null);
+                setLoading(true);
+                try {
+                  const data = await authService.login('agent@dca.com', 'password123');
+                  localStorage.setItem('dca_token', data.token);
+                  localStorage.setItem('dca_user', JSON.stringify(data.user));
+                  onLogin(data.user, data.token);
+                } catch (err) {
+                  setError(err.body?.error || err.message || 'Login failed');
+                } finally { setLoading(false); }
+              }}
               className="flex items-center justify-center gap-2 p-4 rounded-xl border border-surface-border bg-surface-dark hover:border-fedex-orange transition-all text-white font-bold"
             >
               <span className="material-symbols-outlined text-fedex-orange">support_agent</span>

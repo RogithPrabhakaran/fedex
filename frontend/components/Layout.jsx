@@ -20,7 +20,7 @@ const Layout = ({ user, children, activeTab, setActiveTab, onLogout }) => {
 
         <div className="flex flex-1 justify-end gap-8">
           <nav className="hidden lg:flex items-center gap-8">
-            {['Dashboard', 'Customers', 'Campaigns', 'Reports'].map((tab) => (
+            {['Dashboard', 'Customers', 'DCA Assignments', 'Campaigns', 'Reports'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}

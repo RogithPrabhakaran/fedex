@@ -7,6 +7,7 @@ const authRoutes = require('./routes/auth');
 const customerRoutes = require('./routes/customers');
 const dcaActionRoutes = require('./routes/dcaActions');
 const emailRoutes = require('./routes/emails');
+const modelRoutes = require('./routes/model');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -20,11 +21,17 @@ app.use('/api/auth', authRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/dca', dcaActionRoutes);
 app.use('/api/emails', emailRoutes);
+app.use('/api/model', modelRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
+
+// Swagger docs
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./docs/swagger');
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -37,21 +44,33 @@ app.use('*', (req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-// Start server
+// Start server with retry logic for transient DB errors
 const startServer = async () => {
-  try {
-    await sequelize.authenticate();
-    console.log('Database connection established successfully.');
-    
-    await sequelize.sync({ force: false });
-    console.log('Database synchronized.');
-    
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error('Unable to start server:', error);
-    process.exit(1);
+  const retries = parseInt(process.env.DB_CONNECT_RETRIES || '5', 10);
+  const delay = parseInt(process.env.DB_CONNECT_RETRY_DELAY || '2000', 10);
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      await sequelize.authenticate();
+      console.log('Database connection established successfully.');
+
+      await sequelize.sync({ force: false });
+      console.log('Database synchronized.');
+
+      app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+      });
+      return;
+    } catch (error) {
+      console.error(`Database connection attempt ${attempt} failed:`, error.message || error);
+      if (attempt < retries) {
+        console.log(`Retrying in ${delay}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      } else {
+        console.error(`Failed to connect to database after ${retries} attempts.`);
+        process.exit(1);
+      }
+    }
   }
 };
 

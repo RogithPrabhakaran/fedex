@@ -1,28 +1,36 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { api } from './services/api';
+import { authService } from './services/authService';
 import { UserRole } from './types';
 import Layout from './components/Layout';
 import LoginView from './views/LoginView';
 import DashboardView from './views/DashboardView';
 import CampaignView from './views/CampaignView';
 import AgencyDashboard from './views/AgencyDashboard';
+import DcaAssignmentsView from './views/DcaAssignmentsView';
 
 const App = () => {
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(() => {
+    const u = localStorage.getItem('dca_user');
+    return u ? JSON.parse(u) : null;
+  });
   const [activeTab, setActiveTab] = useState('Dashboard');
 
-  const handleLogin = (role) => {
-    setCurrentUser({
-      id: 'usr_1',
-      name: role === UserRole.FEDEX_ADMIN ? 'FedEx Recovery Admin' : 'Agency Specialist',
-      email: role === UserRole.FEDEX_ADMIN ? 'admin@fedex.com' : 'smith@agency-alpha.com',
-      role,
-      avatar: `https://i.pravatar.cc/150?u=${role}`,
-      agencyId: role === UserRole.DCA_AGENT ? 'agency_alpha' : undefined
-    });
+  useEffect(() => {
+    const t = localStorage.getItem('dca_token');
+    if (t) api.setToken(t);
+  }, []);
+
+  const handleLogin = (user, token) => {
+    api.setToken(token);
+    localStorage.setItem('dca_token', token);
+    localStorage.setItem('dca_user', JSON.stringify(user));
+    setCurrentUser(user);
   };
 
   const handleLogout = () => {
+    authService.logout();
     setCurrentUser(null);
   };
 
@@ -54,6 +62,8 @@ const App = () => {
       case 'Dashboard':
       case 'Customers':
         return <DashboardView />;
+      case 'DCA Assignments':
+        return <DcaAssignmentsView />;
       case 'Campaigns':
         return <CampaignView />;
       default:
