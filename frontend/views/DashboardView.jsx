@@ -2,7 +2,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { CustomerStatus } from '../types';
 import CustomerTable from '../components/CustomerTable';
-import { geminiService } from '../services/geminiService';
 import { customerService } from '../services/customerService';
 import { modelService } from '../services/modelService';
 

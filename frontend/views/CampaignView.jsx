@@ -1,7 +1,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { MOCK_CUSTOMERS, EMAIL_TEMPLATES } from '../constants';
-import { geminiService } from '../services/geminiService';
 
 const CampaignView = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(EMAIL_TEMPLATES[0]);
