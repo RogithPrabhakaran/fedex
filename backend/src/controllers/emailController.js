@@ -4,10 +4,13 @@ const nodemailer = require('nodemailer');
 const emailController = {
   async getAllTemplates(req, res) {
     try {
-      const templates = await EmailTemplate.findAll();
+      const templates = await EmailTemplate.findAll({
+        order: [['createdAt', 'DESC']],
+      });
       res.json(templates);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Get all templates error:', error);
+      res.status(500).json({ error: error.message || 'Failed to fetch templates' });
     }
   },
 
@@ -21,16 +24,24 @@ const emailController = {
 
       res.json(template);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Get template by ID error:', error);
+      res.status(500).json({ error: error.message || 'Failed to fetch template' });
     }
   },
 
   async createTemplate(req, res) {
     try {
+      const { name, subject, body, description } = req.body;
+      
+      if (!name || !subject || !body) {
+        return res.status(400).json({ error: 'Name, subject, and body are required' });
+      }
+
       const template = await EmailTemplate.create(req.body);
       res.status(201).json(template);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Create template error:', error);
+      res.status(500).json({ error: error.message || 'Failed to create template' });
     }
   },
 
@@ -47,7 +58,8 @@ const emailController = {
       const template = await EmailTemplate.findByPk(req.params.id);
       res.json(template);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Update template error:', error);
+      res.status(500).json({ error: error.message || 'Failed to update template' });
     }
   },
 
@@ -63,13 +75,22 @@ const emailController = {
 
       res.status(204).send();
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Delete template error:', error);
+      res.status(500).json({ error: error.message || 'Failed to delete template' });
     }
   },
 
   async sendEmail(req, res) {
     try {
       const { templateId, customerIds, customSubject, customBody } = req.body;
+      
+      if (!customerIds || !Array.isArray(customerIds) || customerIds.length === 0) {
+        return res.status(400).json({ error: 'customerIds array is required' });
+      }
+
+      if (!templateId && !customSubject && !customBody) {
+        return res.status(400).json({ error: 'Either templateId or customSubject/customBody is required' });
+      }
       
       let template = null;
       if (templateId) {
@@ -79,21 +100,37 @@ const emailController = {
         }
       }
 
+      // Validate email configuration
+      if (!process.env.EMAIL_HOST || !process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        return res.status(500).json({ error: 'Email service is not configured' });
+      }
+
       const transporter = nodemailer.createTransporter({
         host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT,
-        secure: false,
+        port: process.env.EMAIL_PORT ? parseInt(process.env.EMAIL_PORT, 10) : 587,
+        secure: process.env.EMAIL_PORT === '465',
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
         },
       });
 
+      // Verify transporter configuration
+      try {
+        await transporter.verify();
+      } catch (verifyError) {
+        console.error('Email transporter verification failed:', verifyError);
+        return res.status(500).json({ error: 'Email service configuration is invalid' });
+      }
+
       const results = [];
       
       for (const customerId of customerIds) {
         const customer = await Customer.findByPk(customerId);
-        if (!customer) continue;
+        if (!customer) {
+          results.push({ customerId, status: 'failed', error: 'Customer not found' });
+          continue;
+        }
 
         let subject = customSubject || template?.subject || 'FedEx Communication';
         let body = customBody || template?.body || '';
@@ -119,13 +156,15 @@ const emailController = {
           
           results.push({ customerId, status: 'sent' });
         } catch (emailError) {
+          console.error(`Failed to send email to customer ${customerId}:`, emailError.message);
           results.push({ customerId, status: 'failed', error: emailError.message });
         }
       }
 
       res.json({ results });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Send email error:', error);
+      res.status(500).json({ error: error.message || 'Failed to send emails' });
     }
   },
 };

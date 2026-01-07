@@ -5,7 +5,21 @@ const { User } = require('../models');
 const authController = {
   async register(req, res) {
     try {
+      if (!process.env.JWT_SECRET) {
+        return res.status(500).json({ error: 'Server configuration error' });
+      }
+
       const { email, password, name, role, agencyId } = req.body;
+      
+      // Validate required fields
+      if (!email || !password || !name || !role) {
+        return res.status(400).json({ error: 'Missing required fields: email, password, name, role' });
+      }
+
+      // Validate role
+      if (!['FEDEX_ADMIN', 'DCA_AGENT'].includes(role)) {
+        return res.status(400).json({ error: 'Invalid role. Must be FEDEX_ADMIN or DCA_AGENT' });
+      }
       
       const existingUser = await User.findOne({ where: { email } });
       if (existingUser) {
@@ -36,13 +50,22 @@ const authController = {
         },
       });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Registration error:', error);
+      res.status(500).json({ error: error.message || 'Registration failed' });
     }
   },
 
   async login(req, res) {
     try {
+      if (!process.env.JWT_SECRET) {
+        return res.status(500).json({ error: 'Server configuration error' });
+      }
+
       const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required' });
+      }
       
       const user = await User.findOne({ where: { email } });
       if (!user) {
@@ -68,7 +91,8 @@ const authController = {
         },
       });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Login error:', error);
+      res.status(500).json({ error: error.message || 'Login failed' });
     }
   },
 };

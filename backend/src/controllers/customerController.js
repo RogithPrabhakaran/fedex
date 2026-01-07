@@ -1,6 +1,7 @@
 const { Customer, DcaAction } = require('../models');
 const { Op } = require('sequelize');
 const Joi = require('joi');
+const riskService = require('../services/riskService');
 
 const customerController = {
   async getAllCustomers(req, res) {
@@ -23,6 +24,7 @@ const customerController = {
         include: [{
           model: DcaAction,
           as: 'actions',
+          separate: true,
           order: [['date', 'DESC']],
         }],
         order: [['updatedAt', 'DESC']],
@@ -30,7 +32,8 @@ const customerController = {
 
       res.json(customers);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Get all customers error:', error);
+      res.status(500).json({ error: error.message || 'Failed to fetch customers' });
     }
   },
 
@@ -40,6 +43,7 @@ const customerController = {
         include: [{
           model: DcaAction,
           as: 'actions',
+          separate: true,
           order: [['date', 'DESC']],
         }],
       });
@@ -50,16 +54,26 @@ const customerController = {
 
       res.json(customer);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Get customer by ID error:', error);
+      res.status(500).json({ error: error.message || 'Failed to fetch customer' });
     }
   },
 
   async createCustomer(req, res) {
     try {
       const customer = await Customer.create(req.body);
-      res.status(201).json(customer);
+      // compute risk immediately for this new customer
+      try {
+        const { customer: updated } = await riskService.computeRiskForCustomerId(customer.id);
+        return res.status(201).json(updated);
+      } catch (err) {
+        // risk compute failed but creation succeeded
+        console.error('Risk compute after create failed', err);
+        return res.status(201).json(customer);
+      }
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Create customer error:', error);
+      res.status(500).json({ error: error.message || 'Failed to create customer' });
     }
   },
 
@@ -73,17 +87,25 @@ const customerController = {
         return res.status(404).json({ error: 'Customer not found' });
       }
 
-      const customer = await Customer.findByPk(req.params.id, {
-        include: [{
-          model: DcaAction,
-          as: 'actions',
-          order: [['date', 'DESC']],
-        }],
-      });
-
-      res.json(customer);
+      // re-run risk computation for this customer and return refreshed record
+      try {
+        const { customer } = await riskService.computeRiskForCustomerId(req.params.id);
+        return res.json(customer);
+      } catch (err) {
+        console.error('Risk compute after update failed', err);
+        const customer = await Customer.findByPk(req.params.id, {
+          include: [{
+            model: DcaAction,
+            as: 'actions',
+            separate: true,
+            order: [['date', 'DESC']],
+          }],
+        });
+        return res.json(customer);
+      }
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Update customer error:', error);
+      res.status(500).json({ error: error.message || 'Failed to update customer' });
     }
   },
 
@@ -99,7 +121,8 @@ const customerController = {
 
       res.status(204).send();
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Delete customer error:', error);
+      res.status(500).json({ error: error.message || 'Failed to delete customer' });
     }
   },
 
@@ -119,7 +142,8 @@ const customerController = {
       const customer = await Customer.findByPk(req.params.id);
       res.json(customer);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Assign to DCA error:', error);
+      res.status(500).json({ error: error.message || 'Failed to assign customer to DCA' });
     }
   },
 
@@ -136,19 +160,20 @@ const customerController = {
 
       const { customerIds, dcaId } = value;
 
-      const [updatedCount] = await Customer.update(
+      const updatedCount = await Customer.update(
         { assignedToDcaId: dcaId, status: 'Review' },
         { where: { id: customerIds } }
       );
 
-      if (!updatedCount) {
+      if (updatedCount[0] === 0) {
         return res.status(404).json({ error: 'No customers were updated' });
       }
 
       const updatedCustomers = await Customer.findAll({ where: { id: customerIds } });
-      res.json({ updatedCount, updatedCustomers });
+      res.json({ updatedCount: updatedCount[0], updatedCustomers });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Bulk assign to DCA error:', error);
+      res.status(500).json({ error: error.message || 'Failed to bulk assign customers' });
     }
   },
 
@@ -164,6 +189,7 @@ const customerController = {
         include: [{
           model: DcaAction,
           as: 'actions',
+          separate: true,
           order: [['date', 'DESC']],
         }],
         order: [['updatedAt', 'DESC']],
@@ -171,7 +197,8 @@ const customerController = {
 
       res.json(customers);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Get assigned customers error:', error);
+      res.status(500).json({ error: error.message || 'Failed to fetch assigned customers' });
     }
   },
 };

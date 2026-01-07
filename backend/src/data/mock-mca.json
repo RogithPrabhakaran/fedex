@@ -1,0 +1,58 @@
+{
+  "L17110MH1973PLC019786": {
+    "status_code": 200,
+    "success": true,
+    "data": {
+      "cin": "L17110MH1973PLC019786",
+      "company_name": "RELIANCE INDUSTRIES LIMITED",
+      "company_status": "Active",
+      "paid_up_capital": 67660000000,
+      "authorised_capital": 150000000000,
+      "last_annual_return_date": "31-03-2024",
+      "active_compliance": "ACTIVE Compliant",
+      "registered_address": "Maker Chambers IV, 3rd Floor, 222, Nariman Point, Mumbai, MH, 400021"
+    }
+  },
+  "U63013DL2004PLC217305": {
+    "status_code": 200,
+    "success": true,
+    "data": {
+      "cin": "U63013DL2004PLC217305",
+      "company_name": "GO AIRLINES (INDIA) LIMITED",
+      "company_status": "Under Liquidation",
+      "paid_up_capital": 2500000000,
+      "authorised_capital": 5000000000,
+      "last_annual_return_date": "31-03-2022",
+      "active_compliance": "Non-Compliant",
+      "registered_address": "1st Floor, C-1, Wadia International Centre, Worli, Mumbai, MH"
+    }
+  },
+  "U45400MH2012PTC234572": {
+    "status_code": 200,
+    "success": true,
+    "data": {
+      "cin": "U45400MH2012PTC234572",
+      "company_name": "SOM CONSTRUCTION PRIVATE LIMITED",
+      "company_status": "Struck Off",
+      "paid_up_capital": 100000,
+      "authorised_capital": 100000,
+      "last_annual_return_date": "15-09-2018",
+      "active_compliance": "Inactive",
+      "registered_address": "409, NIT Commercial Complex, Sitabuldi, Nagpur, MH, 440012"
+    }
+  },
+  "L65910MH1984PLC032639": {
+    "status_code": 200,
+    "success": true,
+    "data": {
+      "cin": "L65910MH1984PLC032639",
+      "company_name": "HDFC BANK LIMITED",
+      "company_status": "Amalgamated",
+      "paid_up_capital": 7590000000,
+      "authorised_capital": 8000000000,
+      "last_annual_return_date": "31-03-2024",
+      "active_compliance": "ACTIVE Compliant",
+      "registered_address": "HDFC Bank House, Senapati Bapat Marg, Lower Parel, Mumbai, MH"
+    }
+  }
+}

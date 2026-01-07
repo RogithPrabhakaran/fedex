@@ -4,12 +4,24 @@ const dcaActionController = {
   async createAction(req, res) {
     try {
       const { customerId } = req.params;
-      const actionData = { ...req.body, customerId };
+      
+      // Validate customer exists
+      const customer = await Customer.findByPk(customerId);
+      if (!customer) {
+        return res.status(404).json({ error: 'Customer not found' });
+      }
+
+      const actionData = { 
+        ...req.body, 
+        customerId,
+        performedBy: req.body.performedBy || req.user?.id || 'system'
+      };
       
       const action = await DcaAction.create(actionData);
       res.status(201).json(action);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Create action error:', error);
+      res.status(500).json({ error: error.message || 'Failed to create action' });
     }
   },
 
@@ -24,7 +36,8 @@ const dcaActionController = {
 
       res.json(actions);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Get actions by customer error:', error);
+      res.status(500).json({ error: error.message || 'Failed to fetch actions' });
     }
   },
 
@@ -41,7 +54,8 @@ const dcaActionController = {
       const action = await DcaAction.findByPk(req.params.id);
       res.json(action);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Update action error:', error);
+      res.status(500).json({ error: error.message || 'Failed to update action' });
     }
   },
 
@@ -57,7 +71,8 @@ const dcaActionController = {
 
       res.status(204).send();
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Delete action error:', error);
+      res.status(500).json({ error: error.message || 'Failed to delete action' });
     }
   },
 };

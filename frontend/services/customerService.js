@@ -37,5 +37,24 @@ export const customerService = {
 
   async addAction(customerId, action) {
     return api.post(`/dca/customers/${customerId}/actions`, action);
+  },
+
+  // New comprehensive analysis endpoint (recommended)
+  async analyzeCustomer(id) {
+    return api.post(`/v1/customers/${id}/analyze`);
+  },
+
+  // Analyze all customers
+  async analyzeAllCustomers() {
+    return api.post('/v1/analyze-all');
+  },
+
+  // Legacy endpoints (kept for backward compatibility)
+  async computeRiskAll() {
+    return api.post('/v1/compute-risk-all');
+  },
+
+  async computeRiskForCustomer(id) {
+    return api.post(`/v1/customers/${id}/compute-risk`);
   }
 };

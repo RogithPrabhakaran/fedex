@@ -21,41 +21,75 @@ const modelInputSchema = Joi.object({
 
 const modelController = {
   predict(req, res) {
-    const { error, value } = modelInputSchema.validate(req.body);
-    if (error) return res.status(400).json({ error: error.details[0].message });
-
-    const pyPath = path.resolve(__dirname, '../../predict.py');
-
-    // Prefer virtualenv python if present so packages installed in venv are used
-    const fs = require('fs');
-    const candidates = [
-      path.resolve(__dirname, '../../.venv/bin/python'), // backend/.venv
-      path.resolve(__dirname, '../../../.venv/bin/python'), // project-root .venv
-      'python3'
-    ];
-    const pythonExec = candidates.find(p => typeof p === 'string' && fs.existsSync(p)) || 'python3';
-    console.debug('Using python executable for model:', pythonExec);
-
-    const child = execFile(pythonExec, [pyPath], { maxBuffer: 10 * 1024 * 1024 }, (err, stdout, stderr) => {
-      if (err) {
-        console.error('Model execution error', err, stderr);
-        // attempt to return Python stderr to help debugging if present
-        return res.status(500).json({ error: 'Model execution failed', detail: stderr?.toString?.() });
+    try {
+      const { error, value } = modelInputSchema.validate(req.body);
+      if (error) {
+        return res.status(400).json({ error: error.details[0].message });
       }
 
-      try {
-        const out = JSON.parse(stdout);
-        // ensure exact output format
-        return res.json(out);
-      } catch (e) {
-        console.error('Invalid JSON from model', e);
-        return res.status(500).json({ error: 'Invalid model output' });
-      }
-    });
+      const pyPath = path.resolve(__dirname, '../../predict.py');
 
-    // pass JSON input via stdin
-    child.stdin.write(JSON.stringify(value));
-    child.stdin.end();
+      // Prefer virtualenv python if present so packages installed in venv are used
+      const fs = require('fs');
+      const candidates = [
+        path.resolve(__dirname, '../../.venv/bin/python'), // backend/.venv
+        path.resolve(__dirname, '../../../.venv/bin/python'), // project-root .venv
+        'python3'
+      ];
+      const pythonExec = candidates.find(p => typeof p === 'string' && fs.existsSync(p)) || 'python3';
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Using python executable for model:', pythonExec);
+      }
+
+      const child = execFile(
+        pythonExec, 
+        [pyPath], 
+        { maxBuffer: 10 * 1024 * 1024 }, 
+        (err, stdout, stderr) => {
+          if (err) {
+            console.error('Model execution error:', err.message);
+            const stderrStr = stderr?.toString() || '';
+            console.error('Python stderr:', stderrStr);
+            return res.status(500).json({ 
+              error: 'Model execution failed', 
+              detail: process.env.NODE_ENV === 'development' ? stderrStr : undefined 
+            });
+          }
+
+          if (!stdout || stdout.trim().length === 0) {
+            console.error('Model returned empty output');
+            return res.status(500).json({ error: 'Model returned empty output' });
+          }
+
+          try {
+            const out = JSON.parse(stdout);
+            return res.json(out);
+          } catch (e) {
+            console.error('Invalid JSON from model:', e.message);
+            console.error('Model stdout:', stdout.substring(0, 500));
+            return res.status(500).json({ error: 'Invalid model output' });
+          }
+        }
+      );
+
+      // Handle child process errors
+      child.on('error', (err) => {
+        console.error('Failed to start model process:', err.message);
+        if (!res.headersSent) {
+          res.status(500).json({ error: 'Failed to start model process' });
+        }
+      });
+
+      // pass JSON input via stdin
+      child.stdin.write(JSON.stringify(value));
+      child.stdin.end();
+    } catch (error) {
+      console.error('Unexpected error in modelController.predict:', error);
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    }
   }
 };
 

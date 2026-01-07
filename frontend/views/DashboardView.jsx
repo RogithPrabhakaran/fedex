@@ -53,43 +53,55 @@ const DashboardView = () => {
   };
 
   const handleEdit = async (customer) => {
-    setEditingCustomer(customer);
+    // Set customer immediately but mark as analyzing
+    setEditingCustomer({ ...customer, __analyzing: true });
     setAiInsight(null);
     setIsAnalyzing(true);
+
+    try {
+      // Step 1: Run comprehensive analysis workflow
+      // This will: fetch data, check CIN, fetch API data, run ML model, run risk model, update DB
+      const analysisResult = await customerService.analyzeCustomer(customer.id);
+      
+      if (analysisResult.success && analysisResult.customer) {
+        // Update the customer with all the analysis results
+        const updatedCustomer = {
+          ...analysisResult.customer,
+          __modelPrediction: analysisResult.mlResult ? {
+            risk_score: analysisResult.mlResult.risk_score,
+            risk_category: analysisResult.mlResult.risk_category,
+            business_action: analysisResult.mlResult.business_action,
+            prediction: analysisResult.mlResult.prediction,
+          } : null,
+          __riskAnalysis: analysisResult.riskAnalysis,
+          __analyzing: false,
+        };
+        
+        setEditingCustomer(updatedCustomer);
+        
+        // Update the customer in the main list
+        setCustomers(prev => prev.map(c => 
+          c.id === customer.id ? updatedCustomer : c
+        ));
+      }
+    } catch (error) {
+      console.error('Customer analysis failed', error);
+      // Show error but keep customer open
+      setEditingCustomer(prev => ({ 
+        ...prev, 
+        __analyzing: false,
+        __error: error.message || 'Analysis failed'
+      }));
+      alert(`Analysis failed: ${error.message || 'Unknown error'}`);
+    }
+
+    // Step 2: Get AI insight (non-blocking, can fail)
     try {
       const insight = await geminiService.analyzeCustomerRisk(customer);
       setAiInsight(insight);
     } catch (error) {
       console.error("AI Insight failed", error);
-    }
-
-    // call our propensity model to update repaymentProbability
-    try {
-      // build model input from customer fields (best-effort mapping)
-      const modelInput = {
-        invoice_amount: Number(customer.totalDebt) || 0,
-        payment_terms_days: 30,
-        service_type: 'GROUND',
-        recent_shipments_30d: 0,
-        recent_shipments_90d: 0,
-        ontime_delivery_rate_hist: 0.9,
-        delivery_exceptions_90d: 0,
-        past_due_ratio_hist: Math.min(1, (customer.daysOverdue || 0) / 120),
-        dispute_rate_hist: 0,
-        reminder_count: 0,
-        credit_tier: 'MEDIUM_RISK',
-        credit_limit: Number(customer.creditLimit) || 0,
-        outstanding_balance: Number(customer.totalDebt) || 0,
-        utilization_at_invoice: 0
-      };
-
-      const pred = await modelService.predict(modelInput);
-      if (pred?.success) {
-        const pct = Math.round(pred.risk_score * 100);
-        setEditingCustomer(prev => ({ ...prev, repaymentProbability: pct, __modelPrediction: pred }));
-      }
-    } catch (err) {
-      console.error('Model prediction failed', err);
+      // Don't block UI if AI insight fails
     } finally {
       setIsAnalyzing(false);
     }
@@ -138,6 +150,27 @@ const DashboardView = () => {
            }} className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-white font-black shadow-xl shadow-primary/20 hover:bg-blue-600 transition-all">
             <span className="material-symbols-outlined">send_to_mobile</span>
             Assign to Agency
+          </button>
+
+          <button onClick={async () => {
+            if (!confirm('This will analyze all customers. This may take several minutes. Continue?')) {
+              return;
+            }
+            try {
+              setLoading(true);
+              const result = await customerService.analyzeAllCustomers();
+              const refreshed = await customerService.fetchAll();
+              setCustomers(refreshed);
+              alert(`Analysis complete! ${result.successCount || 0} customers analyzed successfully.`);
+            } catch (err) {
+              console.error('Analyze all failed', err);
+              alert(err.body?.error || err.message || 'Analysis failed');
+            } finally {
+              setLoading(false);
+            }
+          }} className="flex items-center gap-2 rounded-xl border border-surface-border px-6 py-3 text-white font-black hover:bg-surface-border transition-all">
+            <span className="material-symbols-outlined">assessment</span>
+            Analyze All Customers
           </button>
         </div>
       </div>
@@ -209,17 +242,49 @@ const DashboardView = () => {
               <div>
                 <h3 className="text-2xl font-black text-white">{editingCustomer.name}</h3>
                 <p className="text-slate-400 font-mono text-sm">Account Tracking: {editingCustomer.accountId}</p>
-                {editingCustomer.__modelPrediction && (
-                  <div className="mt-2 text-sm text-slate-400 flex items-center gap-3">
-                    <span className="text-[13px]">Model:</span>
-                    <span className="bg-[#0b1220] px-3 py-1 rounded-md font-bold text-white">{editingCustomer.__modelPrediction?.risk_score ? Math.round(editingCustomer.__modelPrediction.risk_score*100) + '%' : ''}</span>
-                    <span className="text-xs text-slate-500">{editingCustomer.__modelPrediction?.risk_category}</span>
+                
+                {/* Analysis Status */}
+                {editingCustomer.__analyzing && (
+                  <div className="mt-2 text-sm text-slate-400 flex items-center gap-2">
+                    <span className="animate-spin material-symbols-outlined text-[16px]">sync</span>
+                    <span>Analyzing customer data...</span>
+                  </div>
+                )}
+                
+                {/* ML Model Results */}
+                {!editingCustomer.__analyzing && editingCustomer.__modelPrediction && (
+                  <div className="mt-2 text-sm text-slate-400 flex items-center gap-3 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px]">ML Model:</span>
+                      <span className="bg-[#0b1220] px-3 py-1 rounded-md font-bold text-white">
+                        {editingCustomer.__modelPrediction?.risk_score ? Math.round(editingCustomer.__modelPrediction.risk_score * 100) + '%' : 'N/A'}
+                      </span>
+                      <span className="text-xs text-slate-500">{editingCustomer.__modelPrediction?.risk_category}</span>
+                    </div>
+                    {editingCustomer.__riskAnalysis && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-[13px]">Risk:</span>
+                        <span className="bg-[#0b1220] px-3 py-1 rounded-md font-bold text-white">
+                          {editingCustomer.repaymentProbability || 0}%
+                        </span>
+                        <span className="text-xs text-slate-500">{editingCustomer.__riskAnalysis.verdict}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {/* Error Message */}
+                {editingCustomer.__error && (
+                  <div className="mt-2 text-sm text-red-400 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[16px]">error</span>
+                    <span>{editingCustomer.__error}</span>
                   </div>
                 )}
               </div>
               <button 
                 onClick={() => setEditingCustomer(null)}
                 className="text-slate-400 hover:text-white p-2 rounded-full hover:bg-surface-border transition-all"
+                disabled={editingCustomer.__analyzing}
               >
                 <span className="material-symbols-outlined">close</span>
               </button>
