@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FedEx AI Debt Allocator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="min-h-screen flex items-center justify-center p-6">
+        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-4xl">
+            <div class="flex items-center justify-between mb-8 border-b pb-4">
+                <h1 class="text-3xl font-bold text-indigo-900">FedEx <span class="text-orange-600">AI Allocator</span></h1>
+                <span class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-0.5 rounded">V1.0 - Predictive Engine</span>
+            </div>
+
+            <form id="predictionForm" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="space-y-4">
+                    <h3 class="font-bold text-gray-700 border-l-4 border-indigo-500 pl-2">Financials</h3>
+                    <div><label class="block text-sm">DSO</label><input type="number" name="DSO" value="30" class="w-full border rounded p-2"></div>
+                    <div><label class="block text-sm">Balance Age</label><input type="number" name="Balance_Age" value="45" class="w-full border rounded p-2"></div>
+                    <div><label class="block text-sm">Lag Trend</label><input type="number" name="Lag_Trend" value="5" class="w-full border rounded p-2"></div>
+                    <div><label class="block text-sm">Credit Score</label><input type="number" name="Credit_Score" value="650" class="w-full border rounded p-2"></div>
+                </div>
+
+                <div class="space-y-4">
+                    <h3 class="font-bold text-gray-700 border-l-4 border-indigo-500 pl-2">Engagement</h3>
+                    <div><label class="block text-sm">MCA Status (0-2)</label><input type="number" name="MCA_Status" value="0" class="w-full border rounded p-2"></div>
+                    <div><label class="block text-sm">Sentiment (-1 to 1)</label><input type="number" step="0.1" name="Sentiment" value="0.2" class="w-full border rounded p-2"></div>
+                    <div><label class="block text-sm">Email Open Rate (0-1)</label><input type="number" step="0.1" name="Email_Open_Rate" value="0.7" class="w-full border rounded p-2"></div>
+                    <div><label class="block text-sm">Response Latency (Hrs)</label><input type="number" name="Response_Lat" value="24" class="w-full border rounded p-2"></div>
+                </div>
+
+                <div class="space-y-4">
+                    <h3 class="font-bold text-gray-700 border-l-4 border-indigo-500 pl-2">Integrity</h3>
+                    <div><label class="block text-sm">Broken Promises</label><input type="number" name="Broken_Promises" value="1" class="w-full border rounded p-2"></div>
+                    <div><label class="block text-sm">PTP Integrity (0-1)</label><input type="number" step="0.1" name="PTP_Integrity" value="0.8" class="w-full border rounded p-2"></div>
+                    <div><label class="block text-sm">Has Dispute (0/1)</label><input type="number" name="Has_Dispute" value="0" class="w-full border rounded p-2"></div>
+                    <input type="hidden" name="Company_Age" value="20">
+                    <input type="hidden" name="Invoice_Error" value="0">
+                    
+                    <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-lg transition">Analyze Account</button>
+                </div>
+            </form>
+
+            <div id="result" class="mt-10 p-6 rounded-lg hidden">
+                <div class="flex flex-col items-center text-center">
+                    <h2 id="actionText" class="text-2xl font-black mb-2"></h2>
+                    <p id="probabilityText" class="text-gray-600 mb-4"></p>
+                    <p id="recommendationText" class="italic text-sm bg-white p-3 rounded shadow-inner w-full"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Convert strings to numbers
+            for (let key in data) {
+                data[key] = parseFloat(data[key]);
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                
+                const resultDiv = document.getElementById('result');
+                const actionText = document.getElementById('actionText');
+                
+                resultDiv.classList.remove('hidden', 'bg-green-100', 'bg-yellow-100', 'bg-red-100');
+                
+                if(result.probability_to_pay > 0.8) {
+                    resultDiv.classList.add('bg-green-100');
+                    actionText.className = "text-2xl font-black text-green-800";
+                } else if(result.probability_to_pay > 0.45) {
+                    resultDiv.classList.add('bg-yellow-100');
+                    actionText.className = "text-2xl font-black text-yellow-800";
+                } else {
+                    resultDiv.classList.add('bg-red-100');
+                    actionText.className = "text-2xl font-black text-red-800";
+                }
+
+                actionText.innerText = result.allocation_result;
+                document.getElementById('probabilityText').innerText = `Recovery Probability: ${(result.probability_to_pay * 100).toFixed(2)}%`;
+                document.getElementById('recommendationText').innerText = result.recommendation;
+                
+            } catch (error) {
+                alert("Error connecting to API. Is Uvicorn running?");
+            }
+        });
+    </script>
+</body>
+</html>
