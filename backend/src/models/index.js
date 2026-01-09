@@ -3,10 +3,14 @@ const User = require('./User');
 const Customer = require('./Customer');
 const DcaAction = require('./DcaAction');
 const EmailTemplate = require('./EmailTemplate');
-const DcaAgency = require('./dcaAgencies');
-const DcaPerformanceByType = require('./dcaAgencies');
-const DcaSlaCompliance = require('./dcaAgencies');
-const DcaCasesSummary = require('./dcaAgencies');
+
+const {
+  DcaAgency,
+  DcaPerformanceByType,
+  DcaSlaCompliance,
+  DcaCasesSummary,
+} = require('./dcaAgencies');
+
 // Define associations
 Customer.hasMany(DcaAction, { foreignKey: 'customerId', as: 'actions' });
 DcaAction.belongsTo(Customer, { foreignKey: 'customerId', as: 'customer' });
