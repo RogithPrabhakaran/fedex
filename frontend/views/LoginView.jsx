@@ -1,7 +1,7 @@
-
 import React, { useState } from 'react';
 import { UserRole } from '../types';
 import { authService } from '../services/authService';
+import DashboardView from './DashboardView';
 
 const LoginView = ({ onLogin }) => {
   const [email, setEmail] = useState('');
@@ -196,6 +196,15 @@ const LoginView = ({ onLogin }) => {
               DCA Agent
             </button>
               </div>
+
+              {/* Quick access button to navigate to agency dashboard */}
+              <button 
+                onClick={() => window.location.href = '/dashboard'}
+                className="w-full flex items-center justify-center gap-2 p-4 rounded-xl border border-surface-border bg-surface-dark hover:border-green-500 hover:bg-green-500/10 transition-all text-white font-bold"
+              >
+                <span className="material-symbols-outlined text-green-500">key</span>
+                Go to Dashboard
+              </button>
             </>
           )}
           

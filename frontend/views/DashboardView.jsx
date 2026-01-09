@@ -8,6 +8,10 @@ import { modelService } from '../services/modelService';
 const DashboardView = () => {
   const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('none');
+  const [sortDir, setSortDir] = useState('desc');
+  const [minOverdue, setMinOverdue] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
   const [selectedIds, setSelectedIds] = useState([]);
   const [editingCustomer, setEditingCustomer] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -30,11 +34,29 @@ const DashboardView = () => {
   }, []);
 
   const filteredCustomers = useMemo(() => {
-    return customers.filter(c => 
+    let list = customers.filter(c => 
       c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
       c.accountId.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [customers, searchTerm]);
+
+    if (statusFilter && statusFilter !== 'ALL') {
+      list = list.filter(c => c.status === statusFilter);
+    }
+
+    if (minOverdue && !Number.isNaN(Number(minOverdue))) {
+      const min = Number(minOverdue);
+      list = list.filter(c => Number(c.daysOverdue) >= min);
+    }
+
+    if (sortBy === 'daysOverdue') {
+      list = list.slice().sort((a, b) => {
+        const diff = Number(a.daysOverdue) - Number(b.daysOverdue);
+        return sortDir === 'asc' ? diff : -diff;
+      });
+    }
+
+    return list;
+  }, [customers, searchTerm, statusFilter, minOverdue, sortBy, sortDir]);
 
   const stats = useMemo(() => {
     const totalDebt = customers.reduce((acc, c) => acc + (Number(c.totalDebt) || 0), 0);
@@ -211,7 +233,7 @@ const DashboardView = () => {
 
       {/* Main Table Section */}
       <div className="flex flex-col gap-6">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 rounded-2xl border border-surface-border bg-surface-dark">
+        <div className="flex flex-col sm:flex-row items-center gap-4 p-6 rounded-2xl border border-surface-border bg-surface-dark">
           <div className="relative w-full sm:w-96">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">search</span>
             <input 
@@ -221,6 +243,32 @@ const DashboardView = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full rounded-xl border border-surface-border bg-[#111418] pl-12 pr-4 py-3 text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
             />
+          </div>
+
+          <div className="ml-auto flex items-center gap-3">
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="rounded-xl border border-surface-border bg-[#111418] px-4 py-3 text-white font-semibold">
+              <option value="ALL">All Statuses</option>
+              {Object.values(CustomerStatus).map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+
+            <input
+              type="number"
+              min={0}
+              placeholder="Min overdue"
+              value={minOverdue}
+              onChange={(e) => setMinOverdue(e.target.value)}
+              className="w-32 rounded-xl border border-surface-border bg-[#111418] px-4 py-3 text-white font-semibold"
+            />
+
+            <select value={sortBy + '|' + sortDir} onChange={(e) => {
+                const [s, d] = e.target.value.split('|');
+                setSortBy(s);
+                setSortDir(d);
+              }} className="rounded-xl border border-surface-border bg-[#111418] px-4 py-3 text-white font-semibold">
+              <option value="none|desc">No Sort</option>
+              <option value="daysOverdue|desc">Days Overdue ↓</option>
+              <option value="daysOverdue|asc">Days Overdue ↑</option>
+            </select>
           </div>
         </div>
 
