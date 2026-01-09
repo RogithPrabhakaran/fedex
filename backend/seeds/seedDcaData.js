@@ -1,3 +1,4 @@
+// require('dotenv').config({ path: './.env' }); // Make sure the path points to your .env file
 const sequalize = require('../src/config/database');
 const {
   DcaAgency,
@@ -5,7 +6,6 @@ const {
   DcaPerformanceByType,
   DcaSlaCompliance,
 } = require('../src/models');
-
 const dcaseed = async () => {
   try {
     const dcaAgencies = await DcaAgency.bulkCreate([
@@ -2861,7 +2861,7 @@ const dcaseed = async () => {
         compliance_rate: 1,
         total_checks: 190,
         breach_count: 0,
-        last_breach_date: '',
+        last_breach_date: null,
       },
       {
         id: 25,
