@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { api } from './services/api';
 import { authService } from './services/authService';
@@ -32,7 +31,23 @@ const App = () => {
   const handleLogout = () => {
     authService.logout();
     setCurrentUser(null);
+    setActiveTab('Dashboard');
   };
+
+  const ADMIN_TABS = [
+    { id: 'Dashboard', label: 'Dashboard', icon: 'dashboard' },
+    { id: 'Customers', label: 'Customers', icon: 'group' },
+    { id: 'DCA Assignments', label: 'Assignments', icon: 'assignment_ind' },
+    { id: 'Campaigns', label: 'Campaigns', icon: 'campaign' },
+  ];
+
+  const DCA_AGENT_TABS = [
+    { id: 'Dashboard', label: 'My Queue', icon: 'list_alt' }, // "My Queue" is their Dashboard
+    { id: 'Profile', label: 'My Profile', icon: 'person' },
+  ];
+
+  const currentTabs =
+    currentUser?.role === UserRole.DCA_AGENT ? DCA_AGENT_TABS : ADMIN_TABS;
 
   if (!currentUser) {
     return <LoginView onLogin={handleLogin} />;
@@ -47,11 +62,22 @@ const App = () => {
           return <AgencyDashboard user={currentUser} />;
         default:
           return (
-            <div className="flex flex-col items-center justify-center h-full p-20 text-center">
-              <span className="material-symbols-outlined text-6xl text-slate-600 mb-4">lock</span>
-              <h2 className="text-2xl font-bold text-white mb-2">Restricted Access</h2>
-              <p className="text-slate-400">DCA agents only have access to their Recovery Queue and Profile.</p>
-              <button onClick={() => setActiveTab('Dashboard')} className="mt-4 text-primary font-bold">Back to Queue</button>
+            <div className='flex flex-col items-center justify-center h-full p-20 text-center'>
+              <span className='material-symbols-outlined text-6xl text-slate-600 mb-4'>
+                lock
+              </span>
+              <h2 className='text-2xl font-bold text-white mb-2'>
+                Restricted Access
+              </h2>
+              <p className='text-slate-400'>
+                DCA agents only have access to their Recovery Queue and Profile.
+              </p>
+              <button
+                onClick={() => setActiveTab('Dashboard')}
+                className='mt-4 text-primary font-bold'
+              >
+                Back to Queue
+              </button>
             </div>
           );
       }
@@ -68,21 +94,28 @@ const App = () => {
         return <CampaignView />;
       default:
         return (
-          <div className="flex flex-col items-center justify-center h-full p-20 text-center">
-            <span className="material-symbols-outlined text-6xl text-slate-600 mb-4">construction</span>
-            <h2 className="text-2xl font-bold text-white mb-2">{activeTab} Page</h2>
-            <p className="text-slate-400">This feature is currently under development.</p>
+          <div className='flex flex-col items-center justify-center h-full p-20 text-center'>
+            <span className='material-symbols-outlined text-6xl text-slate-600 mb-4'>
+              construction
+            </span>
+            <h2 className='text-2xl font-bold text-white mb-2'>
+              {activeTab} Page
+            </h2>
+            <p className='text-slate-400'>
+              This feature is currently under development.
+            </p>
           </div>
         );
     }
   };
 
   return (
-    <Layout 
-      user={currentUser} 
-      activeTab={activeTab} 
+    <Layout
+      user={currentUser}
+      activeTab={activeTab}
       setActiveTab={setActiveTab}
       onLogout={handleLogout}
+      navItems={currentTabs}
     >
       {renderContent()}
     </Layout>
