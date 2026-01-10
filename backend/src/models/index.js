@@ -3,6 +3,9 @@ const User = require('./User');
 const Customer = require('./Customer');
 const DcaAction = require('./DcaAction');
 const EmailTemplate = require('./EmailTemplate');
+const Invoice = require('./Invoice');
+const Case = require('./Case');
+const CaseLog = require('./CaseLog');
 
 const {
   DcaAgency,
@@ -14,6 +17,7 @@ const {
 // Define associations
 Customer.hasMany(DcaAction, { foreignKey: 'customerId', as: 'actions' });
 DcaAction.belongsTo(Customer, { foreignKey: 'customerId', as: 'customer' });
+
 DcaAgency.hasMany(DcaPerformanceByType, { foreignKey: 'dca_id' });
 DcaPerformanceByType.belongsTo(DcaAgency, { foreignKey: 'dca_id' });
 
@@ -22,6 +26,14 @@ DcaSlaCompliance.belongsTo(DcaAgency, { foreignKey: 'dca_id' });
 
 DcaAgency.hasMany(DcaCasesSummary, { foreignKey: 'dca_id' });
 DcaCasesSummary.belongsTo(DcaAgency, { foreignKey: 'dca_id' });
+
+// Invoice -> Case -> CaseLog associations
+Invoice.hasMany(Case, { foreignKey: 'invoice_id', as: 'cases' });
+Case.belongsTo(Invoice, { foreignKey: 'invoice_id', as: 'invoice' });
+
+Case.hasMany(CaseLog, { foreignKey: 'case_id', as: 'logs' });
+CaseLog.belongsTo(Case, { foreignKey: 'case_id', as: 'case' });
+
 module.exports = {
   sequelize,
   User,
@@ -32,4 +44,7 @@ module.exports = {
   DcaPerformanceByType,
   DcaSlaCompliance,
   DcaCasesSummary,
+  Invoice,
+  Case,
+  CaseLog,
 };

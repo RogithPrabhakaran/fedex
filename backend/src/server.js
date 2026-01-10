@@ -16,6 +16,9 @@ const dcaAgencyRoutes = require('./routes/dcaAgencies');
 const emailRoutes = require('./routes/emails');
 const modelRoutes = require('./routes/model');
 const riskRoutes = require('./routes/riskRoutes');
+const invoiceRoutes = require('./routes/invoices');
+const caseRoutes = require('./routes/cases');
+const caseLogRoutes = require('./routes/caseLogs');
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '5000', 10);
@@ -32,6 +35,9 @@ app.use('/api/dca-agencies', dcaAgencyRoutes);
 app.use('/api/emails', emailRoutes);
 app.use('/api/model', modelRoutes);
 app.use('/api/v1', riskRoutes);
+app.use('/api/invoices', invoiceRoutes);
+app.use('/api/cases', caseRoutes);
+app.use('/api/case-logs', caseLogRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
