@@ -19,10 +19,10 @@ const getStatusStyles = (status) => {
   }
 };
 
-const CustomerTable = ({ 
-  customers, 
-  selectedIds, 
-  onToggleSelect, 
+const CustomerTable = ({
+  customers,
+  selectedIds,
+  onToggleSelect,
   onToggleAll,
   onEdit
 }) => {
@@ -33,8 +33,8 @@ const CustomerTable = ({
           <thead className="bg-[#1a2028] text-slate-400 text-[10px] uppercase font-bold tracking-widest">
             <tr>
               <th className="px-6 py-4 w-[60px] text-center">
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   className="rounded border-surface-border bg-transparent text-primary focus:ring-primary focus:ring-offset-0"
                   onChange={onToggleAll}
                   checked={customers.length > 0 && selectedIds.length === customers.length}
@@ -43,6 +43,7 @@ const CustomerTable = ({
               <th className="px-6 py-4">Customer Name</th>
               <th className="px-6 py-4">Account ID</th>
               <th className="px-6 py-4">Status</th>
+              <th className="px-6 py-4">Assigned Agency</th>
               <th className="px-6 py-4">Total Debt</th>
               <th className="px-6 py-4">Days Overdue</th>
               <th className="px-6 py-4 w-[240px]">Repayment Prob.</th>
@@ -51,14 +52,14 @@ const CustomerTable = ({
           </thead>
           <tbody className="divide-y divide-surface-border text-sm text-white">
             {customers.map((customer) => (
-              <tr 
-                key={customer.id} 
+              <tr
+                key={customer.id}
                 className="hover:bg-[#202933] group transition-colors cursor-pointer"
                 onClick={() => onEdit(customer)}
               >
                 <td className="px-6 py-4 text-center" onClick={(e) => e.stopPropagation()}>
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     className="rounded border-surface-border bg-transparent text-primary focus:ring-primary focus:ring-offset-0"
                     checked={selectedIds.includes(customer.id)}
                     onChange={() => onToggleSelect(customer.id)}
@@ -77,26 +78,64 @@ const CustomerTable = ({
                     {customer.status}
                   </span>
                 </td>
+                <td className="px-6 py-4 text-slate-300 font-medium">
+                  {customer.assignedToDcaId ? (
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[16px] text-blue-400">gavel</span>
+                      {customer.assignedToDcaId === 'agency_alpha' ? 'Alpha Collections' :
+                        customer.assignedToDcaId === 'agency_beta' ? 'Beta Recovery' :
+                          customer.assignedToDcaId}
+                    </div>
+                  ) : (
+                    <span className="text-slate-500 italic">In-House</span>
+                  )}
+                </td>
                 <td className="px-6 py-4 font-bold">
                   ${customer.totalDebt.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </td>
                 <td className="px-6 py-4 text-slate-400">{customer.daysOverdue} days</td>
                 <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full rounded-full transition-all duration-1000 ${
-                          customer.repaymentProbability > 70 ? 'bg-emerald-500' : 
-                          customer.repaymentProbability > 40 ? 'bg-amber-500' : 'bg-red-500'
-                        }`}
-                        style={{ width: `${customer.repaymentProbability}%` }}
-                      ></div>
+                  {['Closed', 'Legal Action'].includes(customer.status) ? (
+                    <div className="flex items-center gap-2 opacity-50 filter grayscale">
+                      <div className="flex-1 h-2 bg-gray-800 rounded-full"></div>
+                      <span className="font-bold w-10 text-right text-slate-500 text-xs uppercase tracking-wider">Done</span>
                     </div>
-                    <span className="font-bold w-10 text-right">{customer.repaymentProbability}%</span>
-                  </div>
+                  ) : (
+                    <div className="flex items-center gap-3">
+                      {/* Processing State: Pulsing Bar and 'AI...' Text */}
+                      {customer.analysis_status === 'PROCESSING' ? (
+                        <>
+                          <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
+                            <div className="h-full w-full bg-blue-500/50 animate-pulse rounded-full"></div>
+                          </div>
+                          <span className="font-bold w-10 text-right text-[10px] text-blue-400 animate-pulse">
+                            AI...
+                          </span>
+                        </>
+                      ) : customer.analysis_status === 'COMPLETED' ? (
+                        /* Completed State: Actual Score */
+                        <>
+                          <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all duration-1000 ${customer.repaymentProbability > 70 ? 'bg-emerald-500' :
+                                customer.repaymentProbability > 40 ? 'bg-amber-500' : 'bg-red-500'
+                                }`}
+                              style={{ width: `${customer.repaymentProbability}%` }}
+                            ></div>
+                          </div>
+                          <span className="font-bold w-10 text-right">
+                            {customer.repaymentProbability}%
+                          </span>
+                        </>
+                      ) : (
+                        /* Pending/New State: Show Nothing (Blank) */
+                        <div className="w-full h-2"></div>
+                      )}
+                    </div>
+                  )}
                 </td>
                 <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                  <button 
+                  <button
                     onClick={() => onEdit(customer)}
                     className="p-1 text-slate-400 hover:text-white rounded hover:bg-surface-border transition-colors"
                   >

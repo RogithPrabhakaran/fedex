@@ -5,6 +5,7 @@ import { UserRole } from './types';
 import Layout from './components/Layout';
 import LoginView from './views/LoginView';
 import DashboardView from './views/DashboardView';
+import CustomersView from './views/CustomersView';
 import CampaignView from './views/CampaignView';
 import AgencyDashboard from './views/AgencyDashboard';
 import DcaAssignmentsView from './views/DcaAssignmentsView';
@@ -86,8 +87,9 @@ const App = () => {
     // FedEx Admin View
     switch (activeTab) {
       case 'Dashboard':
-      case 'Customers':
         return <DashboardView />;
+      case 'Customers':
+        return <CustomersView />;
       case 'DCA Assignments':
         return <DcaAssignmentsView />;
       case 'Campaigns':

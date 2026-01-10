@@ -1,21 +1,10 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { CustomerStatus } from '../types';
-import CustomerTable from '../components/CustomerTable';
 import { customerService } from '../services/customerService';
-import { modelService } from '../services/modelService';
+import ReactApexChart from 'react-apexcharts';
 
 const DashboardView = () => {
   const [customers, setCustomers] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('none');
-  const [sortDir, setSortDir] = useState('desc');
-  const [minOverdue, setMinOverdue] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
-  const [selectedIds, setSelectedIds] = useState([]);
-  const [editingCustomer, setEditingCustomer] = useState(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [aiInsight, setAiInsight] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -25,38 +14,13 @@ const DashboardView = () => {
         const data = await customerService.fetchAll();
         setCustomers(data);
       } catch (err) {
-        console.error('Failed to load customers', err);
+        console.error('Failed to load customers for stats', err);
       } finally {
         setLoading(false);
       }
     };
     load();
   }, []);
-
-  const filteredCustomers = useMemo(() => {
-    let list = customers.filter(c => 
-      c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      c.accountId.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    if (statusFilter && statusFilter !== 'ALL') {
-      list = list.filter(c => c.status === statusFilter);
-    }
-
-    if (minOverdue && !Number.isNaN(Number(minOverdue))) {
-      const min = Number(minOverdue);
-      list = list.filter(c => Number(c.daysOverdue) >= min);
-    }
-
-    if (sortBy === 'daysOverdue') {
-      list = list.slice().sort((a, b) => {
-        const diff = Number(a.daysOverdue) - Number(b.daysOverdue);
-        return sortDir === 'asc' ? diff : -diff;
-      });
-    }
-
-    return list;
-  }, [customers, searchTerm, statusFilter, minOverdue, sortBy, sortDir]);
 
   const stats = useMemo(() => {
     const totalDebt = customers.reduce((acc, c) => acc + (Number(c.totalDebt) || 0), 0);
@@ -65,82 +29,213 @@ const DashboardView = () => {
     return { totalDebt, highProb, dcaCount };
   }, [customers]);
 
-  const handleToggleSelect = (id) => {
-    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
-  };
+  // Chart Data Preparation
+  const { riskSeries, riskOptions, agencySeries, agencyOptions, leaderboardSeries, leaderboardOptions } = useMemo(() => {
+    // 1. Risk Distribution Data
+    let low = 0, medium = 0, high = 0;
+    customers.forEach(c => {
+      const prob = c.repaymentProbability || 0;
+      if (prob >= 70) low++;
+      else if (prob >= 30) medium++;
+      else high++;
+    });
 
-  const handleToggleAll = () => {
-    setSelectedIds(prev => prev.length === filteredCustomers.length ? [] : filteredCustomers.map(c => c.id));
-  };
+    const total = low + medium + high || 1;
+    // RadialBar expects percentages [Low%, Medium%, High%]
+    const riskSeries = [
+      Math.round((low / total) * 100),
+      Math.round((medium / total) * 100),
+      Math.round((high / total) * 100)
+    ];
 
-  const handleEdit = async (customer) => {
-    // Set customer immediately but mark as analyzing
-    setEditingCustomer({ ...customer, __analyzing: true });
-    setAiInsight(null);
-    setIsAnalyzing(true);
+    const riskOptions = {
+      chart: {
+        type: 'radialBar',
+        background: 'transparent',
+        sparkline: { enabled: true }
+      },
+      plotOptions: {
+        radialBar: {
+          startAngle: -90,
+          endAngle: 90,
+          track: {
+            background: "#334155",
+            strokeWidth: '97%',
+            margin: 5,
+            dropShadow: {
+              enabled: true,
+              top: 2,
+              left: 0,
+              color: '#000',
+              opacity: 1,
+              blur: 2
+            }
+          },
+          dataLabels: {
+            name: { show: false },
+            value: {
+              offsetY: -2,
+              fontSize: '22px',
+              color: 'white',
+              fontWeight: 900
+            }
+          }
+        }
+      },
+      grid: { padding: { top: -10 } },
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shade: 'dark',
+          type: 'horizontal',
+          shadeIntensity: 0.5,
+          gradientToColors: ['#00E396', '#FEB019', '#FF4560'],
+          inverseColors: true,
+          opacityFrom: 1,
+          opacityTo: 1,
+          stops: [0, 100]
+        }
+      },
+      labels: ['Low Risk', 'Medium Risk', 'High Risk'],
+      colors: ['#00C49F', '#FFBB28', '#FF8042'], // Fallbacks
+      legend: { show: true, position: 'bottom', labels: { colors: '#94a3b8' } },
+    };
 
-    try {
-      // Step 1: Run comprehensive analysis workflow
-      // This will: fetch data, check CIN, fetch API data, run ML model, run risk model, update DB
-      const analysisResult = await customerService.analyzeCustomer(customer.id);
-      
-      if (analysisResult.success && analysisResult.customer) {
-        // Update the customer with all the analysis results
-        const updatedCustomer = {
-          ...analysisResult.customer,
-          __modelPrediction: analysisResult.mlResult ? {
-            risk_score: analysisResult.mlResult.risk_score,
-            risk_category: analysisResult.mlResult.risk_category,
-            business_action: analysisResult.mlResult.business_action,
-            prediction: analysisResult.mlResult.prediction,
-          } : null,
-          __riskAnalysis: analysisResult.riskAnalysis,
-          __analyzing: false,
-        };
-        
-        setEditingCustomer(updatedCustomer);
-        
-        // Update the customer in the main list
-        setCustomers(prev => prev.map(c => 
-          c.id === customer.id ? updatedCustomer : c
-        ));
+
+    // 2. Agency Performance Data (Bar Chart)
+    const agencyCounts = {};
+    const agencyPerformance = {}; // { agencyName: recoveredAmount }
+
+    // Initialize generic list or handle dynamic from seed values
+    // Using mapping or raw IDs
+    const getAgencyName = (id) => {
+      if (!id) return 'In-House';
+      if (id === 'agency_alpha') return 'Alpha Collections';
+      if (id === 'agency_beta') return 'Beta Recovery';
+      return id;
+    };
+
+    customers.forEach(c => {
+      const agencyId = c.assignedToDcaId;
+      const agencyName = getAgencyName(agencyId);
+
+      if (!agencyCounts[agencyName]) agencyCounts[agencyName] = { active: 0, closed: 0 };
+      if (!agencyPerformance[agencyName]) agencyPerformance[agencyName] = 0;
+
+      const isClosed = ['PAID_IN_FULL', 'SETTLED', 'CLOSED', 'LEGAL_ACTION', 'Closed', 'Legal Action'].includes(c.status);
+      if (isClosed) {
+        agencyCounts[agencyName].closed++;
+        // Rough estimate: we assume closed means recovered for this demo since we lack transaction table access here
+        agencyPerformance[agencyName] += (Number(c.totalDebt) || 0);
+      } else {
+        agencyCounts[agencyName].active++;
       }
-    } catch (error) {
-      console.error('Customer analysis failed', error);
-      // Show error but keep customer open
-      setEditingCustomer(prev => ({ 
-        ...prev, 
-        __analyzing: false,
-        __error: error.message || 'Analysis failed'
-      }));
-      alert(`Analysis failed: ${error.message || 'Unknown error'}`);
-    }
+    });
 
-    // Step 2: Get AI insight (non-blocking, can fail)
-    try {
-      const insight = await geminiService.analyzeCustomerRisk(customer);
-      setAiInsight(insight);
-    } catch (error) {
-      console.error("AI Insight failed", error);
-      // Don't block UI if AI insight fails
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
+    const categories = Object.keys(agencyCounts);
+    const activeData = categories.map(k => agencyCounts[k].active);
+    const closedData = categories.map(k => agencyCounts[k].closed);
 
-  const saveEdit = async (e) => {
-    e.preventDefault();
-    if (editingCustomer) {
-      try {
-        const updated = await customerService.updateCustomer(editingCustomer.id, editingCustomer);
-        setCustomers(prev => prev.map(c => c.id === updated.id ? updated : c));
-        setEditingCustomer(null);
-      } catch (err) {
-        console.error('Failed to save customer', err);
-        alert(err.body?.error || err.message || 'Save failed');
-      }
-    }
-  };
+    const agencySeries = [
+      { name: 'Active Cases', data: activeData },
+      { name: 'Resolved / Legal', data: closedData }
+    ];
+
+    const agencyOptions = {
+      chart: {
+        type: 'bar',
+        background: 'transparent',
+        toolbar: { show: false },
+        zoom: { enabled: false }
+      },
+      colors: ['#4d148c', '#FF6200'], // Fedex Purple and Orange
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          columnWidth: '55%',
+          borderRadius: 8,
+          borderRadiusApplication: 'end',
+        },
+      },
+      dataLabels: { enabled: false },
+      stroke: { show: true, width: 2, colors: ['transparent'] },
+      xaxis: {
+        categories: categories,
+        labels: { style: { colors: '#94a3b8', fontSize: '12px', fontWeight: 700 } },
+        axisBorder: { show: false },
+        axisTicks: { show: false }
+      },
+      yaxis: { labels: { style: { colors: '#94a3b8' } } },
+      fill: { opacity: 1 },
+      grid: {
+        borderColor: '#334155',
+        strokeDashArray: 4,
+        yaxis: { lines: { show: true } }
+      },
+      legend: { position: 'top', horizontalAlign: 'right', labels: { colors: '#94a3b8' } },
+      tooltip: { theme: 'dark' }
+    };
+
+    // 3. Leaderboard Data (Horizontal Bar Sorted by Recovery)
+    // Convert performance object to array, sort, and slice
+    const leaderboardData = Object.entries(agencyPerformance)
+      .map(([name, amount]) => ({ name, amount }))
+      .sort((a, b) => b.amount - a.amount);
+
+    const leaderboardSeries = [{
+      name: 'Total Recovered',
+      data: leaderboardData.map(d => d.amount)
+    }];
+
+    const leaderboardOptions = {
+      chart: {
+        type: 'bar',
+        background: 'transparent',
+        toolbar: { show: false }
+      },
+      plotOptions: {
+        bar: {
+          borderRadius: 4,
+          horizontal: true,
+          barHeight: '50%',
+          distributed: true // colorful bars
+        }
+      },
+      colors: ['#00E396', '#FEB019', '#FF4560', '#775DD0', '#546E7A', '#26a69a'],
+      dataLabels: {
+        enabled: true,
+        textAnchor: 'start',
+        style: { colors: ['#fff'] },
+        formatter: function (val, opt) {
+          return "$" + val.toLocaleString()
+        },
+        offsetX: 0,
+      },
+      xaxis: {
+        categories: leaderboardData.map(d => d.name),
+        labels: { show: false }, // clean look
+        axisBorder: { show: false },
+        axisTicks: { show: false }
+      },
+      yaxis: {
+        labels: {
+          style: { colors: '#fff', fontSize: '14px', fontWeight: 600 }
+        }
+      },
+      grid: { show: false },
+      tooltip: {
+        theme: 'dark',
+        y: {
+          formatter: function (val) {
+            return "$" + val.toLocaleString()
+          }
+        }
+      },
+      legend: { show: false }
+    };
+
+    return { riskSeries, riskOptions, agencySeries, agencyOptions, leaderboardSeries, leaderboardOptions };
+  }, [customers]);
 
   return (
     <div className="flex flex-col gap-8 p-4 md:p-10 max-w-[1600px] mx-auto w-full">
@@ -153,46 +248,6 @@ const DashboardView = () => {
           </div>
           <h1 className="text-4xl font-black text-white tracking-tight">Oversight Dashboard</h1>
           <p className="text-slate-400 text-lg">Tracking performance and Agency progress for all outstanding accounts.</p>
-        </div>
-        <div className="flex gap-4">
-           <button onClick={async () => {
-             if (selectedIds.length === 0) return alert('No customers selected');
-             try {
-               // use bulk assign endpoint
-               await customerService.assignToDcaBulk(selectedIds, 'agency_alpha');
-               const refreshed = await customerService.fetchAll();
-               setCustomers(refreshed);
-               setSelectedIds([]);
-               alert('Assigned selected customers to agency_alpha (bulk)');
-             } catch (err) {
-               console.error('Bulk assign failed', err);
-               alert(err.body?.error || err.message || 'Assign failed');
-             }
-           }} className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-white font-black shadow-xl shadow-primary/20 hover:bg-blue-600 transition-all">
-            <span className="material-symbols-outlined">send_to_mobile</span>
-            Assign to Agency
-          </button>
-
-          <button onClick={async () => {
-            if (!confirm('This will analyze all customers. This may take several minutes. Continue?')) {
-              return;
-            }
-            try {
-              setLoading(true);
-              const result = await customerService.analyzeAllCustomers();
-              const refreshed = await customerService.fetchAll();
-              setCustomers(refreshed);
-              alert(`Analysis complete! ${result.successCount || 0} customers analyzed successfully.`);
-            } catch (err) {
-              console.error('Analyze all failed', err);
-              alert(err.body?.error || err.message || 'Analysis failed');
-            } finally {
-              setLoading(false);
-            }
-          }} className="flex items-center gap-2 rounded-xl border border-surface-border px-6 py-3 text-white font-black hover:bg-surface-border transition-all">
-            <span className="material-symbols-outlined">assessment</span>
-            Analyze All Customers
-          </button>
         </div>
       </div>
 
@@ -231,196 +286,62 @@ const DashboardView = () => {
         </div>
       </div>
 
-      {/* Main Table Section */}
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col sm:flex-row items-center gap-4 p-6 rounded-2xl border border-surface-border bg-surface-dark">
-          <div className="relative w-full sm:w-96">
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">search</span>
-            <input 
-              type="text"
-              placeholder="Search by Company or Agency ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-xl border border-surface-border bg-[#111418] pl-12 pr-4 py-3 text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        {/* Risk Distribution Chart - Radial Bar */}
+        <div className="flex flex-col rounded-2xl border border-surface-border bg-surface-dark p-6 min-h-[450px] lg:col-span-1">
+          <h3 className="text-lg font-black text-white mb-4 flex items-center gap-2">
+            <span className="material-symbols-outlined text-slate-400">donut_large</span>
+            Risk Portfolio
+          </h3>
+          <div className="flex-1 w-full min-h-0 flex items-center justify-center">
+            <ReactApexChart
+              options={riskOptions}
+              series={riskSeries}
+              type="radialBar"
+              height={350}
+              width={'100%'}
             />
-          </div>
-
-          <div className="ml-auto flex items-center gap-3">
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="rounded-xl border border-surface-border bg-[#111418] px-4 py-3 text-white font-semibold">
-              <option value="ALL">All Statuses</option>
-              {Object.values(CustomerStatus).map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-
-            <input
-              type="number"
-              min={0}
-              placeholder="Min overdue"
-              value={minOverdue}
-              onChange={(e) => setMinOverdue(e.target.value)}
-              className="w-32 rounded-xl border border-surface-border bg-[#111418] px-4 py-3 text-white font-semibold"
-            />
-
-            <select value={sortBy + '|' + sortDir} onChange={(e) => {
-                const [s, d] = e.target.value.split('|');
-                setSortBy(s);
-                setSortDir(d);
-              }} className="rounded-xl border border-surface-border bg-[#111418] px-4 py-3 text-white font-semibold">
-              <option value="none|desc">No Sort</option>
-              <option value="daysOverdue|desc">Days Overdue ↓</option>
-              <option value="daysOverdue|asc">Days Overdue ↑</option>
-            </select>
           </div>
         </div>
 
-        <CustomerTable 
-          customers={filteredCustomers} 
-          selectedIds={selectedIds}
-          onToggleSelect={handleToggleSelect}
-          onToggleAll={handleToggleAll}
-          onEdit={handleEdit}
-        />
+        {/* Agency Status Chart - Modern Bar */}
+        <div className="flex flex-col rounded-2xl border border-surface-border bg-surface-dark p-6 min-h-[450px] lg:col-span-1">
+          <h3 className="text-lg font-black text-white mb-4 flex items-center gap-2">
+            <span className="material-symbols-outlined text-slate-400">bar_chart</span>
+            Agency Assignments
+          </h3>
+          <div className="flex-1 w-full min-h-0">
+            <ReactApexChart
+              options={agencyOptions}
+              series={agencySeries}
+              type="bar"
+              height={350}
+              width={'100%'}
+            />
+          </div>
+        </div>
+
+        {/* Agency Leaderboard - Horizontal Bar */}
+        <div className="flex flex-col rounded-2xl border border-surface-border bg-surface-dark p-6 min-h-[450px] lg:col-span-1">
+          <h3 className="text-lg font-black text-white mb-4 flex items-center gap-2">
+            <span className="material-symbols-outlined text-yellow-400">emoji_events</span>
+            Top Performers
+          </h3>
+          <div className="flex-1 w-full min-h-0">
+            <ReactApexChart
+              options={leaderboardOptions}
+              series={leaderboardSeries}
+              type="bar"
+              height={350}
+              width={'100%'}
+            />
+            <p className="text-center text-xs text-slate-500 mt-2">Ranked by Total Recovered Amount</p>
+          </div>
+        </div>
+
       </div>
-
-      {/* Detail Slideover with Action Log History */}
-      {editingCustomer && (
-        <div className="fixed inset-0 z-[100] flex justify-end bg-black/60 backdrop-blur-sm transition-opacity">
-          <div className="w-full max-w-[600px] bg-surface-dark h-full border-l border-surface-border flex flex-col animate-in slide-in-from-right duration-300">
-            <div className="flex items-center justify-between p-8 border-b border-surface-border shrink-0">
-              <div>
-                <h3 className="text-2xl font-black text-white">{editingCustomer.name}</h3>
-                <p className="text-slate-400 font-mono text-sm">Account Tracking: {editingCustomer.accountId}</p>
-                
-                {/* Analysis Status */}
-                {editingCustomer.__analyzing && (
-                  <div className="mt-2 text-sm text-slate-400 flex items-center gap-2">
-                    <span className="animate-spin material-symbols-outlined text-[16px]">sync</span>
-                    <span>Analyzing customer data...</span>
-                  </div>
-                )}
-                
-                {/* ML Model Results */}
-                {!editingCustomer.__analyzing && editingCustomer.__modelPrediction && (
-                  <div className="mt-2 text-sm text-slate-400 flex items-center gap-3 flex-wrap">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[13px]">ML Model:</span>
-                      <span className="bg-[#0b1220] px-3 py-1 rounded-md font-bold text-white">
-                        {editingCustomer.__modelPrediction?.risk_score ? Math.round(editingCustomer.__modelPrediction.risk_score * 100) + '%' : 'N/A'}
-                      </span>
-                      <span className="text-xs text-slate-500">{editingCustomer.__modelPrediction?.risk_category}</span>
-                    </div>
-                    {editingCustomer.__riskAnalysis && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-[13px]">Risk:</span>
-                        <span className="bg-[#0b1220] px-3 py-1 rounded-md font-bold text-white">
-                          {editingCustomer.repaymentProbability || 0}%
-                        </span>
-                        <span className="text-xs text-slate-500">{editingCustomer.__riskAnalysis.verdict}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-                
-                {/* Error Message */}
-                {editingCustomer.__error && (
-                  <div className="mt-2 text-sm text-red-400 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[16px]">error</span>
-                    <span>{editingCustomer.__error}</span>
-                  </div>
-                )}
-              </div>
-              <button 
-                onClick={() => setEditingCustomer(null)}
-                className="text-slate-400 hover:text-white p-2 rounded-full hover:bg-surface-border transition-all"
-                disabled={editingCustomer.__analyzing}
-              >
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-10">
-              {/* Recovery Status */}
-              <div className="grid grid-cols-2 gap-4">
-                 <div className="p-4 rounded-2xl bg-[#111418] border border-surface-border">
-                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Assigned Agency</p>
-                   <p className="text-white font-bold mt-1">{editingCustomer.assignedToDcaId ? 'Agency Alpha' : 'In-House Collection'}</p>
-                 </div>
-                 <div className="p-4 rounded-2xl bg-[#111418] border border-surface-border">
-                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Current Status</p>
-                   <p className="text-primary font-bold mt-1 uppercase text-sm">{editingCustomer.status}</p>
-                 </div>
-              </div>
-
-              {/* Action History Feed (Admin View) */}
-              <div className="space-y-6">
-                <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[18px]">history</span>
-                  Agency Action Log
-                </h4>
-                <div className="space-y-4">
-                  {editingCustomer.actions.length === 0 ? (
-                    <div className="p-8 text-center text-slate-500 bg-[#111418] rounded-2xl border border-dashed border-surface-border">
-                      No external agency logs for this period.
-                    </div>
-                  ) : editingCustomer.actions.map(action => (
-                    <div key={action.id} className="p-5 bg-[#111418] border border-surface-border rounded-2xl">
-                       <div className="flex justify-between items-center mb-3">
-                         <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${
-                           action.type === 'LEGAL_NOTICE' ? 'bg-red-500 text-white' : 'bg-primary/20 text-primary'
-                         }`}>{action.type}</span>
-                         <span className="text-[10px] text-slate-500 font-bold">{action.date}</span>
-                       </div>
-                       <p className="text-slate-300 text-sm leading-relaxed">{action.notes}</p>
-                       <div className="mt-3 pt-3 border-t border-surface-border text-[9px] text-slate-500 flex justify-between uppercase font-bold">
-                         <span>Performed By: {action.performedBy}</span>
-                         <span>System Log ID: {action.id}</span>
-                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Edit Form - Only Admin can change company details */}
-              <form className="space-y-6 pt-10 border-t border-surface-border" onSubmit={saveEdit}>
-                <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest">Administrative Override</h4>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Company Name</label>
-                  <input 
-                    type="text"
-                    value={editingCustomer.name}
-                    onChange={(e) => setEditingCustomer({...editingCustomer, name: e.target.value})}
-                    className="w-full rounded-xl border border-surface-border bg-[#111418] px-4 py-3 text-white focus:border-primary"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Global Status</label>
-                  <select 
-                    value={editingCustomer.status}
-                    onChange={(e) => setEditingCustomer({...editingCustomer, status: e.target.value})}
-                    className="w-full rounded-xl border border-surface-border bg-[#111418] px-4 py-3 text-white focus:border-primary"
-                  >
-                    {Object.values(CustomerStatus).map(s => <option key={s}>{s}</option>)}
-                  </select>
-                </div>
-              </form>
-            </div>
-
-            <div className="p-8 border-t border-surface-border bg-[#161d24] flex gap-4">
-              <button 
-                onClick={() => setEditingCustomer(null)}
-                className="flex-1 py-4 text-sm font-bold text-white rounded-xl border border-surface-border hover:bg-surface-border"
-              >
-                Close
-              </button>
-              <button 
-                onClick={saveEdit}
-                className="flex-1 py-4 text-sm font-black text-white bg-primary rounded-xl hover:bg-blue-600 shadow-xl shadow-primary/20"
-              >
-                Save Edits
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

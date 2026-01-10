@@ -1,12 +1,34 @@
+
 const bcrypt = require('bcryptjs');
-const { User, Customer, EmailTemplate, DcaAction } = require('../src/models');
+const {
+  User,
+  Customer,
+  EmailTemplate,
+  DcaAction,
+  DcaAgency,
+  DcaPerformanceByType,
+  DcaSlaCompliance,
+  DcaCasesSummary,
+  Invoice,
+  Case,
+  CaseLog
+} = require('../src/models');
+
+// Simple UUID generator to avoid external dependency issues
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
 
 const seedData = async () => {
   try {
-    // Create users
+    console.log('Starting seed process...');
+
+    // 1. Users
     const hashedPassword = await bcrypt.hash('password123', 10);
-    
-    const users = await User.bulkCreate([
+    await User.bulkCreate([
       {
         id: 'user-1',
         email: 'admin@fedex.com',
@@ -26,10 +48,39 @@ const seedData = async () => {
       },
     ]);
 
-    // Create customers with all new fields
+    // 2. DCA Agencies
+    await DcaAgency.bulkCreate([
+      {
+        dca_id: 'agency_alpha',
+        agency_name: 'Alpha Collections Partners',
+        short_name: 'Alpha',
+        specialization: 'Commercial High Value',
+        regions: 'North America',
+        contact_person: 'John Smith',
+        contact_email: 'john@alphacollect.com',
+        status: 'ACTIVE',
+        performance_score: 8.5,
+        commission_rate: 15.00,
+      },
+      {
+        dca_id: 'agency_beta',
+        agency_name: 'Beta Global Recovery',
+        short_name: 'Beta',
+        specialization: 'International Logistics',
+        regions: 'Europe, Asia',
+        contact_person: 'Sarah Connor',
+        contact_email: 'sarah@betarecovery.com',
+        status: 'ACTIVE',
+        performance_score: 9.2,
+        commission_rate: 18.50,
+      }
+    ]);
+
+    // 3. Customers
+    // Need varied statuses and assignments to populate Leaderboard and Charts
     const customers = await Customer.bulkCreate([
       {
-        id: '1',
+        id: uuidv4(),
         name: 'Acme Logistics Corp',
         accountId: 'FX-883920',
         contactEmail: 'jane.doe@acme.com',
@@ -39,54 +90,31 @@ const seedData = async () => {
         totalDebt: 12450.00,
         daysOverdue: 15,
         repaymentProbability: 85,
-        notes: 'Preferred delivery window: 9AM - 5PM EST.',
-        cin: 'U12345ACME2020',
-        invoice_amount: 12450.00,
-        payment_terms_days: 30,
-        service_type: 'GROUND',
-        recent_shipments_30d: 12,
-        recent_shipments_90d: 45,
-        ontime_delivery_rate_hist: 0.95,
-        delivery_exceptions_90d: 1,
-        past_due_ratio_hist: 0.125,
-        dispute_rate_hist: 0.02,
-        reminder_count: 1,
-        credit_tier: 'LOW_RISK',
-        credit_limit: 50000.00,
-        outstanding_balance: 12450.00,
-        utilization_at_invoice: 0.249,
-        analysis_status: 'PENDING',
+        assignedToDcaId: null,
+        credit_tier: 'MEDIUM_RISK',
+        dispute_rate_hist: 0.05,
+        past_due_ratio_hist: 0.1,
+        reminder_count: 1
       },
       {
-        id: '2',
+        id: uuidv4(),
         name: 'Globex Inc',
         accountId: 'FX-992104',
         contactEmail: 'billing@globex.io',
         contactPhone: '+1 (555) 987-6543',
         region: 'Europe',
-        status: 'New',
+        status: 'Active',
         totalDebt: 5200.00,
         daysOverdue: 5,
-        repaymentProbability: 92,
-        cin: 'U67890GLOB2021',
-        invoice_amount: 5200.00,
-        payment_terms_days: 30,
-        service_type: 'EXPRESS',
-        recent_shipments_30d: 8,
-        recent_shipments_90d: 28,
-        ontime_delivery_rate_hist: 0.98,
-        delivery_exceptions_90d: 0,
-        past_due_ratio_hist: 0.042,
-        dispute_rate_hist: 0.01,
-        reminder_count: 0,
-        credit_tier: 'LOW_RISK',
-        credit_limit: 25000.00,
-        outstanding_balance: 5200.00,
-        utilization_at_invoice: 0.208,
-        analysis_status: 'PENDING',
+        repaymentProbability: 95,
+        assignedToDcaId: null,
+        credit_tier: 'LOW_RISK', // High Credit Score -> High Prob
+        dispute_rate_hist: 0.0,
+        past_due_ratio_hist: 0.0,
+        reminder_count: 0
       },
       {
-        id: '3',
+        id: uuidv4(),
         name: 'Soylent Corp',
         accountId: 'FX-445120',
         contactEmail: 'collections@soylent.com',
@@ -94,27 +122,16 @@ const seedData = async () => {
         region: 'North America',
         status: 'At Risk',
         totalDebt: 28900.00,
-        daysOverdue: 45,
-        repaymentProbability: 45,
-        cin: 'U11111SOYL2019',
-        invoice_amount: 28900.00,
-        payment_terms_days: 30,
-        service_type: 'GROUND',
-        recent_shipments_30d: 5,
-        recent_shipments_90d: 18,
-        ontime_delivery_rate_hist: 0.85,
-        delivery_exceptions_90d: 3,
-        past_due_ratio_hist: 0.375,
-        dispute_rate_hist: 0.08,
-        reminder_count: 3,
-        credit_tier: 'HIGH_RISK',
-        credit_limit: 40000.00,
-        outstanding_balance: 28900.00,
-        utilization_at_invoice: 0.723,
-        analysis_status: 'PENDING',
+        daysOverdue: 60,
+        repaymentProbability: 35,
+        assignedToDcaId: null,
+        credit_tier: 'HIGH_RISK', // Low Credit Score -> Low Prob
+        dispute_rate_hist: 0.2,
+        past_due_ratio_hist: 0.5,
+        reminder_count: 3
       },
       {
-        id: '4',
+        id: uuidv4(),
         name: 'Initech',
         accountId: 'FX-332110',
         contactEmail: 'peters@initech.com',
@@ -125,220 +142,162 @@ const seedData = async () => {
         daysOverdue: 90,
         repaymentProbability: 12,
         assignedToDcaId: 'agency_alpha',
-        cin: 'U22222INIT2018',
-        invoice_amount: 3100.00,
-        payment_terms_days: 30,
-        service_type: 'GROUND',
-        recent_shipments_30d: 0,
-        recent_shipments_90d: 2,
-        ontime_delivery_rate_hist: 0.70,
-        delivery_exceptions_90d: 5,
-        past_due_ratio_hist: 0.75,
-        dispute_rate_hist: 0.15,
-        reminder_count: 5,
         credit_tier: 'HIGH_RISK',
-        credit_limit: 10000.00,
-        outstanding_balance: 3100.00,
-        utilization_at_invoice: 0.31,
-        analysis_status: 'PENDING',
+        dispute_rate_hist: 0.1,
+        past_due_ratio_hist: 0.8,
+        reminder_count: 5
+      },
+      // Customers for Leaderboard (Paid/Settled assigned to Agencies)
+      {
+        id: uuidv4(),
+        name: 'Massive Dynamic',
+        accountId: 'FX-772190',
+        contactEmail: 'finance@massivedynamic.com',
+        contactPhone: '+1 (555) 555-0100',
+        region: 'North America',
+        status: 'Closed',
+        totalDebt: 150000.00, // Large amount to show on leaderboard
+        daysOverdue: 0,
+        repaymentProbability: 100,
+        assignedToDcaId: 'agency_alpha',
+        credit_tier: 'LOW_RISK',
+        dispute_rate_hist: 0.0,
+        reminder_count: 0
       },
       {
-        id: '5',
-        name: 'Umbrella Corp',
-        accountId: 'FX-881230',
-        contactEmail: 'wesker@umbrella.com',
-        contactPhone: '+1 (555) 666-7777',
+        id: uuidv4(),
+        name: 'Hooli',
+        accountId: 'FX-112233',
+        contactEmail: 'gavin@hooli.xyz',
+        contactPhone: '+1 (555) 666-1337',
         region: 'North America',
-        status: 'Legal Action',
-        totalDebt: 150000.00,
+        status: 'Closed',
+        totalDebt: 75000.00,
         daysOverdue: 120,
+        repaymentProbability: 100,
+        assignedToDcaId: 'agency_beta',
+        credit_tier: 'MEDIUM_RISK',
+        dispute_rate_hist: 0.1,
+        reminder_count: 2
+      },
+      {
+        id: uuidv4(),
+        name: 'Umbrella Corp',
+        accountId: 'FX-666999',
+        contactEmail: 'wesker@umbrella.com',
+        contactPhone: '+1 (555) 999-8888',
+        region: 'Europe',
+        status: 'Legal Action',
+        totalDebt: 500000.00,
+        daysOverdue: 200,
         repaymentProbability: 5,
         assignedToDcaId: 'agency_alpha',
-        cin: 'U33333UMBR2017',
-        invoice_amount: 150000.00,
-        payment_terms_days: 30,
-        service_type: 'FREIGHT',
-        recent_shipments_30d: 0,
-        recent_shipments_90d: 0,
-        ontime_delivery_rate_hist: 0.60,
-        delivery_exceptions_90d: 12,
-        past_due_ratio_hist: 1.0,
-        dispute_rate_hist: 0.25,
-        reminder_count: 8,
         credit_tier: 'HIGH_RISK',
-        credit_limit: 200000.00,
-        outstanding_balance: 150000.00,
-        utilization_at_invoice: 0.75,
-        analysis_status: 'PENDING',
+        dispute_rate_hist: 0.4,
+        reminder_count: 10
       },
       {
-        id: '6',
-        name: 'TechStart Solutions',
-        accountId: 'FX-556677',
-        contactEmail: 'finance@techstart.io',
-        contactPhone: '+1 (555) 444-5555',
+        id: uuidv4(),
+        name: 'Stark Industries',
+        accountId: 'FX-888777',
+        contactEmail: 'pepper@stark.com',
+        contactPhone: '+1 (555) 777-6666',
         region: 'North America',
-        status: 'Active',
-        totalDebt: 8500.00,
-        daysOverdue: 0,
-        repaymentProbability: 95,
-        cin: 'U44444TECH2022',
-        invoice_amount: 8500.00,
-        payment_terms_days: 30,
-        service_type: 'EXPRESS',
-        recent_shipments_30d: 15,
-        recent_shipments_90d: 52,
-        ontime_delivery_rate_hist: 0.99,
-        delivery_exceptions_90d: 0,
-        past_due_ratio_hist: 0.0,
-        dispute_rate_hist: 0.0,
-        reminder_count: 0,
-        credit_tier: 'LOW_RISK',
-        credit_limit: 75000.00,
-        outstanding_balance: 8500.00,
-        utilization_at_invoice: 0.113,
-        analysis_status: 'PENDING',
-      },
-      {
-        id: '7',
-        name: 'Global Shipping Partners',
-        accountId: 'FX-778899',
-        contactEmail: 'accounts@globalship.com',
-        contactPhone: '+1 (555) 333-2222',
-        region: 'Europe',
         status: 'Review',
-        totalDebt: 45000.00,
+        totalDebt: 12000.00,
         daysOverdue: 30,
-        repaymentProbability: 65,
-        cin: 'U55555GLOB2020',
-        invoice_amount: 45000.00,
-        payment_terms_days: 45,
-        service_type: 'INTERNATIONAL',
-        recent_shipments_30d: 20,
-        recent_shipments_90d: 65,
-        ontime_delivery_rate_hist: 0.88,
-        delivery_exceptions_90d: 4,
-        past_due_ratio_hist: 0.25,
-        dispute_rate_hist: 0.05,
-        reminder_count: 2,
+        repaymentProbability: 60,
+        assignedToDcaId: 'agency_beta',
         credit_tier: 'MEDIUM_RISK',
-        credit_limit: 100000.00,
-        outstanding_balance: 45000.00,
-        utilization_at_invoice: 0.45,
-        analysis_status: 'PENDING',
-      },
-      {
-        id: '8',
-        name: 'Metro Express Logistics',
-        accountId: 'FX-112233',
-        contactEmail: 'billing@metroexpress.net',
-        contactPhone: '+1 (555) 777-8888',
-        region: 'North America',
-        status: 'Negotiating',
-        totalDebt: 18900.00,
-        daysOverdue: 20,
-        repaymentProbability: 75,
-        cin: 'U66666METR2021',
-        invoice_amount: 18900.00,
-        payment_terms_days: 30,
-        service_type: 'GROUND',
-        recent_shipments_30d: 10,
-        recent_shipments_90d: 35,
-        ontime_delivery_rate_hist: 0.92,
-        delivery_exceptions_90d: 2,
-        past_due_ratio_hist: 0.167,
-        dispute_rate_hist: 0.03,
-        reminder_count: 1,
-        credit_tier: 'MEDIUM_RISK',
-        credit_limit: 60000.00,
-        outstanding_balance: 18900.00,
-        utilization_at_invoice: 0.315,
-        analysis_status: 'PENDING',
-      },
+        dispute_rate_hist: 0.0,
+        reminder_count: 1
+      }
     ]);
 
-    // Create DCA actions
+    // 4. Invoices (Fixed against Schema)
+    // Schema required: invoice_id, customer_name, total_amount, invoice_date, due_date
+    const invoices = await Invoice.bulkCreate(customers.map((c, i) => ({
+      invoice_id: `INV-${1000 + i}`,
+      customer_name: c.name, // Required
+      customer_email: c.contactEmail,
+      customer_phone: c.contactPhone,
+      total_amount: c.totalDebt, // Was 'amount' incorrect
+      amount_duty: 0,
+      invoice_date: new Date(new Date().setDate(new Date().getDate() - c.daysOverdue - 30)),
+      due_date: new Date(new Date().setDate(new Date().getDate() - c.daysOverdue)),
+      // Removed: customer_id, status (not in Invoice model)
+    })));
+
+    // 5. DCA Actions
     await DcaAction.bulkCreate([
       {
-        id: 'a1',
-        customerId: '3',
+        customerId: customers[3].id, // Initech
         type: 'CALL',
-        date: new Date('2023-10-20'),
-        notes: 'First reminder call. Customer promised payment next week.',
-        performedBy: 'System',
+        date: new Date(new Date().setDate(new Date().getDate() - 5)),
+        notes: 'Called CFO, no answer. Left voicemail.',
+        performedBy: 'System'
       },
       {
-        id: 'a2',
-        customerId: '4',
-        type: 'CALL',
-        date: new Date('2023-10-21'),
-        notes: 'DCA Initial Contact. No answer.',
-        performedBy: 'Agent Smith',
-      },
-      {
-        id: 'a3',
-        customerId: '4',
-        type: 'VISIT',
-        date: new Date('2023-10-23'),
-        notes: 'Site visit. Premises appears abandoned.',
-        performedBy: 'Agent Smith',
-      },
-      {
-        id: 'a4',
-        customerId: '5',
+        customerId: customers[3].id,
         type: 'LEGAL_NOTICE',
-        date: new Date('2023-10-22'),
-        notes: 'Legal notice served via certified mail.',
-        performedBy: 'Legal Dept',
+        date: new Date(),
+        notes: 'Sent final demand letter.',
+        performedBy: 'Agency Alpha'
       },
+      {
+        customerId: customers[0].id, // Acme
+        type: 'RECOVERY_PLAN',
+        date: new Date(new Date().setDate(new Date().getDate() - 2)),
+        notes: 'Proposed 3-month payment plan.',
+        performedBy: 'Admin'
+      },
+      {
+        customerId: customers[6].id, // Umbrella
+        type: 'LEGAL_NOTICE',
+        date: new Date(new Date().setDate(new Date().getDate() - 20)),
+        notes: 'Case filed in district court.',
+        performedBy: 'Agency Alpha Legal Team'
+      }
     ]);
 
-    // Create email templates
+    // 6. Cases & Logs
+    const cases = await Case.bulkCreate(invoices.map((inv, i) => ({
+      invoice_id: inv.invoice_id,
+      bucket_category: 'FREIGHT',
+      priority_score: customers[i].repaymentProbability < 50 ? 9 : 3,
+      life_cycle_status: customers[i].assignedToDcaId ? 'ASSIGNED' : 'WIP',
+      amount_recovered: customers[i].status === 'Closed' ? customers[i].totalDebt : 0,
+      // Fix: assigned_agency_id is INTEGER in Case model, but agencies use STRING ids.
+      // Setting to null or 0 to avoid type mismatch as we cannot change schema.
+      // Or if there is a mapping, we'd use it. For now leaving null.
+      assigned_agency_id: null,
+    })));
+
+    // 7. Performance Data
+    await DcaPerformanceByType.bulkCreate([
+      { dca_id: 'agency_alpha', debt_category: 'Freight', cases_handled: 120, recovery_rate: 75.5, recovered_amount: 500000 },
+      { dca_id: 'agency_beta', debt_category: 'Customs', cases_handled: 85, recovery_rate: 82.0, recovered_amount: 320000 },
+    ]);
+
+    await DcaSlaCompliance.bulkCreate([
+      { dca_id: 'agency_alpha', sla_type: 'First Contact', target_hours: 24, compliance_rate: 98.5 },
+      { dca_id: 'agency_beta', sla_type: 'First Contact', target_hours: 24, compliance_rate: 95.0 },
+    ]);
+
+    await DcaCasesSummary.bulkCreate([
+      { dca_id: 'agency_alpha', month_year: '2023-10', total_cases_assigned: 50, cases_recovered: 30, recovered_amount: 150000 },
+      { dca_id: 'agency_beta', month_year: '2023-10', total_cases_assigned: 40, cases_recovered: 28, recovered_amount: 120000 },
+    ]);
+
+    // 8. Email Templates
     await EmailTemplate.bulkCreate([
       {
         id: 'tpl_1',
-        name: 'Q3 Shipping Update',
-        subject: 'Important Updates Regarding Your Q3 Shipments',
-        description: 'Standard quarterly update regarding rate adjustments and holiday hours.',
-        image: 'https://picsum.photos/400/225?random=1',
-        body: `Dear {{ContactName}},
-
-We are writing to inform you about upcoming changes to our shipping schedules for the North American region. As a valued partner with {{Status}} status, we want to ensure your logistics operations remain seamless.
-
-Action Required:
-Please review your shipment manifest for the week of October 15th via your dashboard.
-
-Best regards,
-The FedEx Logistics Team`,
-      },
-      {
-        id: 'tpl_2',
-        name: 'Service Alert',
-        subject: 'Urgent: Service Interruption Notice',
-        description: 'Urgent notification for weather delays or system maintenance.',
-        image: 'https://picsum.photos/400/225?random=2',
-        body: `URGENT: Service Alert
-
-Dear {{ContactName}},
-
-Due to severe weather conditions, some services in your region may experience delays. We are monitoring the situation closely.
-
-Best regards,
-FedEx Operations`,
-      },
-      {
-        id: 'tpl_3',
         name: 'Payment Reminder',
-        subject: 'Reminder: Outstanding Balance for Account {{AccountID}}',
-        description: 'Soft reminder for upcoming or slightly overdue payments.',
-        image: 'https://picsum.photos/400/225?random=3',
-        body: `Dear {{ContactName}},
-
-This is a friendly reminder regarding your outstanding balance of {{DebtAmount}}. We value your business and would like to ensure your account remains in good standing.
-
-Best regards,
-FedEx Billing`,
-      },
+        subject: 'Reminder: Outstanding Balance',
+        body: 'Dear {{ContactName}}, please pay us.',
+        description: 'Standard reminder for outstanding payments',
+      }
     ]);
 
     console.log('Seed data created successfully!');
