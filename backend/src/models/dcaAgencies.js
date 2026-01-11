@@ -3,46 +3,76 @@ const sequelize = require('../config/database'); // Adjust path to your DB confi
 
 // DCA Agencies Model
 
-const DcaAgency = sequelize.define(
-  'DcaAgency',
-  {
-    dca_id: {
-      type: DataTypes.STRING,
-      primaryKey: true,
-      allowNull: false,
-    },
-    agency_name: { type: DataTypes.STRING, allowNull: false },
-    short_name: { type: DataTypes.STRING },
-    specialization: { type: DataTypes.STRING },
-    regions: { type: DataTypes.STRING },
-    contact_person: { type: DataTypes.STRING },
-    contact_phone: { type: DataTypes.STRING },
-    contact_email: { type: DataTypes.STRING },
-    recovery_rate_overall: { type: DataTypes.DECIMAL(5, 2) },
-    avg_days_to_recovery: { type: DataTypes.INTEGER },
-    total_cases_handled: { type: DataTypes.BIGINT },
-    commission_rate: { type: DataTypes.DECIMAL(5, 2) },
-    min_case_amount: { type: DataTypes.DECIMAL(10, 2) },
-    max_case_amount: { type: DataTypes.DECIMAL(10, 2) },
-    status: {
-      type: DataTypes.ENUM('ACTIVE', 'WARNING', 'SUSPENDED'),
-      defaultValue: 'ACTIVE',
-    },
-    performance_score: { type: DataTypes.DECIMAL(3, 1) },
-    sla_first_contact_hours: { type: DataTypes.INTEGER },
-    sla_recovery_days: { type: DataTypes.INTEGER },
-    created_date: { type: DataTypes.DATEONLY },
-    last_performance_review: { type: DataTypes.DATEONLY },
-    api_endpoint: { type: DataTypes.STRING },
-    api_auth_token: { type: DataTypes.STRING },
-    is_preferred_partner: { type: DataTypes.BOOLEAN },
-    notes: { type: DataTypes.TEXT },
+const DcaAgency = sequelize.define('DcaAgency', {
+  // *** IDENTITY ***
+  dca_id: { 
+    type: DataTypes.STRING(255), 
+    primaryKey: true, 
+    allowNull: false 
   },
-  {
-    tableName: 'dca_agencies',
-    timestamps: false,
-  }
-);
+  agency_name: { 
+    type: DataTypes.STRING(255), 
+    allowNull: false 
+  },
+  short_name: { type: DataTypes.STRING(255) },
+  
+  // *** NEW ROUTING FIELDS (The "Brain" needs these) ***
+  specialties: {
+    type: DataTypes.JSON, 
+    allowNull: true,
+    defaultValue: [],
+    comment: 'Array of skills e.g. ["CUSTOMS", "FREIGHT", "B2B"]'
+  },
+  tier_level: { 
+    type: DataTypes.INTEGER, 
+    defaultValue: 2,
+    comment: '1=Elite (Best/Expensive), 2=Standard, 3=Volume (Cheap/CallCenter)'
+  },
+  monthly_capacity_limit: { 
+    type: DataTypes.INTEGER, 
+    defaultValue: 500 
+  },
+  current_active_load: { 
+    type: DataTypes.INTEGER, 
+    defaultValue: 0,
+    comment: 'Real-time count of open cases assigned to this agency'
+  },
+
+  // *** CONTACT & META ***
+  contact_person: { type: DataTypes.STRING(255) },
+  contact_email: { type: DataTypes.STRING(255) },
+  contact_phone: { type: DataTypes.STRING(255) },
+  regions: { type: DataTypes.STRING(255) },
+  
+  // *** PERFORMANCE SNAPSHOTS ***
+  recovery_rate_overall: { type: DataTypes.DECIMAL(5, 2) },
+  avg_days_to_recovery: { type: DataTypes.INTEGER },
+  total_cases_handled: { type: DataTypes.BIGINT },
+  performance_score: { type: DataTypes.DECIMAL(3, 1) },
+
+  // *** FINANCIALS & CONFIG ***
+  commission_rate: { type: DataTypes.DECIMAL(5, 2) },
+  min_case_amount: { type: DataTypes.DECIMAL(10, 2) },
+  max_case_amount: { type: DataTypes.DECIMAL(10, 2) },
+  
+  // *** SYSTEM STATUS ***
+  status: { 
+    type: DataTypes.ENUM('ACTIVE', 'WARNING', 'SUSPENDED'), 
+    defaultValue: 'ACTIVE' 
+  },
+  api_endpoint: { type: DataTypes.STRING(255) },
+  api_auth_token: { type: DataTypes.STRING(255) },
+  is_preferred_partner: { type: DataTypes.BOOLEAN },
+  notes: { type: DataTypes.TEXT },
+  
+  // *** DATES ***
+  created_date: { type: DataTypes.DATEONLY },
+  last_performance_review: { type: DataTypes.DATEONLY }
+
+}, {
+  tableName: 'dca_agencies',
+  timestamps: false, 
+});
 
 // Performance By Type Model
 
