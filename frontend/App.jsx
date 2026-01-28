@@ -9,6 +9,7 @@ import CustomersView from './views/CustomersView';
 import CampaignView from './views/CampaignView';
 import AgencyDashboard from './views/AgencyDashboard';
 import DcaAssignmentsView from './views/DcaAssignmentsView';
+import ProfileView from './views/ProfileView';
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(() => {
@@ -39,7 +40,7 @@ const App = () => {
     { id: 'Dashboard', label: 'Dashboard', icon: 'dashboard' },
     { id: 'Customers', label: 'Customers', icon: 'group' },
     { id: 'DCA Assignments', label: 'Assignments', icon: 'assignment_ind' },
-    { id: 'Campaigns', label: 'Campaigns', icon: 'campaign' },
+    { id: 'Automation', label: 'Automation', icon: 'smart_toy' },
   ];
 
   const DCA_AGENT_TABS = [
@@ -61,6 +62,8 @@ const App = () => {
         case 'Dashboard':
         case 'Customers':
           return <AgencyDashboard user={currentUser} />;
+        case 'Profile':
+          return <ProfileView user={currentUser} />;
         default:
           return (
             <div className='flex flex-col items-center justify-center h-full p-20 text-center'>
@@ -92,7 +95,7 @@ const App = () => {
         return <CustomersView />;
       case 'DCA Assignments':
         return <DcaAssignmentsView />;
-      case 'Campaigns':
+      case 'Automation':
         return <CampaignView />;
       default:
         return (

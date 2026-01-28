@@ -1,13 +1,28 @@
-// require('dotenv').config({ path: './.env' }); // Make sure the path points to your .env file
-const sequalize = require('../src/config/database');
+require('dotenv').config();
+const sequelize = require('../src/config/database');
 const {
   DcaAgency,
   DcaCasesSummary,
   DcaPerformanceByType,
   DcaSlaCompliance,
 } = require('../src/models');
+
 const dcaseed = async () => {
+  console.log('Starting DCA data seeding...');
+
   try {
+    // Clear existing data - disable FK checks to allow truncate
+    console.log('Clearing existing data...');
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
+    await DcaSlaCompliance.destroy({ where: {}, truncate: true });
+    await DcaPerformanceByType.destroy({ where: {}, truncate: true });
+    await DcaCasesSummary.destroy({ where: {}, truncate: true });
+    await DcaAgency.destroy({ where: {}, truncate: true });
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+    console.log('✓ Existing data cleared');
+
+    // Seed DCA Agencies
+    console.log('Seeding DCA agencies...');
     const dcaAgencies = await DcaAgency.bulkCreate([
       {
         dca_id: 'DCA-AGILE-24',
@@ -1310,9 +1325,10 @@ const dcaseed = async () => {
         notes: '',
       },
     ]);
+    console.log('✓ DCA agencies seeded');
 
-    // case Summary
-
+    // Case Summary
+    console.log('Seeding case summaries...');
     const caseSummaries = await DcaCasesSummary.bulkCreate([
       {
         id: 1,
@@ -1865,8 +1881,10 @@ const dcaseed = async () => {
         performance_trend: 'DECLINING',
       },
     ]);
+    console.log('✓ Case summaries seeded');
 
-    // dca Performance per Type
+    // Performance By Type
+    console.log('Seeding performance by type data...');
     const dcaPerformanceByType = await DcaPerformanceByType.bulkCreate([
       {
         id: 1,
@@ -2619,9 +2637,10 @@ const dcaseed = async () => {
         last_updated: '2026-01-07',
       },
     ]);
+    console.log('✓ Performance by type data seeded');
 
-    // dcasla Compliance
-
+    // SLA Compliance
+    console.log('Seeding SLA compliance data...');
     const dcaSLACompliance = await DcaSlaCompliance.bulkCreate([
       {
         id: 1,
@@ -3124,10 +3143,22 @@ const dcaseed = async () => {
         last_breach_date: '2026-01-01',
       },
     ]);
-    console.log('DCA data seeded successfully.');
+    console.log('✓ DCA data seeded successfully');
   } catch (error) {
-    console.error('Error seeding DCA data:', error);
+    console.error('✗ Error seeding DCA data:');
+    console.error('Message:', error.message);
+    if (error.errors) {
+      console.error('Validation errors:', JSON.stringify(error.errors, null, 2));
+    }
   }
 };
 
-dcaseed();
+dcaseed()
+  .then(() => {
+    console.log('Seeding process completed');
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error('Fatal error:', err);
+    process.exit(1);
+  });
