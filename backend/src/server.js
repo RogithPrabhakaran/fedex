@@ -19,7 +19,7 @@ const riskRoutes = require('./routes/riskRoutes');
 const invoiceRoutes = require('./routes/invoices');
 const caseRoutes = require('./routes/cases');
 const caseLogRoutes = require('./routes/caseLogs');
-
+const paymentRoutes = require('./routes/payments');
 const app = express();
 const PORT = parseInt(process.env.PORT || '5000', 10);
 
@@ -38,6 +38,7 @@ app.use('/api/v1', riskRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/cases', caseRoutes);
 app.use('/api/case-logs', caseLogRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
