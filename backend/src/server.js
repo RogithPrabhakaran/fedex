@@ -19,6 +19,7 @@ const riskRoutes = require('./routes/riskRoutes');
 const invoiceRoutes = require('./routes/invoices');
 const caseRoutes = require('./routes/cases');
 const caseLogRoutes = require('./routes/caseLogs');
+const userRoutes = require('./routes/users');
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '5000', 10);
@@ -38,6 +39,7 @@ app.use('/api/v1', riskRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/cases', caseRoutes);
 app.use('/api/case-logs', caseLogRoutes);
+app.use('/api/users', userRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -53,8 +55,8 @@ app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use((err, req, res, next) => {
   console.error('Error:', err.stack);
   const statusCode = err.statusCode || 500;
-  const message = process.env.NODE_ENV === 'production' 
-    ? 'Something went wrong!' 
+  const message = process.env.NODE_ENV === 'production'
+    ? 'Something went wrong!'
     : err.message || 'Something went wrong!';
   res.status(statusCode).json({ error: message });
 });
