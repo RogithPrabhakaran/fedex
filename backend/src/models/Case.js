@@ -2,102 +2,143 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const Case = sequelize.define('Case', {
+  // Primary Key
   case_id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING(50),
     primaryKey: true,
-    autoIncrement: true,
-    comment: 'Unique ID for internal tracking (e.g., 1001)',
+    allowNull: false,
+    comment: 'Unique case identifier',
   },
+  
+  // Links to source invoice
   invoice_id: {
     type: DataTypes.STRING(50),
-    allowNull: false,
+    allowNull: true,
     references: {
       model: 'invoices',
       key: 'invoice_id',
     },
-    comment: 'Links to the Invoice. (The source of the debt)',
+    comment: 'Foreign key to invoices table',
   },
-  assigned_agency_id: {
+  tracking_no: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+    comment: 'Shipment tracking number',
+  },
+  
+  // Business Classification (LAYER 1 output)
+  debt_category: {
+    type: DataTypes.ENUM('CUSTOMS_DUTY', 'FREIGHT', 'ADMIN_FEES', 'PENALTIES'),
+    allowNull: false,
+    comment: 'Debt classification category',
+  },
+  debtor_type: {
+    type: DataTypes.ENUM('B2B', 'B2C'),
+    allowNull: false,
+    comment: 'Business to Business or Business to Consumer',
+  },
+  
+  // Debtor Info (parsed from invoice)
+  debtor_name: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    comment: 'Name of the debtor',
+  },
+  debtor_gstin: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+    comment: 'GSTIN of the debtor',
+  },
+  debtor_phone: {
+    type: DataTypes.STRING(15),
+    allowNull: true,
+    comment: 'Contact phone number',
+  },
+  debtor_email: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    comment: 'Contact email address',
+  },
+  
+  // Financials
+  case_amount: {
+    type: DataTypes.DECIMAL(12, 2),
+    allowNull: true,
+    comment: 'Total case amount',
+  },
+  dpd: {
     type: DataTypes.INTEGER,
     allowNull: true,
-    comment: 'ID of the DCA currently owning this case',
+    comment: 'Days Past Due',
   },
-  bucket_category: {
-    type: DataTypes.ENUM('CUSTOMS', 'FREIGHT', 'ADMIN'),
-    allowNull: false,
-    comment: 'AI Classification: CUSTOMS, FREIGHT, ADMIN',
-  },
-  priority_score: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    defaultValue: 5,
-    validate: {
-      min: 1,
-      max: 10,
-    },
-    comment: 'AI Logic: 1 (Low) to 10 (Critical). Based on amount & ageing',
-  },
-  life_cycle_status: {
-    type: DataTypes.ENUM('OPEN', 'ASSIGNED', 'WIP', 'CLOSED', 'RECALLED'),
-    allowNull: false,
-    defaultValue: 'OPEN',
-    comment: 'The Manager View (High Level): OPEN, ASSIGNED, WIP, CLOSED, RECALLED',
-  },
-  disposition_code: {
-    type: DataTypes.STRING(50),
+  
+  // Intelligence (LAYER 2 output)
+  complexity_score: {
+    type: DataTypes.DECIMAL(3, 1),
     allowNull: true,
-    comment: 'The Agent View (Granular Details): PTP, PTP_BROKEN, RTP, SKP, DNC, DISPUTE',
+    comment: 'Case complexity score',
   },
-  next_action_date: {
+  recovery_probability: {
+    type: DataTypes.DECIMAL(5, 3),
+    allowNull: true,
+    comment: 'Probability of successful recovery',
+  },
+  priority: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+    comment: 'HIGH, MEDIUM, LOW',
+  },
+  
+  // DCA Assignment
+  dca_id: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+    comment: 'Assigned DCA identifier',
+  },
+  assigned_at: {
     type: DataTypes.DATE,
     allowNull: true,
-    comment: 'SLA Trigger: The "Snooze" button. If date < TODAY, alert the agent',
+    comment: 'DCA assignment timestamp',
   },
-  last_touched_at: {
-    type: DataTypes.DATE,
-    allowNull: true,
-    comment: 'SLA Watchdog: If this is > 7 days old, trigger a Slack Alert',
-  },
-  sla_deadline: {
-    type: DataTypes.DATE,
-    allowNull: true,
-    comment: 'Hard Deadline: The date by which this must be closed (e.g., Day 45)',
-  },
-  amount_recovered: {
-    type: DataTypes.DECIMAL(10, 2),
+  
+  // Workflow Status
+  status: {
+    type: DataTypes.ENUM('NEW', 'ASSIGNED', 'CONTACTED', 'PROMISED', 'PARTIAL_PAYMENT', 'RECOVERED', 'WRITE_OFF'),
     allowNull: false,
-    defaultValue: 0.00,
-    comment: 'Total money collected so far (allows for partial payments)',
+    defaultValue: 'NEW',
+    comment: 'Current case status',
   },
-  notes_summary: {
-    type: DataTypes.TEXT,
+  
+  // SLA Tracking
+  first_contact_due: {
+    type: DataTypes.DATE,
     allowNull: true,
-    comment: 'A short summary of the latest log (e.g., "User traveling till Mon")',
+    comment: 'First contact deadline',
+  },
+  recovery_due: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    comment: 'Recovery deadline',
+  },
+  
+  // Audit
+  created_at: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: DataTypes.NOW,
+    comment: 'Case creation timestamp',
   },
 }, {
   tableName: 'cases',
   timestamps: true,
   indexes: [
     {
-      fields: ['invoice_id'],
+      name: 'idx_dca',
+      fields: ['dca_id', 'status'],
     },
     {
-      fields: ['assigned_agency_id'],
-    },
-    {
-      fields: ['life_cycle_status'],
-    },
-    {
-      fields: ['bucket_category'],
-    },
-    {
-      fields: ['priority_score'],
-    },
-    {
-      fields: ['next_action_date'],
-    },
-    {
-      fields: ['last_touched_at'],
+      name: 'idx_priority',
+      fields: ['priority', 'complexity_score'],
     },
   ],
 });

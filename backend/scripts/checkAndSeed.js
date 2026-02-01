@@ -6,7 +6,17 @@
  */
 
 require('dotenv').config();
-const { sequelize, Customer, User, EmailTemplate, DcaAction } = require('../src/models');
+const { sequelize,  User,
+  Customer,
+  EmailTemplate,
+  DcaAction,
+  DcaAgency,
+  DcaPerformanceByType,
+  DcaSlaCompliance,
+  DcaCasesSummary,
+  Invoice,
+  Case,
+  CaseLog } = require('../src/models');
 const seedData = require('../seeds/seedData');
 
 async function checkAndSeed() {
@@ -22,6 +32,9 @@ async function checkAndSeed() {
     // Check if we have any customers
     const customerCount = await Customer.count();
     const userCount = await User.count();
+
+    const casesCount=await Case.count();
+    
 
     console.log(`\nCurrent database state:`);
     console.log(`  Customers: ${customerCount}`);
