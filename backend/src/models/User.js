@@ -24,7 +24,7 @@ const User = sequelize.define('User', {
     allowNull: false,
   },
   role: {
-    type: DataTypes.ENUM('FEDEX_ADMIN', 'DCA_AGENT'),
+    type: DataTypes.ENUM('FEDEX_ADMIN', 'DCA_AGENT', 'DCA_MANAGER'),
     allowNull: false,
   },
   avatar: {

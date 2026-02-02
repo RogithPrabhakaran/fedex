@@ -49,7 +49,7 @@ export const customerService = {
     return api.post('/v1/analyze-all');
   },
 
-  // Legacy endpoints (kept for backward compatibility)
+  // Legacy endpoints (kept for backward compatibility) 
   async computeRiskAll() {
     return api.post('/v1/compute-risk-all');
   },

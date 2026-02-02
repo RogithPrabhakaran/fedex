@@ -21,6 +21,21 @@ PREPRO_PATH = os.path.join(os.path.dirname(__file__), 'preprocessor.pkl')
 THRESHOLD_LOW = 0.8
 THRESHOLD_MED = 0.6
 
+# Optionally override thresholds by fetching from the API if environment variable is set.
+RISK_SETTINGS_URL = os.environ.get('RISK_SETTINGS_URL')  # e.g. http://localhost:5000/api/settings/risk-thresholds
+if RISK_SETTINGS_URL:
+    try:
+        import requests
+        resp = requests.get(RISK_SETTINGS_URL, timeout=3)
+        if resp.status_code == 200:
+            data = resp.json()
+            rt = data.get('risk_thresholds') or {}
+            if 'low_max' in rt and 'med_min' in rt and 'med_max' in rt and 'high_min' in rt:
+                THRESHOLD_LOW = float(rt.get('med_max', 0.6))
+                THRESHOLD_MED = float(rt.get('med_min', 0.6))
+    except Exception:
+        pass
+
 
 def load_objects():
     model = joblib.load(MODEL_PATH)

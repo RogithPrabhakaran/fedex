@@ -35,6 +35,8 @@ const DcaAgency = sequelize.define(
     last_performance_review: { type: DataTypes.DATEONLY },
     api_endpoint: { type: DataTypes.STRING },
     api_auth_token: { type: DataTypes.STRING },
+    monthly_capacity_limit: { type: DataTypes.INTEGER },
+    bank_details: { type: DataTypes.JSON },
     is_preferred_partner: { type: DataTypes.BOOLEAN },
     notes: { type: DataTypes.TEXT },
   },

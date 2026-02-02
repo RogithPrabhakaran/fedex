@@ -6,6 +6,8 @@ const {
 } = require('../models/dcaAgencies');
 const { Op } = require('sequelize');
 
+const { v4: uuidv4 } = require('uuid');
+
 const dcaAgencyController = {
   // ==================== DCA AGENCY CRUD ====================
   
@@ -70,6 +72,67 @@ const dcaAgencyController = {
     } catch (error) {
       console.error('Update agency error:', error);
       res.status(500).json({ error: error.message || 'Failed to update agency' });
+    }
+  },
+
+  // Regenerate API auth token for agency
+  async regenerateApiKey(req, res) {
+    try {
+      const agency = await DcaAgency.findByPk(req.params.id);
+      if (!agency) return res.status(404).json({ error: 'Agency not found' });
+
+      const newKey = uuidv4();
+      await agency.update({ api_auth_token: newKey });
+      res.json({ api_auth_token: newKey });
+    } catch (error) {
+      console.error('Regenerate API key error:', error);
+      res.status(500).json({ error: 'Failed to regenerate API key' });
+    }
+  },
+
+  async getAgencyAgents(req, res) {
+    try {
+      const User = require('../models/User');
+      const agencyId = req.params.id;
+      const agents = await User.findAll({ where: { agencyId, role: 'DCA_AGENT' } });
+      res.json(agents);
+    } catch (error) {
+      console.error('Get agency agents error:', error);
+      res.status(500).json({ error: 'Failed to fetch agents' });
+    }
+  },
+
+  async inviteAgent(req, res) {
+    try {
+      const User = require('../models/User');
+      const agencyId = req.params.id;
+      const { name, email } = req.body;
+
+      if (!email || !name) return res.status(400).json({ error: 'Name and email are required' });
+
+      // Generate temporary password (in real app, send invite email)
+      const tempPassword = uuidv4().split('-')[0] + 'A1!';
+      const bcrypt = require('bcryptjs');
+      const hashed = bcrypt.hashSync(tempPassword, 10);
+
+      const user = await User.create({ name, email, password: hashed, role: 'DCA_AGENT', agencyId });
+      // In production, send email with temp credentials
+      res.status(201).json({ id: user.id, email: user.email, tempPassword });
+    } catch (error) {
+      console.error('Invite agent error:', error);
+      res.status(500).json({ error: 'Failed to invite agent' });
+    }
+  },
+
+  async removeAgent(req, res) {
+    try {
+      const User = require('../models/User');
+      const deleted = await User.destroy({ where: { id: req.params.userId } });
+      if (!deleted) return res.status(404).json({ error: 'Agent not found' });
+      res.status(204).send();
+    } catch (error) {
+      console.error('Remove agent error:', error);
+      res.status(500).json({ error: 'Failed to remove agent' });
     }
   },
 

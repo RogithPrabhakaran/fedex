@@ -14,6 +14,12 @@ router.post('/agencies', dcaAgencyController.createAgency);
 router.put('/agencies/:id', dcaAgencyController.updateAgency);
 router.delete('/agencies/:id', dcaAgencyController.deleteAgency);
 
+// Extra agency management endpoints
+router.post('/agencies/:id/regenerate-key', dcaAgencyController.regenerateApiKey);
+router.get('/agencies/:id/agents', dcaAgencyController.getAgencyAgents);
+router.post('/agencies/:id/agents', dcaAgencyController.inviteAgent);
+router.delete('/agencies/:id/agents/:userId', dcaAgencyController.removeAgent);
+
 // ==================== PERFORMANCE BY TYPE ROUTES ====================
 router.get('/performance', dcaAgencyController.getAllPerformanceByType);
 router.get('/performance/:id', dcaAgencyController.getPerformanceByTypeById);

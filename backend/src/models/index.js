@@ -6,6 +6,9 @@ const EmailTemplate = require('./EmailTemplate');
 const Invoice = require('./Invoice');
 const Case = require('./Case');
 const CaseLog = require('./CaseLog');
+const AppSettings = require('./AppSettings');
+const Issue = require('./Issue');
+const IssueComment = require('./IssueComment');
 
 const {
   DcaAgency,
@@ -47,4 +50,7 @@ module.exports = {
   Invoice,
   Case,
   CaseLog,
+  AppSettings,
+  Issue,
+  IssueComment,
 };

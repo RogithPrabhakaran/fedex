@@ -8,8 +8,17 @@ import DashboardView from './views/DashboardView';
 import CustomersView from './views/CustomersView';
 import CampaignView from './views/CampaignView';
 import AgencyDashboard from './views/AgencyDashboard';
+import DcaAdminDashboard from './views/DcaAdminDashboard';
 import DcaAssignmentsView from './views/DcaAssignmentsView';
+import DcaAgentsView from './views/DcaAgentsView';
+import AgentDetailView from './views/AgentDetailView';
 import ProfileView from './views/ProfileView';
+import AdminSettingsView from './views/AdminSettingsView';
+import AgentSettingsView from './views/AgentSettingsView';
+import DcaLeaderboardView from './views/DcaLeaderboardView';
+import IssuesResolveView from './views/IssuesResolveView';
+import AgentIssuesView from './views/AgentIssuesView';
+import SlaManagementView from './views/SlaManagementView';
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(() => {
@@ -17,6 +26,7 @@ const App = () => {
     return u ? JSON.parse(u) : null;
   });
   const [activeTab, setActiveTab] = useState('Dashboard');
+  const [selectedAgent, setSelectedAgent] = useState(null);
 
   useEffect(() => {
     const t = localStorage.getItem('dca_token');
@@ -39,13 +49,18 @@ const App = () => {
   const ADMIN_TABS = [
     { id: 'Dashboard', label: 'Dashboard', icon: 'dashboard' },
     { id: 'Customers', label: 'Customers', icon: 'group' },
+    { id: 'DCA Leaderboard', label: 'Leaderboards', icon: 'leaderboard' },
+    { id: 'SLA Management', label: 'SLA Management', icon: 'schedule' },
+    { id: 'Issues', label: 'Issues', icon: 'report_problem' },
     { id: 'DCA Assignments', label: 'Assignments', icon: 'assignment_ind' },
     { id: 'Automation', label: 'Automation', icon: 'smart_toy' },
   ];
 
   const DCA_AGENT_TABS = [
     { id: 'Dashboard', label: 'My Queue', icon: 'list_alt' }, // "My Queue" is their Dashboard
-    { id: 'Profile', label: 'My Profile', icon: 'person' },
+    { id: 'DCA Dashboard', label: 'Analytics', icon: 'emoji_events' },
+    { id: 'Agents', label: 'My Team', icon: 'people' },
+    { id: 'Issues', label: 'Issues', icon: 'forum' },
   ];
 
   const currentTabs =
@@ -62,8 +77,18 @@ const App = () => {
         case 'Dashboard':
         case 'Customers':
           return <AgencyDashboard user={currentUser} />;
+        case 'DCA Dashboard':
+          return <DcaAdminDashboard />;
+        case 'Issues':
+          return <AgentIssuesView user={currentUser} />;
         case 'Profile':
           return <ProfileView user={currentUser} />;
+        case 'Agent Settings':
+          return <AgentSettingsView user={currentUser} />;
+        case 'Agent Detail':
+          return <AgentDetailView agent={selectedAgent} onBack={() => setActiveTab('Agents')} />;
+        case 'Agents':
+          return <DcaAgentsView user={currentUser} setActiveTab={setActiveTab} setSelectedAgent={setSelectedAgent} />;
         default:
           return (
             <div className='flex flex-col items-center justify-center h-full p-20 text-center'>
@@ -74,7 +99,7 @@ const App = () => {
                 Restricted Access
               </h2>
               <p className='text-slate-400'>
-                DCA agents only have access to their Recovery Queue and Profile.
+                DCA agents only have access to their Recovery Queue, My Team, and Profile.
               </p>
               <button
                 onClick={() => setActiveTab('Dashboard')}
@@ -95,8 +120,22 @@ const App = () => {
         return <CustomersView />;
       case 'DCA Assignments':
         return <DcaAssignmentsView />;
+      case 'Agent Detail':
+        return <AgentDetailView agent={selectedAgent} onBack={() => setActiveTab('Agents')} />;
+      case 'Agents':
+        return <DcaAgentsView user={currentUser} setActiveTab={setActiveTab} setSelectedAgent={setSelectedAgent} />;
       case 'Automation':
         return <CampaignView />;
+      case 'DCA Leaderboard':
+        return <DcaLeaderboardView />;
+      case 'SLA Management':
+        return <SlaManagementView />;
+      case 'Issues':
+        return <IssuesResolveView />;
+      case 'Profile':
+        return <ProfileView user={currentUser} />;
+      case 'Admin Settings':
+        return <AdminSettingsView user={currentUser} />;
       default:
         return (
           <div className='flex flex-col items-center justify-center h-full p-20 text-center'>
