@@ -1,3 +1,10 @@
+/**
+ * IssueComment model
+ *
+ * Stores threaded comments for an Issue. Used by the agent forum UI and the
+ * admin issue detail screen.
+ */
+
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 

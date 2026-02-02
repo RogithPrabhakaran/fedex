@@ -1,7 +1,21 @@
+/**
+ * Issues controller
+ *
+ * Handles admin-facing issue CRUD operations. These endpoints are used by
+ * the FedEx Admin UI to list, view, create, update, and delete issue records.
+ * The implementation intentionally keeps logic in the controller minimal and
+ * relies on Sequelize model methods and database constraints for validation.
+ */
+
 const Issue = require('../models/Issue');
 const { Op } = require('sequelize');
 
 const issuesController = {
+  /**
+   * GET /api/issues
+   * List issues with optional filters: status, priority, q (search in title/description).
+   * Supports sorting by created_at desc by default.
+   */
   async listIssues(req, res) {
     try {
       const { status, priority, q } = req.query;
@@ -22,6 +36,10 @@ const issuesController = {
     }
   },
 
+  /**
+   * GET /api/issues/:id
+   * Return a single issue by primary key. Returns 404 if not found.
+   */
   async getIssue(req, res) {
     try {
       const issue = await Issue.findByPk(req.params.id);
@@ -33,6 +51,10 @@ const issuesController = {
     }
   },
 
+  /**
+   * POST /api/issues
+   * Create a new issue. Expects a JSON body containing at least a title and description.
+   */
   async createIssue(req, res) {
     try {
       const newIssue = await Issue.create(req.body);
@@ -43,6 +65,11 @@ const issuesController = {
     }
   },
 
+  /**
+   * PUT /api/issues/:id
+   * Update an existing issue. Partial updates are accepted; returns 404 when
+   * attempting to update a non-existent resource.
+   */
   async updateIssue(req, res) {
     try {
       const [updated] = await Issue.update(req.body, { where: { id: req.params.id } });
@@ -55,6 +82,11 @@ const issuesController = {
     }
   },
 
+  /**
+   * DELETE /api/issues/:id
+   * Remove an issue from the database. Returns 204 on success, 404 when
+   * the resource does not exist.
+   */
   async deleteIssue(req, res) {
     try {
       const deleted = await Issue.destroy({ where: { id: req.params.id } });

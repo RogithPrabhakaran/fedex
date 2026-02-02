@@ -1,3 +1,16 @@
+/**
+ * User model
+ *
+ * Represents application users including FedEx admins and DCA agents/managers.
+ * Passwords stored in `password` MUST be hashed before creating the record;
+ * controllers that create users currently use bcrypt for hashing.
+ *
+ * Available roles:
+ * - FEDEX_ADMIN: full access to admin pages
+ * - DCA_AGENT: agent-facing features and forum
+ * - DCA_MANAGER: agency management
+ */
+
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 

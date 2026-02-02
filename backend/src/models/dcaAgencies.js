@@ -1,3 +1,13 @@
+/**
+ * DcaAgency and related models
+ *
+ * The DcaAgency model stores DCA (agency) level metadata used by the
+ * application: contact information, performance metrics, API tokens, capacity
+ * limits and bank/payment related fields. Some fields (e.g. `bank_details`)
+ * contain structured JSON and should be considered sensitive; consider
+ * encrypting these fields in production or using a dedicated secrets store.
+ */
+
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database'); // Adjust path to your DB config
 
@@ -35,7 +45,10 @@ const DcaAgency = sequelize.define(
     last_performance_review: { type: DataTypes.DATEONLY },
     api_endpoint: { type: DataTypes.STRING },
     api_auth_token: { type: DataTypes.STRING },
+    // Maximum number of cases the agency accepts per month. Used by the
+    // DCA leaderboards and assignment logic to avoid over-allocation.
     monthly_capacity_limit: { type: DataTypes.INTEGER },
+    // Free-form bank/payment details. Treat as sensitive data in production.
     bank_details: { type: DataTypes.JSON },
     is_preferred_partner: { type: DataTypes.BOOLEAN },
     notes: { type: DataTypes.TEXT },

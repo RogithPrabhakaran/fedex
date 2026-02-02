@@ -1,3 +1,16 @@
+/**
+ * Issue model
+ *
+ * Represents an issue or complaint submitted by Agents or Admin users. Used
+ * by both the admin Issues Resolve view and the Agent forum-style view.
+ *
+ * Fields:
+ * - title, description: core content
+ * - reported_by / reported_email: optional metadata for the reporter
+ * - priority, status: lifecycle controls
+ * - assigned_to / resolution_notes: admin fields for tracking resolution
+ */
+
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 

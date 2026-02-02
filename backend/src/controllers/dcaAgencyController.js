@@ -1,3 +1,17 @@
+/**
+ * DCA Agency controller
+ *
+ * Provides management APIs for DCA agencies and their related summaries,
+ * performance metrics, and SLA compliance records. Exposes endpoints for
+ * listing agencies, regenerating API tokens, inviting/removing agents, and
+ * CRUD for performance/SLA/case summary records.
+ *
+ * Important notes:
+ * - `regenerateApiKey` produces a new UUID token stored on the agency row.
+ * - `inviteAgent` currently returns a temporary password; production should
+ *   send an email and not return plain credentials.
+ */
+
 const {
   DcaAgency,
   DcaPerformanceByType,
@@ -10,7 +24,11 @@ const { v4: uuidv4 } = require('uuid');
 
 const dcaAgencyController = {
   // ==================== DCA AGENCY CRUD ====================
-  
+  /**
+   * GET /api/dca-agencies
+   * Query parameters: status, specialization, region
+   * Returns a list of agencies ordered by performance_score desc.
+   */
   async getAllAgencies(req, res) {
     try {
       const { status, specialization, region } = req.query;
