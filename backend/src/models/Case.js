@@ -4,10 +4,11 @@ const sequelize = require('../config/database');
 const Case = sequelize.define('Case', {
   // Primary Key
   case_id: {
-    type: DataTypes.STRING(50),
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
     allowNull: false,
-    comment: 'Unique case identifier',
+    comment: 'Unique case identifier (UUID)',
   },
   
   // Links to source invoice
@@ -120,6 +121,16 @@ const Case = sequelize.define('Case', {
     allowNull: true,
     comment: 'Recovery deadline',
   },
+  sla_warning_threshold: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    comment: 'SLA warning threshold timestamp',
+  },
+  last_agent_check: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    comment: 'Last agent check timestamp',
+  },
   
   // Audit
   created_at: {
@@ -139,6 +150,14 @@ const Case = sequelize.define('Case', {
     {
       name: 'idx_priority',
       fields: ['priority', 'complexity_score'],
+    },
+    {
+      name: 'idx_sla_deadline',
+      fields: ['first_contact_due', 'status'],
+    },
+    {
+      name: 'idx_recovery_due',
+      fields: ['recovery_due', 'status'],
     },
   ],
 });

@@ -9,7 +9,7 @@ const CaseLog = sequelize.define('CaseLog', {
     comment: 'Unique ID for this specific event',
   },
   case_id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
     allowNull: false,
     references: {
       model: 'cases',

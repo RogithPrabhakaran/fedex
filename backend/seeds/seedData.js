@@ -48,33 +48,7 @@ const seedData = async () => {
       },
     ]);
 
-    // 2. DCA Agencies
-    await DcaAgency.bulkCreate([
-      {
-        dca_id: 'agency_alpha',
-        agency_name: 'Alpha Collections Partners',
-        short_name: 'Alpha',
-        specialization: 'Commercial High Value',
-        regions: 'North America',
-        contact_person: 'John Smith',
-        contact_email: 'john@alphacollect.com',
-        status: 'ACTIVE',
-        performance_score: 8.5,
-        commission_rate: 15.00,
-      },
-      {
-        dca_id: 'agency_beta',
-        agency_name: 'Beta Global Recovery',
-        short_name: 'Beta',
-        specialization: 'International Logistics',
-        regions: 'Europe, Asia',
-        contact_person: 'Sarah Connor',
-        contact_email: 'sarah@betarecovery.com',
-        status: 'ACTIVE',
-        performance_score: 9.2,
-        commission_rate: 18.50,
-      }
-    ]);
+
 
     // 3. Customers
     // Need varied statuses and assignments to populate Leaderboard and Charts
@@ -216,78 +190,32 @@ const seedData = async () => {
 
     // 4. Invoices (Fixed against Schema)
     // Schema required: invoice_id, customer_name, total_amount, invoice_date, due_date
-    const invoices = await Invoice.bulkCreate(customers.map((c, i) => ({
-      invoice_id: `INV-${1000 + i}`,
-      customer_name: c.name, // Required
-      customer_email: c.contactEmail,
-      customer_phone: c.contactPhone,
-      total_amount: c.totalDebt, // Was 'amount' incorrect
-      amount_duty: 0,
-      invoice_date: new Date(new Date().setDate(new Date().getDate() - c.daysOverdue - 30)),
-      due_date: new Date(new Date().setDate(new Date().getDate() - c.daysOverdue)),
-      // Removed: customer_id, status (not in Invoice model)
-    })));
-
-    // 5. DCA Actions
-    await DcaAction.bulkCreate([
-      {
-        customerId: customers[3].id, // Initech
-        type: 'CALL',
-        date: new Date(new Date().setDate(new Date().getDate() - 5)),
-        notes: 'Called CFO, no answer. Left voicemail.',
-        performedBy: 'System'
-      },
-      {
-        customerId: customers[3].id,
-        type: 'LEGAL_NOTICE',
-        date: new Date(),
-        notes: 'Sent final demand letter.',
-        performedBy: 'Agency Alpha'
-      },
-      {
-        customerId: customers[0].id, // Acme
-        type: 'RECOVERY_PLAN',
-        date: new Date(new Date().setDate(new Date().getDate() - 2)),
-        notes: 'Proposed 3-month payment plan.',
-        performedBy: 'Admin'
-      },
-      {
-        customerId: customers[6].id, // Umbrella
-        type: 'LEGAL_NOTICE',
-        date: new Date(new Date().setDate(new Date().getDate() - 20)),
-        notes: 'Case filed in district court.',
-        performedBy: 'Agency Alpha Legal Team'
-      }
-    ]);
+   
 
     // 6. Cases & Logs
-    const cases = await Case.bulkCreate(invoices.map((inv, i) => ({
-      invoice_id: inv.invoice_id,
-      bucket_category: 'FREIGHT',
-      priority_score: customers[i].repaymentProbability < 50 ? 9 : 3,
-      life_cycle_status: customers[i].assignedToDcaId ? 'ASSIGNED' : 'WIP',
-      amount_recovered: customers[i].status === 'Closed' ? customers[i].totalDebt : 0,
-      // Fix: assigned_agency_id is INTEGER in Case model, but agencies use STRING ids.
-      // Setting to null or 0 to avoid type mismatch as we cannot change schema.
-      // Or if there is a mapping, we'd use it. For now leaving null.
-      assigned_agency_id: null,
+    // Create cases for each customer with auto-generated UUID case_ids
+    const cases = await Case.bulkCreate(customers.map((customer, i) => ({
+      // case_id will be auto-generated as UUID
+      invoice_id: null, // Can be linked later when invoices are created
+      tracking_no: `TRK${100000 + i}`,
+      debt_category: 'FREIGHT',
+      debtor_type: customer.totalDebt > 50000 ? 'B2B' : 'B2C',
+      debtor_name: customer.name,
+      debtor_gstin: customer.accountId.replace('FX-', 'GSTIN'),
+      debtor_phone: customer.contactPhone,
+      debtor_email: customer.contactEmail,
+      case_amount: customer.totalDebt,
+      dpd: customer.daysOverdue,
+      complexity_score: customer.repaymentProbability < 50 ? 8.5 : 3.2,
+      recovery_probability: customer.repaymentProbability / 100,
+      priority: customer.repaymentProbability < 40 ? 'HIGH' : customer.repaymentProbability < 70 ? 'MEDIUM' : 'LOW',
+      dca_id: customer.assignedToDcaId,
+      assigned_at: customer.assignedToDcaId ? new Date() : null,
+      status: customer.status === 'Closed' ? 'RECOVERED' : customer.status === 'Legal Action' ? 'WRITE_OFF' : 'NEW',
+      first_contact_due: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
+      recovery_due: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
     })));
 
-    // 7. Performance Data
-    await DcaPerformanceByType.bulkCreate([
-      { dca_id: 'agency_alpha', debt_category: 'Freight', cases_handled: 120, recovery_rate: 75.5, recovered_amount: 500000 },
-      { dca_id: 'agency_beta', debt_category: 'Customs', cases_handled: 85, recovery_rate: 82.0, recovered_amount: 320000 },
-    ]);
-
-    await DcaSlaCompliance.bulkCreate([
-      { dca_id: 'agency_alpha', sla_type: 'First Contact', target_hours: 24, compliance_rate: 98.5 },
-      { dca_id: 'agency_beta', sla_type: 'First Contact', target_hours: 24, compliance_rate: 95.0 },
-    ]);
-
-    await DcaCasesSummary.bulkCreate([
-      { dca_id: 'agency_alpha', month_year: '2023-10', total_cases_assigned: 50, cases_recovered: 30, recovered_amount: 150000 },
-      { dca_id: 'agency_beta', month_year: '2023-10', total_cases_assigned: 40, cases_recovered: 28, recovered_amount: 120000 },
-    ]);
 
     // 8. Email Templates
     await EmailTemplate.bulkCreate([
