@@ -242,43 +242,43 @@ const DashboardView = () => {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-slate-400 text-sm font-bold uppercase tracking-widest">
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-widest">
             <span className="material-symbols-outlined text-[18px]">admin_panel_settings</span>
             FedEx Internal / Recovery Oversight
           </div>
-          <h1 className="text-4xl font-black text-white tracking-tight">Oversight Dashboard</h1>
-          <p className="text-slate-400 text-lg">Tracking performance and Agency progress for all outstanding accounts.</p>
+          <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">Oversight Dashboard</h1>
+          <p className="text-slate-600 dark:text-slate-400 text-lg">Tracking performance and Agency progress for all outstanding accounts.</p>
         </div>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="flex flex-col gap-4 rounded-2xl p-8 border border-surface-border bg-surface-dark shadow-sm">
+        <div className="flex flex-col gap-4 rounded-2xl p-8 border border-slate-200 dark:border-surface-border bg-white dark:bg-surface-dark shadow-sm">
           <div className="flex justify-between items-start">
-            <p className="text-slate-400 text-sm font-black uppercase tracking-widest">Agency Assignments</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm font-black uppercase tracking-widest">Agency Assignments</p>
             <span className="material-symbols-outlined text-primary text-3xl">hub</span>
           </div>
           <div className="flex items-end gap-3">
-            <h3 className="text-4xl font-black text-white">{stats.dcaCount} Cases</h3>
-            <span className="text-slate-400 text-sm font-bold mb-1.5">Active External</span>
+            <h3 className="text-4xl font-black text-slate-900 dark:text-white">{stats.dcaCount} Cases</h3>
+            <span className="text-slate-600 dark:text-slate-400 text-sm font-bold mb-1.5">Active External</span>
           </div>
         </div>
-        <div className="flex flex-col gap-4 rounded-2xl p-8 border border-surface-border bg-surface-dark shadow-sm">
+        <div className="flex flex-col gap-4 rounded-2xl p-8 border border-slate-200 dark:border-surface-border bg-white dark:bg-surface-dark shadow-sm">
           <div className="flex justify-between items-start">
-            <p className="text-slate-400 text-sm font-black uppercase tracking-widest">Total Value at Risk</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm font-black uppercase tracking-widest">Total Value at Risk</p>
             <span className="material-symbols-outlined text-fedex-orange text-3xl">monetization_on</span>
           </div>
           <div className="flex items-end gap-3">
-            <h3 className="text-4xl font-black text-white">${(stats.totalDebt / 1000).toFixed(0)}k</h3>
+            <h3 className="text-4xl font-black text-slate-900 dark:text-white">${(stats.totalDebt / 1000).toFixed(0)}k</h3>
           </div>
         </div>
-        <div className="flex flex-col gap-4 rounded-2xl p-8 border border-surface-border bg-surface-dark shadow-sm">
+        <div className="flex flex-col gap-4 rounded-2xl p-8 border border-slate-200 dark:border-surface-border bg-white dark:bg-surface-dark shadow-sm">
           <div className="flex justify-between items-start">
-            <p className="text-slate-400 text-sm font-black uppercase tracking-widest">DCA Recovery Rate</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm font-black uppercase tracking-widest">DCA Recovery Rate</p>
             <span className="material-symbols-outlined text-emerald-500 text-3xl">speed</span>
           </div>
           <div className="flex items-end gap-3">
-            <h3 className="text-4xl font-black text-white">42%</h3>
+            <h3 className="text-4xl font-black text-slate-900 dark:text-white">42%</h3>
             <span className="flex items-center text-emerald-500 text-sm font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full mb-1.5">
               +12% Goal
             </span>
@@ -290,9 +290,9 @@ const DashboardView = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* Risk Distribution Chart - Radial Bar */}
-        <div className="flex flex-col rounded-2xl border border-surface-border bg-surface-dark p-6 min-h-[450px] lg:col-span-1">
-          <h3 className="text-lg font-black text-white mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-slate-400">donut_large</span>
+        <div className="flex flex-col rounded-2xl border border-slate-200 dark:border-surface-border bg-white dark:bg-surface-dark p-6 min-h-[450px] lg:col-span-1">
+          <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+            <span className="material-symbols-outlined text-slate-500 dark:text-slate-400">donut_large</span>
             Risk Portfolio
           </h3>
           <div className="flex-1 w-full min-h-0 flex items-center justify-center">
@@ -307,9 +307,9 @@ const DashboardView = () => {
         </div>
 
         {/* Agency Status Chart - Modern Bar */}
-        <div className="flex flex-col rounded-2xl border border-surface-border bg-surface-dark p-6 min-h-[450px] lg:col-span-1">
-          <h3 className="text-lg font-black text-white mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-slate-400">bar_chart</span>
+        <div className="flex flex-col rounded-2xl border border-slate-200 dark:border-surface-border bg-white dark:bg-surface-dark p-6 min-h-[450px] lg:col-span-1">
+          <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+            <span className="material-symbols-outlined text-slate-500 dark:text-slate-400">bar_chart</span>
             Agency Assignments
           </h3>
           <div className="flex-1 w-full min-h-0">
@@ -324,8 +324,8 @@ const DashboardView = () => {
         </div>
 
         {/* Agency Leaderboard - Horizontal Bar */}
-        <div className="flex flex-col rounded-2xl border border-surface-border bg-surface-dark p-6 min-h-[450px] lg:col-span-1">
-          <h3 className="text-lg font-black text-white mb-4 flex items-center gap-2">
+        <div className="flex flex-col rounded-2xl border border-slate-200 dark:border-surface-border bg-white dark:bg-surface-dark p-6 min-h-[450px] lg:col-span-1">
+          <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
             <span className="material-symbols-outlined text-yellow-400">emoji_events</span>
             Top Performers
           </h3>

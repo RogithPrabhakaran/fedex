@@ -82,18 +82,18 @@ const SlaManagementView = () => {
     <div className='p-6 max-w-4xl mx-auto'>
       <div className='flex items-center justify-between mb-6'>
         <div>
-          <h1 className='text-3xl font-black text-white'>SLA Management</h1>
+          <h1 className='text-3xl font-black text-slate-900 dark:text-white'>SLA Management</h1>
           <p className='text-slate-400'>Configure Service Level Agreement definitions used across the platform.</p>
         </div>
         <div>
-          <button onClick={load} className='px-4 py-2 bg-[#111418] rounded-md text-white border border-surface-border'>Refresh</button>
+          <button onClick={load} className='px-4 py-2 bg-[#111418] rounded-md text-white border border-slate-200 dark:border-surface-border'>Refresh</button>
         </div>
       </div>
 
       {error && <div className='mb-4 bg-rose-600/10 border border-rose-600/30 text-rose-500 px-4 py-3 rounded'>{error}</div>}
       {success && <div className='mb-4 bg-green-600/10 border border-green-600/30 text-green-500 px-4 py-3 rounded'>{success}</div>}
 
-      <div className='bg-surface-dark p-6 rounded-2xl border border-surface-border'>
+      <div className='bg-white dark:bg-surface-dark p-6 rounded-2xl border border-slate-200 dark:border-surface-border'>
         <div className='flex gap-3 items-center mb-4'>
           <div className='w-3/12 text-slate-400 uppercase font-bold'>#</div>
           <div className='w-3/12 text-slate-400 uppercase font-bold'>Name</div>

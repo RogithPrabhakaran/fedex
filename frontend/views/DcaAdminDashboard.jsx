@@ -74,49 +74,49 @@ const DcaAdminDashboard = () => {
     <div className="p-4 md:p-10 max-w-[1400px] mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-black text-white">DCA Admin Dashboard</h1>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white">DCA Admin Dashboard</h1>
           <p className="text-slate-400">Overview of agency performance, recovery progress, and top accounts.</p>
         </div>
       </div>
 
       {/* Top cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <div className="p-6 bg-surface-dark border border-surface-border rounded-2xl">
+        <div className="p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl">
           <div className="text-slate-400 text-xs font-black uppercase">Total Value At Risk</div>
-          <div className="text-2xl font-black text-white mt-2">{numberFormat(totals.totalPaymentDue)}</div>
+          <div className="text-2xl font-black text-slate-900 dark:text-white mt-2">{numberFormat(totals.totalPaymentDue)}</div>
         </div>
 
-        <div className="p-6 bg-surface-dark border border-surface-border rounded-2xl">
+        <div className="p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl">
           <div className="text-slate-400 text-xs font-black uppercase">Total Recovered</div>
-          <div className="text-2xl font-black text-white mt-2">{numberFormat(totals.totalRecovered)}</div>
+          <div className="text-2xl font-black text-slate-900 dark:text-white mt-2">{numberFormat(totals.totalRecovered)}</div>
           <div className="text-sm text-slate-500 mt-1">{totals.totalPaymentDue > 0 ? `${Math.round((totals.totalRecovered / totals.totalPaymentDue) * 100)}% recovered` : '—'}</div>
         </div>
 
-        <div className="p-6 bg-surface-dark border border-surface-border rounded-2xl">
+        <div className="p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl">
           <div className="text-slate-400 text-xs font-black uppercase">Successful Transactions</div>
-          <div className="text-2xl font-black text-white mt-2">{totals.closed}</div>
+          <div className="text-2xl font-black text-slate-900 dark:text-white mt-2">{totals.closed}</div>
         </div>
 
-        <div className="p-6 bg-surface-dark border border-surface-border rounded-2xl">
+        <div className="p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl">
           <div className="text-slate-400 text-xs font-black uppercase">Unsuccessful / Open</div>
-          <div className="text-2xl font-black text-white mt-2">{totals.open}</div>
+          <div className="text-2xl font-black text-slate-900 dark:text-white mt-2">{totals.open}</div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Top 3 Agencies + Leaderboard */}
         <div className="col-span-1 space-y-6">
-          <div className="p-6 bg-surface-dark border border-surface-border rounded-2xl">
-            <h3 className="text-lg font-black text-white mb-3">Top 3 Agents</h3>
+          <div className="p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl">
+            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3">Top 3 Agents</h3>
             <div className="space-y-3">
               {top3Agencies.map(a => (
-                <div key={a.dca_id} className="flex justify-between items-center p-3 rounded-xl bg-[#0f1316] border border-surface-border">
+                <div key={a.dca_id} className="flex justify-between items-center p-3 rounded-xl bg-[#0f1316] border border-slate-200 dark:border-surface-border">
                   <div>
-                    <div className="text-white font-bold">{a.name}</div>
+                    <div className="text-slate-900 dark:text-white font-bold">{a.name}</div>
                     <div className="text-slate-500 text-xs">{a.regions || 'Global'}</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-white font-black">{numberFormat(a.recovered_amount)}</div>
+                    <div className="text-slate-900 dark:text-white font-black">{numberFormat(a.recovered_amount)}</div>
                     <div className="text-slate-400 text-xs">{(a.recovery_rate || 0).toFixed(1)}% recovery</div>
                   </div>
                 </div>
@@ -125,8 +125,8 @@ const DcaAdminDashboard = () => {
             </div>
           </div>
 
-          <div className="p-6 bg-surface-dark border border-surface-border rounded-2xl overflow-auto">
-            <h3 className="text-lg font-black text-white mb-3">Top Customers</h3>
+          <div className="p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl overflow-auto">
+            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3">Top Customers</h3>
             <table className="w-full text-sm table-auto">
               <thead>
                 <tr className="text-slate-400 text-xs text-left">
@@ -137,8 +137,8 @@ const DcaAdminDashboard = () => {
               </thead>
               <tbody>
                 {totals.topCustomers.map(cu => (
-                  <tr key={cu.id} className="border-t border-surface-border">
-                    <td className="py-3 text-white font-bold">{cu.name}</td>
+                  <tr key={cu.id} className="border-t border-slate-200 dark:border-surface-border">
+                    <td className="py-3 text-slate-900 dark:text-white font-bold">{cu.name}</td>
                     <td className="py-3 text-slate-300">{numberFormat(cu.totalDebt)}</td>
                     <td className="py-3 text-slate-400">{cu.region}</td>
                   </tr>
@@ -153,8 +153,8 @@ const DcaAdminDashboard = () => {
 
         {/* Middle Column - Monthly Recovered Trend */}
         <div className="col-span-1">
-          <div className="p-6 bg-surface-dark border border-surface-border rounded-2xl min-h-[420px]">
-            <h3 className="text-lg font-black text-white mb-3">Recovered - Last 12 Months</h3>
+          <div className="p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl min-h-[420px]">
+            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3">Recovered - Last 12 Months</h3>
             <div className="h-[320px]">
               <ReactApexChart options={monthlyOptions} series={monthlySeries} type="area" height={320} />
             </div>
@@ -163,17 +163,17 @@ const DcaAdminDashboard = () => {
 
         {/* Right Column - Quick Metrics & Agency Distribution */}
         <div className="col-span-1 space-y-6">
-          <div className="p-6 bg-surface-dark border border-surface-border rounded-2xl">
-            <h3 className="text-lg font-black text-white mb-3">Agents Distribution</h3>
+          <div className="p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl">
+            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3">Agents Distribution</h3>
             <div className="space-y-2">
               {agencies.map(a => (
                 <div key={a.dca_id} className="flex items-center justify-between text-sm text-slate-300 py-2">
                   <div className="w-2/3">
-                    <div className="font-bold text-white">{a.name}</div>
+                    <div className="font-bold text-slate-900 dark:text-white">{a.name}</div>
                     <div className="text-xs text-slate-500">{a.regions || 'Global'}</div>
                   </div>
                   <div className="text-right w-1/3">
-                    <div className="text-white">{numberFormat(a.recovered_amount)}</div>
+                    <div className="text-slate-900 dark:text-white">{numberFormat(a.recovered_amount)}</div>
                     <div className="text-slate-400 text-xs">{(a.recovery_rate || 0).toFixed(0)}%</div>
                   </div>
                 </div>
@@ -182,11 +182,11 @@ const DcaAdminDashboard = () => {
             </div>
           </div>
 
-          <div className="p-6 bg-surface-dark border border-surface-border rounded-2xl">
-            <h3 className="text-lg font-black text-white mb-3">Quick Actions</h3>
+          <div className="p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl">
+            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3">Quick Actions</h3>
             <div className="flex gap-2">
               <button className="px-4 py-2 bg-primary rounded-lg text-white font-bold">Export CSV</button>
-              <button className="px-4 py-2 border border-surface-border rounded-lg text-white">Refresh</button>
+              <button className="px-4 py-2 border border-slate-200 dark:border-surface-border rounded-lg text-slate-900 dark:text-white">Refresh</button>
             </div>
           </div>
         </div>

@@ -52,17 +52,17 @@ const CampaignView = () => {
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden">
       {/* Sidebar: Audience Selection */}
-      <aside className="w-[400px] border-r border-surface-border bg-surface-dark flex flex-col shrink-0">
+      <aside className="w-[400px] border-r border-slate-200 dark:border-surface-border bg-white dark:bg-surface-dark flex flex-col shrink-0">
         <div className="p-8 pb-4 flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <h2 className="text-2xl font-black text-white tracking-tight">Select Audience</h2>
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Select Audience</h2>
             <p className="text-slate-400 text-sm">Target customers for this automated reminder.</p>
           </div>
 
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Region</label>
-              <select className="bg-[#111418] border-surface-border rounded-xl text-white px-4 py-3 text-sm focus:ring-primary">
+              <select className="bg-[#111418] border-slate-200 dark:border-surface-border rounded-xl text-white px-4 py-3 text-sm focus:ring-primary">
                 <option>All Regions</option>
                 <option>North America</option>
                 <option>Europe</option>
@@ -72,7 +72,7 @@ const CampaignView = () => {
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Risk Level</label>
               <div className="flex flex-wrap gap-2">
                 {['Low', 'Medium', 'High', 'Critical'].map(level => (
-                  <button key={level} className="px-3 py-1.5 rounded-full text-[10px] font-bold bg-[#111418] border border-surface-border text-slate-400 hover:border-primary hover:text-white transition-all">
+                  <button key={level} className="px-3 py-1.5 rounded-full text-[10px] font-bold bg-[#111418] border border-slate-200 dark:border-surface-border text-slate-400 hover:border-primary hover:text-white transition-all">
                     {level}
                   </button>
                 ))}
@@ -93,16 +93,16 @@ const CampaignView = () => {
                 onClick={() => toggleCustomer(c.id)}
                 className={`p-4 rounded-xl border transition-all cursor-pointer ${selectedCustomers.includes(c.id)
                   ? 'border-primary bg-primary/5'
-                  : 'border-surface-border bg-transparent hover:border-slate-500'
+                  : 'border-slate-200 dark:border-surface-border bg-transparent hover:border-slate-500'
                   }`}
               >
                 <div className="flex justify-between items-start">
-                  <span className="text-sm font-bold text-white">{c.name}</span>
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">{c.name}</span>
                   <input
                     type="checkbox"
                     checked={selectedCustomers.includes(c.id)}
                     onChange={() => { }}
-                    className="rounded border-surface-border text-primary focus:ring-offset-0"
+                    className="rounded border-slate-200 dark:border-surface-border text-primary focus:ring-offset-0"
                   />
                 </div>
                 <div className="flex justify-between items-end mt-2">
@@ -130,7 +130,7 @@ const CampaignView = () => {
               </React.Fragment>
             ))}
             <div className="ml-4">
-              <h2 className="text-2xl font-black text-white">Compose Reminder</h2>
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white">Compose Reminder</h2>
               <p className="text-slate-400">Design your email template and AI messaging.</p>
             </div>
           </div>
@@ -146,16 +146,16 @@ const CampaignView = () => {
                 AI Content Active
               </div>
             </div>
-            <div className="rounded-2xl border border-surface-border bg-surface-dark overflow-hidden">
-              <div className="px-6 py-4 border-b border-surface-border bg-[#161d24] flex items-center gap-4">
+            <div className="rounded-2xl border border-slate-200 dark:border-surface-border bg-white dark:bg-surface-dark overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-200 dark:border-surface-border bg-[#161d24] flex items-center gap-4">
                 <span className="text-slate-500 text-xs w-16 text-right font-bold">To:</span>
                 <span className="bg-primary/10 text-primary px-3 py-0.5 rounded-lg text-xs font-mono">
                   {activeCustomers.length > 0 ? activeCustomers[0].contactEmail : '{{CustomerEmail}}'}
                 </span>
               </div>
-              <div className="px-6 py-4 border-b border-surface-border bg-[#161d24] flex items-center gap-4">
+              <div className="px-6 py-4 border-b border-slate-200 dark:border-surface-border bg-[#161d24] flex items-center gap-4">
                 <span className="text-slate-500 text-xs w-16 text-right font-bold">Subject:</span>
-                <span className="text-white text-sm font-bold">{selectedTemplate.subject}</span>
+                <span className="text-slate-900 dark:text-white text-sm font-bold">{selectedTemplate.subject}</span>
               </div>
               <div className="p-10 bg-white text-slate-800 font-sans leading-relaxed whitespace-pre-wrap">
                 <div className="max-w-2xl mx-auto flex flex-col gap-6">
@@ -177,17 +177,17 @@ const CampaignView = () => {
       </section>
 
       {/* Action Bar */}
-      <aside className="w-[340px] border-l border-surface-border bg-surface-dark p-8 flex flex-col shrink-0 gap-8">
+      <aside className="w-[340px] border-l border-slate-200 dark:border-surface-border bg-white dark:bg-surface-dark p-8 flex flex-col shrink-0 gap-8">
         <div className="flex flex-col gap-6 flex-1">
-          <h3 className="text-xl font-black text-white tracking-tight">Summary</h3>
+          <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Summary</h3>
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl bg-[#111418] border border-surface-border">
+            <div className="p-4 rounded-xl bg-[#111418] border border-slate-200 dark:border-surface-border">
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Recipients</p>
-              <p className="text-3xl font-black text-white mt-1">{selectedCustomers.length}</p>
+              <p className="text-3xl font-black text-slate-900 dark:text-white mt-1">{selectedCustomers.length}</p>
             </div>
-            <div className="p-4 rounded-xl bg-[#111418] border border-surface-border">
+            <div className="p-4 rounded-xl bg-[#111418] border border-slate-200 dark:border-surface-border">
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Est. Time</p>
-              <p className="text-3xl font-black text-white mt-1">~1m</p>
+              <p className="text-3xl font-black text-slate-900 dark:text-white mt-1">~1m</p>
             </div>
           </div>
 
@@ -197,12 +197,12 @@ const CampaignView = () => {
               <input
                 type="text"
                 defaultValue="Q3 Recovery Initiative"
-                className="w-full bg-[#111418] border-surface-border rounded-xl text-white px-4 py-3 text-sm focus:ring-primary"
+                className="w-full bg-[#111418] border-slate-200 dark:border-surface-border rounded-xl text-white px-4 py-3 text-sm focus:ring-primary"
               />
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Schedule</label>
-              <select className="w-full bg-[#111418] border-surface-border rounded-xl text-white px-4 py-3 text-sm focus:ring-primary">
+              <select className="w-full bg-[#111418] border-slate-200 dark:border-surface-border rounded-xl text-white px-4 py-3 text-sm focus:ring-primary">
                 <option>Launch Immediately</option>
                 <option>Schedule for later</option>
               </select>
@@ -226,7 +226,7 @@ const CampaignView = () => {
             {isSending ? 'Sending...' : 'Send Reminders'}
             <span className="material-symbols-outlined">send</span>
           </button>
-          <button className="w-full py-2 text-sm font-bold text-slate-400 hover:text-white transition-colors">Save as Draft</button>
+          <button className="w-full py-2 text-sm font-bold text-slate-400 hover:text-slate-900 dark:text-white transition-colors">Save as Draft</button>
         </div>
       </aside>
     </div>

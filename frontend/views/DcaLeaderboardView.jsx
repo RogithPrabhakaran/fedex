@@ -4,9 +4,9 @@ import { dashboardService } from '../services/dashboardService';
 const numberFormat = (v) => (v ? `$${Number(v).toLocaleString()}` : '$0');
 
 const StatCard = ({ title, value, subtitle }) => (
-  <div className='p-6 bg-surface-dark border border-surface-border rounded-2xl'>
+  <div className='p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl'>
     <div className='text-slate-400 text-xs font-black uppercase'>{title}</div>
-    <div className='text-2xl font-black text-white mt-2'>{value}</div>
+    <div className='text-2xl font-black text-slate-900 dark:text-white mt-2'>{value}</div>
     {subtitle && <div className='text-sm text-slate-500 mt-1'>{subtitle}</div>}
   </div>
 );
@@ -60,7 +60,7 @@ const DcaLeaderboardView = () => {
     <div className='p-6 max-w-6xl mx-auto'>
       <div className='flex items-center justify-between mb-6'>
         <div>
-          <h1 className='text-3xl font-black text-white'>DCA Leaderboard</h1>
+          <h1 className='text-3xl font-black text-slate-900 dark:text-white'>DCA Leaderboard</h1>
           <p className='text-slate-400'>Ranking of DCA partners and quick stats for actions this month.</p>
         </div>
       </div>
@@ -73,7 +73,7 @@ const DcaLeaderboardView = () => {
       </div>
 
       {/* Filters & Sorting */}
-      <div className='bg-surface-dark p-4 rounded-2xl border border-surface-border mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
+      <div className='bg-white dark:bg-surface-dark p-4 rounded-2xl border border-slate-200 dark:border-surface-border mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
         <div className='flex items-center gap-3'>
           <input placeholder='Search agencies or regions' value={filterText} onChange={(e) => setFilterText(e.target.value)} className='p-2 rounded-md bg-[#0f1316] text-white px-4' />
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className='p-2 rounded-md bg-[#0f1316] text-white'>
@@ -101,7 +101,7 @@ const DcaLeaderboardView = () => {
       </div>
 
       {/* Leaderboard table */}
-      <div className='bg-surface-dark p-4 rounded-2xl border border-surface-border overflow-auto'>
+      <div className='bg-white dark:bg-surface-dark p-4 rounded-2xl border border-slate-200 dark:border-surface-border overflow-auto'>
         <table className='w-full text-sm'>
           <thead className='text-slate-400 text-xs text-left'>
             <tr>
@@ -127,17 +127,17 @@ const DcaLeaderboardView = () => {
             )}
 
             {!loading && filtered.map((a, idx) => (
-              <tr key={a.dca_id || a.id || idx} className='border-t border-surface-border'>
+              <tr key={a.dca_id || a.id || idx} className='border-t border-slate-200 dark:border-surface-border'>
                 <td className='py-3'>{idx + 1}</td>
-                <td className='py-3 text-white font-bold'>{a.name || a.agency_name}</td>
+                <td className='py-3 text-slate-900 dark:text-white font-bold'>{a.name || a.agency_name}</td>
                 <td className='py-3 text-slate-400'>{a.regions || 'Global'}</td>
-                <td className='py-3 text-white'>{(a.recovery_rate || 0).toFixed(1)}%</td>
+                <td className='py-3 text-slate-900 dark:text-white'>{(a.recovery_rate || 0).toFixed(1)}%</td>
                 <td className='py-3 text-slate-300'>{numberFormat(a.recovered_amount || a.recovered_amount)}</td>
                 <td className='py-3 text-slate-300'>{a.total_cases_handled || a.cases_handled || '—'}</td>
                 <td className='py-3 text-slate-300'>{a.avg_days_to_recovery || a.avg_days_to_recovery || '—'}</td>
                 <td className='py-3'><span className={`px-3 py-1 rounded-full text-xs font-bold ${a.status === 'ACTIVE' ? 'bg-green-500/20 text-green-500' : (a.status === 'WARNING' ? 'bg-amber-500/20 text-amber-500' : 'bg-rose-500/20 text-rose-500')}`}>{a.status}</span></td>
                 <td className='py-3 text-slate-300'>{a.commission_rate != null ? `${a.commission_rate}%` : '—'}</td>
-                <td className='py-3'><button onClick={() => alert('Open agency details for ' + (a.name || a.agency_name))} className='px-3 py-1 bg-[#111418] rounded-md text-white border border-surface-border'>View</button></td>
+                <td className='py-3'><button onClick={() => alert('Open agency details for ' + (a.name || a.agency_name))} className='px-3 py-1 bg-[#111418] rounded-md text-white border border-slate-200 dark:border-surface-border'>View</button></td>
               </tr>
             ))}
           </tbody>

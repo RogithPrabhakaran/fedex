@@ -2,9 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { issuesService } from '../services/issuesService';
 
 const IssueRow = ({ issue, onResolve, onView, onAssign }) => (
-  <tr className='border-t border-surface-border'>
+  <tr className='border-t border-slate-200 dark:border-surface-border'>
     <td className='py-3'>{issue.id}</td>
-    <td className='py-3 text-white font-bold'>{issue.title}</td>
+    <td className='py-3 text-slate-900 dark:text-white font-bold'>{issue.title}</td>
     <td className='py-3 text-slate-300'>{issue.priority}</td>
     <td className='py-3 text-slate-300'>{issue.status}</td>
     <td className='py-3 text-slate-300'>{issue.reported_by || issue.reported_email}</td>
@@ -12,7 +12,7 @@ const IssueRow = ({ issue, onResolve, onView, onAssign }) => (
     <td className='py-3'>
       <div className='flex gap-2'>
         {issue.status !== 'RESOLVED' && <button onClick={() => onResolve(issue)} className='px-3 py-1 bg-primary rounded-md text-white'>Resolve</button>}
-        <button onClick={() => onView(issue)} className='px-3 py-1 bg-[#111418] rounded-md text-white border border-surface-border'>View</button>
+        <button onClick={() => onView(issue)} className='px-3 py-1 bg-[#111418] rounded-md text-white border border-slate-200 dark:border-surface-border'>View</button>
       </div>
     </td>
   </tr>
@@ -99,29 +99,29 @@ const IssuesResolveView = () => {
     <div className='p-6 max-w-6xl mx-auto'>
       <div className='flex items-center justify-between mb-6'>
         <div>
-          <h1 className='text-3xl font-black text-white'>Issues & Complaints</h1>
+          <h1 className='text-3xl font-black text-slate-900 dark:text-white'>Issues & Complaints</h1>
           <p className='text-slate-400'>Resolve and manage complaints lodged by agents or customers.</p>
         </div>
         <div>
-          <button onClick={load} className='px-4 py-2 bg-[#111418] text-white rounded-md border border-surface-border'>Refresh</button>
+          <button onClick={load} className='px-4 py-2 bg-[#111418] text-white rounded-md border border-slate-200 dark:border-surface-border'>Refresh</button>
         </div>
       </div>
 
       {/* Top stat cards */}
       <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-6'>
-        <div className='p-4 bg-surface-dark border border-surface-border rounded-2xl'>
+        <div className='p-4 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl'>
           <div className='text-slate-400 text-xs uppercase font-bold'>Open / In-progress</div>
-          <div className='text-2xl font-black text-white mt-2'>{stats.open + stats.inProgress}/{stats.total}</div>
+          <div className='text-2xl font-black text-slate-900 dark:text-white mt-2'>{stats.open + stats.inProgress}/{stats.total}</div>
           <div className='text-slate-500 text-sm mt-1'>{stats.highCount} high priority</div>
         </div>
 
-        <div className='p-4 bg-surface-dark border border-surface-border rounded-2xl'>
+        <div className='p-4 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl'>
           <div className='text-slate-400 text-xs uppercase font-bold'>Avg Resolution (days)</div>
-          <div className='text-2xl font-black text-white mt-2'>{stats.avgDays}</div>
+          <div className='text-2xl font-black text-slate-900 dark:text-white mt-2'>{stats.avgDays}</div>
           <div className='text-slate-500 text-sm mt-1'>Based on resolved issues</div>
         </div>
 
-        <div className='p-4 bg-surface-dark border border-surface-border rounded-2xl'>
+        <div className='p-4 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl'>
           <div className='text-slate-400 text-xs uppercase font-bold'>Status Distribution</div>
           <div className='mt-2 space-y-3'>
             <div className='text-slate-300 text-xs'>Open
@@ -143,7 +143,7 @@ const IssuesResolveView = () => {
         </div>
       </div>
 
-      <div className='bg-surface-dark p-4 rounded-2xl border border-surface-border mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
+      <div className='bg-white dark:bg-surface-dark p-4 rounded-2xl border border-slate-200 dark:border-surface-border mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
         <div className='flex items-center gap-3'>
           <input placeholder='Search title or description' value={search} onChange={(e) => setSearch(e.target.value)} className='p-2 rounded-md bg-[#0f1316] text-white px-4' />
 
@@ -165,7 +165,7 @@ const IssuesResolveView = () => {
 
       </div>
 
-      <div className='bg-surface-dark p-4 rounded-2xl border border-surface-border overflow-auto'>
+      <div className='bg-white dark:bg-surface-dark p-4 rounded-2xl border border-slate-200 dark:border-surface-border overflow-auto'>
         <table className='w-full text-sm'>
           <thead className='text-slate-400 text-xs text-left'>
             <tr>
@@ -237,9 +237,9 @@ const IssueModal = ({ issue, onClose }) => {
 
   return (
     <div className='fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50'>
-      <div className='bg-surface-dark p-6 rounded-2xl w-full max-w-2xl border border-surface-border'>
+      <div className='bg-white dark:bg-surface-dark p-6 rounded-2xl w-full max-w-2xl border border-slate-200 dark:border-surface-border'>
         <div className='flex justify-between items-center mb-4'>
-          <h3 className='text-xl font-bold text-white'>{isNew ? 'Create Issue' : `Issue #${issue.id}`}</h3>
+          <h3 className='text-xl font-bold text-slate-900 dark:text-white'>{isNew ? 'Create Issue' : `Issue #${issue.id}`}</h3>
           <div className='flex gap-2'>
             {!isNew && <button onClick={handleDelete} className='px-3 py-1 bg-rose-600 text-white rounded-md'>Delete</button>}
             <button onClick={onClose} className='px-3 py-1 bg-[#111418] rounded-md text-white'>Close</button>

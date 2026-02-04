@@ -23,7 +23,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
         <span className='material-symbols-outlined text-6xl text-slate-600 mb-4'>
           lock
         </span>
-        <h2 className='text-2xl font-bold text-white mb-2'>
+        <h2 className='text-2xl font-bold text-slate-900 dark:text-white mb-2'>
           Access Restricted
         </h2>
         <p className='text-slate-400'>
@@ -155,7 +155,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
       <div className='flex items-center justify-center h-full'>
         <div className='text-center'>
           <div className='animate-spin size-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4'></div>
-          <p className='text-white font-bold'>Loading agents...</p>
+          <p className='text-slate-900 dark:text-white font-bold'>Loading agents...</p>
         </div>
       </div>
     );
@@ -167,7 +167,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
         {/* Header */}
         <div className='flex justify-between items-center'>
           <div>
-            <h1 className='text-4xl font-black text-white tracking-tight mb-2'>Manage Agents</h1>
+            <h1 className='text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-2'>Manage Agents</h1>
             <p className='text-slate-400'>Monitor and manage your DCA agents performance and assignments</p>
           </div>
           <button
@@ -187,14 +187,14 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder='Search by name, email, or company...'
-              className='w-full bg-surface-dark border border-surface-border rounded-xl text-white px-4 py-3 pl-12 focus:border-primary focus:ring-2 focus:ring-primary/20'
+              className='w-full bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-xl text-white px-4 py-3 pl-12 focus:border-primary focus:ring-2 focus:ring-primary/20'
             />
             <span className='material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400'>search</span>
           </div>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className='bg-surface-dark border border-surface-border rounded-xl text-white px-4 py-3 focus:border-primary focus:ring-2 focus:ring-primary/20'
+            className='bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-xl text-white px-4 py-3 focus:border-primary focus:ring-2 focus:ring-primary/20'
           >
             <option value='all'>All Status</option>
             <option value='Active'>Active</option>
@@ -205,29 +205,29 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
 
         {/* Stats Cards */}
         <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
-          <div className='bg-surface-dark border border-surface-border rounded-2xl p-6'>
+          <div className='bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl p-6'>
             <span className='text-slate-400 text-xs font-black uppercase'>Total Agents</span>
-            <p className='text-3xl font-black text-white mt-2'>{agents.length}</p>
+            <p className='text-3xl font-black text-slate-900 dark:text-white mt-2'>{agents.length}</p>
           </div>
-          <div className='bg-surface-dark border border-surface-border rounded-2xl p-6'>
+          <div className='bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl p-6'>
             <span className='text-slate-400 text-xs font-black uppercase'>Active</span>
             <p className='text-3xl font-black text-green-500 mt-2'>{agents.filter(a => a.status === 'Active').length}</p>
           </div>
-          <div className='bg-surface-dark border border-surface-border rounded-2xl p-6'>
+          <div className='bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl p-6'>
             <span className='text-slate-400 text-xs font-black uppercase'>Total Assigned Cases</span>
             <p className='text-3xl font-black text-primary mt-2'>{agents.reduce((sum, a) => sum + a.assignedCases, 0)}</p>
           </div>
-          <div className='bg-surface-dark border border-surface-border rounded-2xl p-6'>
+          <div className='bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl p-6'>
             <span className='text-slate-400 text-xs font-black uppercase'>Total Recovered</span>
             <p className='text-3xl font-black text-amber-500 mt-2'>${agents.reduce((sum, a) => sum + parseInt(a.totalRecovered.replace(/[$,]/g, '')), 0).toLocaleString()}</p>
           </div>
         </div>
 
         {/* Agents Table */}
-        <div className='bg-surface-dark border border-surface-border rounded-2xl overflow-hidden'>
+        <div className='bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl overflow-hidden'>
           <div className='overflow-x-auto'>
             <table className='w-full'>
-              <thead className='bg-[#111418] border-b border-surface-border'>
+              <thead className='bg-[#111418] border-b border-slate-200 dark:border-surface-border'>
                 <tr>
                   <th className='px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider'>Name</th>
                   <th className='px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider'>Status</th>
@@ -259,7 +259,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
                             }}
                             className='text-left'
                           >
-                            <p className='text-white font-bold underline hover:text-primary'>{agent.name}</p>
+                            <p className='text-slate-900 dark:text-white font-bold underline hover:text-primary'>{agent.name}</p>
                             <p className='text-slate-400 text-sm'>{agent.email}</p>
                           </button>
                         </div>
@@ -270,7 +270,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
                         </span>
                       </td>
                       <td className='px-6 py-4'>
-                        <p className='text-white font-bold text-center'>{agent.assignedCases}</p>
+                        <p className='text-slate-900 dark:text-white font-bold text-center'>{agent.assignedCases}</p>
                       </td>
                       <td className='px-6 py-4'>
                         <div className='flex items-center gap-3'>
@@ -280,11 +280,11 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
                               style={{ width: `${agent.successRate}%` }}
                             ></div>
                           </div>
-                          <p className='text-white font-bold'>{agent.successRate}%</p>
+                          <p className='text-slate-900 dark:text-white font-bold'>{agent.successRate}%</p>
                         </div>
                       </td>
                       <td className='px-6 py-4'>
-                        <p className='text-white font-bold text-green-500'>{agent.totalRecovered}</p>
+                        <p className='text-slate-900 dark:text-white font-bold text-green-500'>{agent.totalRecovered}</p>
                       </td>
                       <td className='px-6 py-4'>
                         <div className='flex gap-2'>
@@ -308,12 +308,12 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
       {/* Add Agent Modal */}
       {showAddModal && (
         <div className='fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
-          <div className='bg-surface-dark border border-surface-border rounded-2xl p-8 max-w-md w-full space-y-6'>
+          <div className='bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl p-8 max-w-md w-full space-y-6'>
             <div className='flex justify-between items-center'>
-              <h2 className='text-2xl font-black text-white'>Add New Agent</h2>
+              <h2 className='text-2xl font-black text-slate-900 dark:text-white'>Add New Agent</h2>
               <button
                 onClick={() => setShowAddModal(false)}
-                className='text-slate-400 hover:text-white transition-colors'
+                className='text-slate-400 hover:text-slate-900 dark:text-white transition-colors'
               >
                 <span className='material-symbols-outlined'>close</span>
               </button>
@@ -326,7 +326,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
                   type='text'
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className='w-full bg-[#111418] border border-surface-border rounded-xl text-white px-4 py-3 focus:border-primary focus:ring-2 focus:ring-primary/20'
+                  className='w-full bg-[#111418] border border-slate-200 dark:border-surface-border rounded-xl text-white px-4 py-3 focus:border-primary focus:ring-2 focus:ring-primary/20'
                   placeholder='Agent name'
                   required
                 />
@@ -338,7 +338,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
                   type='email'
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className='w-full bg-[#111418] border border-surface-border rounded-xl text-white px-4 py-3 focus:border-primary focus:ring-2 focus:ring-primary/20'
+                  className='w-full bg-[#111418] border border-slate-200 dark:border-surface-border rounded-xl text-white px-4 py-3 focus:border-primary focus:ring-2 focus:ring-primary/20'
                   placeholder='agent@dca.com'
                   required
                 />
@@ -350,7 +350,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
                   type='text'
                   value={formData.company}
                   onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                  className='w-full bg-[#111418] border border-surface-border rounded-xl text-white px-4 py-3 focus:border-primary focus:ring-2 focus:ring-primary/20'
+                  className='w-full bg-[#111418] border border-slate-200 dark:border-surface-border rounded-xl text-white px-4 py-3 focus:border-primary focus:ring-2 focus:ring-primary/20'
                   placeholder='Company name'
                   required
                 />
@@ -361,7 +361,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className='w-full bg-[#111418] border border-surface-border rounded-xl text-white px-4 py-3 focus:border-primary focus:ring-2 focus:ring-primary/20'
+                  className='w-full bg-[#111418] border border-slate-200 dark:border-surface-border rounded-xl text-white px-4 py-3 focus:border-primary focus:ring-2 focus:ring-primary/20'
                 >
                   <option value='Active'>Active</option>
                   <option value='Inactive'>Inactive</option>

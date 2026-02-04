@@ -176,7 +176,7 @@ const CustomersView = () => {
             {/* Header & Actions */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div className="flex flex-col gap-2">
-                    <h1 className="text-4xl font-black text-white tracking-tight">Customers</h1>
+                    <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">Customers</h1>
                     <p className="text-slate-400 text-lg">Manage all customer accounts and assignments.</p>
                 </div>
                 <div className="flex gap-4">
@@ -216,7 +216,7 @@ const CustomersView = () => {
                         } finally {
                             setLoading(false);
                         }
-                    }} className="flex items-center gap-2 rounded-xl border border-surface-border px-6 py-3 text-white font-black hover:bg-surface-border transition-all">
+                    }} className="flex items-center gap-2 rounded-xl border border-slate-200 dark:border-surface-border px-6 py-3 text-white font-black hover:bg-surface-border transition-all">
                         <span className="material-symbols-outlined">assessment</span>
                         Analyze All
                     </button>
@@ -225,7 +225,7 @@ const CustomersView = () => {
 
             {/* Main Table Section */}
             <div className="flex flex-col gap-6">
-                <div className="flex flex-col sm:flex-row items-center gap-4 p-6 rounded-2xl border border-surface-border bg-surface-dark">
+                <div className="flex flex-col sm:flex-row items-center gap-4 p-6 rounded-2xl border border-slate-200 dark:border-surface-border bg-white dark:bg-surface-dark">
                     <div className="relative w-full sm:w-96">
                         <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">search</span>
                         <input
@@ -233,12 +233,12 @@ const CustomersView = () => {
                             placeholder="Search by Company or Agency ID..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full rounded-xl border border-surface-border bg-[#111418] pl-12 pr-4 py-3 text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                            className="w-full rounded-xl border border-slate-200 dark:border-surface-border bg-[#111418] pl-12 pr-4 py-3 text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                         />
                     </div>
 
                     <div className="ml-auto flex items-center gap-3">
-                        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="rounded-xl border border-surface-border bg-[#111418] px-4 py-3 text-white font-semibold">
+                        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="rounded-xl border border-slate-200 dark:border-surface-border bg-[#111418] px-4 py-3 text-white font-semibold">
                             <option value="ALL">All Statuses</option>
                             {Object.values(CustomerStatus).map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
@@ -249,14 +249,14 @@ const CustomersView = () => {
                             placeholder="Min overdue"
                             value={minOverdue}
                             onChange={(e) => setMinOverdue(e.target.value)}
-                            className="w-32 rounded-xl border border-surface-border bg-[#111418] px-4 py-3 text-white font-semibold"
+                            className="w-32 rounded-xl border border-slate-200 dark:border-surface-border bg-[#111418] px-4 py-3 text-white font-semibold"
                         />
 
                         <select value={sortBy + '|' + sortDir} onChange={(e) => {
                             const [s, d] = e.target.value.split('|');
                             setSortBy(s);
                             setSortDir(d);
-                        }} className="rounded-xl border border-surface-border bg-[#111418] px-4 py-3 text-white font-semibold">
+                        }} className="rounded-xl border border-slate-200 dark:border-surface-border bg-[#111418] px-4 py-3 text-white font-semibold">
                             <option value="none|desc">No Sort</option>
                             <option value="daysOverdue|desc">Days Overdue ↓</option>
                             <option value="daysOverdue|asc">Days Overdue ↑</option>
@@ -276,10 +276,10 @@ const CustomersView = () => {
             {/* Detail Slideover */}
             {editingCustomer && (
                 <div className="fixed inset-0 z-[100] flex justify-end bg-black/60 backdrop-blur-sm transition-opacity">
-                    <div className="w-full max-w-[600px] bg-surface-dark h-full border-l border-surface-border flex flex-col animate-in slide-in-from-right duration-300">
-                        <div className="flex items-center justify-between p-8 border-b border-surface-border shrink-0">
+                    <div className="w-full max-w-[600px] bg-white dark:bg-surface-dark h-full border-l border-slate-200 dark:border-surface-border flex flex-col animate-in slide-in-from-right duration-300">
+                        <div className="flex items-center justify-between p-8 border-b border-slate-200 dark:border-surface-border shrink-0">
                             <div>
-                                <h3 className="text-2xl font-black text-white">{editingCustomer.name}</h3>
+                                <h3 className="text-2xl font-black text-slate-900 dark:text-white">{editingCustomer.name}</h3>
                                 <p className="text-slate-400 font-mono text-sm">Account Tracking: {editingCustomer.accountId}</p>
 
                                 {editingCustomer.__analyzing && (
@@ -328,11 +328,11 @@ const CustomersView = () => {
 
                         <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-10">
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 rounded-2xl bg-[#111418] border border-surface-border">
+                                <div className="p-4 rounded-2xl bg-[#111418] border border-slate-200 dark:border-surface-border">
                                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Assigned Agency</p>
-                                    <p className="text-white font-bold mt-1">{editingCustomer.assignedToDcaId ? 'Agency Alpha' : 'In-House Collection'}</p>
+                                    <p className="text-slate-900 dark:text-white font-bold mt-1">{editingCustomer.assignedToDcaId ? 'Agency Alpha' : 'In-House Collection'}</p>
                                 </div>
-                                <div className="p-4 rounded-2xl bg-[#111418] border border-surface-border">
+                                <div className="p-4 rounded-2xl bg-[#111418] border border-slate-200 dark:border-surface-border">
                                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Current Status</p>
                                     <p className="text-primary font-bold mt-1 uppercase text-sm">{editingCustomer.status}</p>
                                 </div>
@@ -345,18 +345,18 @@ const CustomersView = () => {
                                 </h4>
                                 <div className="space-y-4">
                                     {(editingCustomer.actions || []).length === 0 ? (
-                                        <div className="p-8 text-center text-slate-500 bg-[#111418] rounded-2xl border border-dashed border-surface-border">
+                                        <div className="p-8 text-center text-slate-500 bg-[#111418] rounded-2xl border border-dashed border-slate-200 dark:border-surface-border">
                                             No external agency logs for this period.
                                         </div>
                                     ) : (editingCustomer.actions || []).map(action => (
-                                        <div key={action.id} className="p-5 bg-[#111418] border border-surface-border rounded-2xl">
+                                        <div key={action.id} className="p-5 bg-[#111418] border border-slate-200 dark:border-surface-border rounded-2xl">
                                             <div className="flex justify-between items-center mb-3">
                                                 <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${action.type === 'LEGAL_NOTICE' ? 'bg-red-500 text-white' : 'bg-primary/20 text-primary'
                                                     }`}>{action.type}</span>
                                                 <span className="text-[10px] text-slate-500 font-bold">{action.date}</span>
                                             </div>
                                             <p className="text-slate-300 text-sm leading-relaxed">{action.notes}</p>
-                                            <div className="mt-3 pt-3 border-t border-surface-border text-[9px] text-slate-500 flex justify-between uppercase font-bold">
+                                            <div className="mt-3 pt-3 border-t border-slate-200 dark:border-surface-border text-[9px] text-slate-500 flex justify-between uppercase font-bold">
                                                 <span>Performed By: {action.performedBy}</span>
                                                 <span>System Log ID: {action.id}</span>
                                             </div>
@@ -365,7 +365,7 @@ const CustomersView = () => {
                                 </div>
                             </div>
 
-                            <form className="space-y-6 pt-10 border-t border-surface-border" onSubmit={saveEdit}>
+                            <form className="space-y-6 pt-10 border-t border-slate-200 dark:border-surface-border" onSubmit={saveEdit}>
                                 <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest">Administrative Override</h4>
                                 <div className="flex flex-col gap-1.5">
                                     <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Company Name</label>
@@ -373,7 +373,7 @@ const CustomersView = () => {
                                         type="text"
                                         value={editingCustomer.name}
                                         onChange={(e) => setEditingCustomer({ ...editingCustomer, name: e.target.value })}
-                                        className="w-full rounded-xl border border-surface-border bg-[#111418] px-4 py-3 text-white focus:border-primary"
+                                        className="w-full rounded-xl border border-slate-200 dark:border-surface-border bg-[#111418] px-4 py-3 text-white focus:border-primary"
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
@@ -381,7 +381,7 @@ const CustomersView = () => {
                                     <select
                                         value={editingCustomer.status}
                                         onChange={(e) => setEditingCustomer({ ...editingCustomer, status: e.target.value })}
-                                        className="w-full rounded-xl border border-surface-border bg-[#111418] px-4 py-3 text-white focus:border-primary"
+                                        className="w-full rounded-xl border border-slate-200 dark:border-surface-border bg-[#111418] px-4 py-3 text-white focus:border-primary"
                                     >
                                         {Object.values(CustomerStatus).map(s => <option key={s}>{s}</option>)}
                                     </select>
@@ -389,10 +389,10 @@ const CustomersView = () => {
                             </form>
                         </div>
 
-                        <div className="p-8 border-t border-surface-border bg-[#161d24] flex gap-4">
+                        <div className="p-8 border-t border-slate-200 dark:border-surface-border bg-[#161d24] flex gap-4">
                             <button
                                 onClick={() => setEditingCustomer(null)}
-                                className="flex-1 py-4 text-sm font-bold text-white rounded-xl border border-surface-border hover:bg-surface-border"
+                                className="flex-1 py-4 text-sm font-bold text-white rounded-xl border border-slate-200 dark:border-surface-border hover:bg-surface-border"
                             >
                                 Close
                             </button>
