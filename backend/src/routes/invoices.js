@@ -9,7 +9,6 @@ router.use(authMiddleware);
 // ==================== INVOICE ROUTES ====================
 router.get('/', invoiceController.getAllInvoices);
 router.get('/overdue', invoiceController.getOverdueInvoices);
-router.get('/customer/:email', invoiceController.getInvoicesByCustomer);
 router.get('/:id', invoiceController.getInvoiceById);
 router.get('/:id/cases', invoiceController.getInvoiceWithCases);
 router.post('/', invoiceController.createInvoice);

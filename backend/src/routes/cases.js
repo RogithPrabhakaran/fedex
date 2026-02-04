@@ -15,7 +15,6 @@ router.get('/:id/logs', caseController.getCaseWithLogs);
 router.post('/', caseController.createCase);
 router.put('/:id', caseController.updateCase);
 router.put('/:id/assign', caseController.assignCaseToAgency);
-router.put('/:id/disposition', caseController.updateCaseDisposition);
 router.delete('/:id', caseController.deleteCase);
 
 module.exports = router;

@@ -65,9 +65,6 @@ const caseLogController = {
       }
 
       const log = await CaseLog.create(req.body);
-      
-      // Update case's last_touched_at timestamp
-      await caseRecord.update({ last_touched_at: new Date() });
 
       res.status(201).json(log);
     } catch (error) {
@@ -144,8 +141,6 @@ const caseLogController = {
         description: `Status changed from ${old_status} to ${new_status}`,
       });
 
-      await caseRecord.update({ last_touched_at: new Date() });
-
       res.status(201).json(log);
     } catch (error) {
       console.error('Create status change log error:', error);
@@ -170,8 +165,6 @@ const caseLogController = {
         description,
       });
 
-      await caseRecord.update({ last_touched_at: new Date() });
-
       res.status(201).json(log);
     } catch (error) {
       console.error('Create call log error:', error);
@@ -195,8 +188,6 @@ const caseLogController = {
         action_type: 'COMMENT',
         description,
       });
-
-      await caseRecord.update({ last_touched_at: new Date() });
 
       res.status(201).json(log);
     } catch (error) {

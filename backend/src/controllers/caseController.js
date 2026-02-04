@@ -7,22 +7,26 @@ const caseController = {
   async getAllCases(req, res) {
     try {
       const { 
-        life_cycle_status, 
-        assigned_agency_id, 
-        bucket_category, 
-        priority_score,
-        sla_overdue 
+        status, 
+        dca_id, 
+        priority,
+        debt_category,
+        debtor_type,
+        sla_overdue,
+        limit = 100,
+        offset = 0
       } = req.query;
       const where = {};
 
-      if (life_cycle_status) where.life_cycle_status = life_cycle_status;
-      if (assigned_agency_id) where.assigned_agency_id = assigned_agency_id;
-      if (bucket_category) where.bucket_category = bucket_category;
-      if (priority_score) where.priority_score = { [Op.gte]: priority_score };
+      if (status) where.status = status;
+      if (dca_id) where.dca_id = dca_id;
+      if (priority) where.priority = priority;
+      if (debt_category) where.debt_category = debt_category;
+      if (debtor_type) where.debtor_type = debtor_type;
       
       // Filter for SLA overdue cases
       if (sla_overdue === 'true') {
-        where.sla_deadline = { [Op.lt]: new Date() };
+        where.first_contact_due = { [Op.lt]: new Date() };
       }
 
       const cases = await Case.findAll({
@@ -31,7 +35,9 @@ const caseController = {
           model: Invoice,
           as: 'invoice',
         }],
-        order: [['priority_score', 'DESC'], ['sla_deadline', 'ASC']],
+        order: [['complexity_score', 'DESC'], ['first_contact_due', 'ASC']],
+        limit: parseInt(limit),
+        offset: parseInt(offset),
       });
 
       res.json(cases);
@@ -76,7 +82,7 @@ const caseController = {
         case_id: caseRecord.case_id,
         actor: 'System',
         action_type: 'STATUS_CHANGE',
-        description: `Case created with status: ${caseRecord.life_cycle_status}`,
+        description: `Case created with status: ${caseRecord.status}`,
       });
 
       res.status(201).json(caseRecord);
@@ -104,12 +110,12 @@ const caseController = {
       const caseRecord = await Case.findByPk(req.params.id);
       
       // Log status change if status was updated
-      if (req.body.life_cycle_status && req.body.life_cycle_status !== oldCase.life_cycle_status) {
+      if (req.body.status && req.body.status !== oldCase.status) {
         await CaseLog.create({
           case_id: caseRecord.case_id,
           actor: req.user?.email || 'System',
           action_type: 'STATUS_CHANGE',
-          description: `Status changed from ${oldCase.life_cycle_status} to ${caseRecord.life_cycle_status}`,
+          description: `Status changed from ${oldCase.status} to ${caseRecord.status}`,
         });
       }
 
@@ -168,7 +174,7 @@ const caseController = {
   // Assign case to DCA agency
   async assignCaseToAgency(req, res) {
     try {
-      const { assigned_agency_id } = req.body;
+      const { dca_id } = req.body;
       
       const caseRecord = await Case.findByPk(req.params.id);
       if (!caseRecord) {
@@ -176,9 +182,9 @@ const caseController = {
       }
 
       await caseRecord.update({
-        assigned_agency_id,
-        life_cycle_status: 'ASSIGNED',
-        last_touched_at: new Date(),
+        dca_id,
+        status: 'ASSIGNED',
+        assigned_at: new Date(),
       });
 
       // Log the assignment
@@ -186,7 +192,7 @@ const caseController = {
         case_id: caseRecord.case_id,
         actor: req.user?.email || 'System',
         action_type: 'STATUS_CHANGE',
-        description: `Case assigned to agency ID: ${assigned_agency_id}`,
+        description: `Case assigned to DCA: ${dca_id}`,
       });
 
       res.json(caseRecord);
@@ -196,38 +202,9 @@ const caseController = {
     }
   },
 
-  // Update case disposition
-  async updateCaseDisposition(req, res) {
-    try {
-      const { disposition_code, notes_summary } = req.body;
-      
-      const caseRecord = await Case.findByPk(req.params.id);
-      if (!caseRecord) {
-        return res.status(404).json({ error: 'Case not found' });
-      }
 
-      await caseRecord.update({
-        disposition_code,
-        notes_summary,
-        last_touched_at: new Date(),
-      });
 
-      // Log the disposition update
-      await CaseLog.create({
-        case_id: caseRecord.case_id,
-        actor: req.user?.email || 'Agency_User',
-        action_type: 'COMMENT',
-        description: `Disposition updated to: ${disposition_code}. Notes: ${notes_summary}`,
-      });
-
-      res.json(caseRecord);
-    } catch (error) {
-      console.error('Update case disposition error:', error);
-      res.status(500).json({ error: error.message || 'Failed to update disposition' });
-    }
-  },
-
-  // Get stale cases (not touched in 7+ days)
+  // Get stale cases (not assigned in 7+ days or overdue SLA)
   async getStaleCases(req, res) {
     try {
       const sevenDaysAgo = new Date();
@@ -235,14 +212,17 @@ const caseController = {
 
       const cases = await Case.findAll({
         where: {
-          last_touched_at: { [Op.lt]: sevenDaysAgo },
-          life_cycle_status: { [Op.notIn]: ['CLOSED'] },
+          [Op.or]: [
+            { assigned_at: { [Op.lt]: sevenDaysAgo } },
+            { first_contact_due: { [Op.lt]: new Date() } }
+          ],
+          status: { [Op.notIn]: ['RECOVERED', 'WRITE_OFF'] },
         },
         include: [{
           model: Invoice,
           as: 'invoice',
         }],
-        order: [['last_touched_at', 'ASC']],
+        order: [['assigned_at', 'ASC']],
       });
 
       res.json(cases);
@@ -257,12 +237,12 @@ const caseController = {
     try {
       const { agencyId } = req.params;
       const cases = await Case.findAll({
-        where: { assigned_agency_id: agencyId },
+        where: { dca_id: agencyId },
         include: [{
           model: Invoice,
           as: 'invoice',
         }],
-        order: [['priority_score', 'DESC']],
+        order: [['complexity_score', 'DESC'], ['dpd', 'DESC']],
       });
 
       res.json(cases);

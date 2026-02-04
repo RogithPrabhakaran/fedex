@@ -2,7 +2,7 @@ import { api } from './api';
 
 export const dcaService = {
   async fetchAgencies(query = '') {
-    return api.get(`/dca/agencies${query}`);
+    return api.get(`/dca-agencies/agencies${query}`);
   },
 
   async fetchAgencyPerformance(agencyId) {

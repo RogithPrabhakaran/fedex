@@ -2,7 +2,7 @@ import { api } from './api';
 
 export const dashboardService = {
   async fetchAgencies(query = '') {
-    return api.get(`/dca/agencies${query}`);
+    return api.get(`/dca-agencies/agencies${query}`);
   },
 
   async fetchCustomers(query = '') {

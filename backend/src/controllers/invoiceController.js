@@ -6,21 +6,26 @@ const invoiceController = {
 
   async getAllInvoices(req, res) {
     try {
-      const { customer_name, customer_email, bill_of_entry_no, overdue } = req.query;
+      const { 
+        tax_id, 
+        tracking_no, 
+        payment_status, 
+        invoice_no,
+        limit = 100,
+        offset = 0
+      } = req.query;
       const where = {};
 
-      if (customer_name) where.customer_name = { [Op.like]: `%${customer_name}%` };
-      if (customer_email) where.customer_email = customer_email;
-      if (bill_of_entry_no) where.bill_of_entry_no = bill_of_entry_no;
-      
-      // Filter for overdue invoices
-      if (overdue === 'true') {
-        where.due_date = { [Op.lt]: new Date() };
-      }
+      if (tax_id) where.tax_id = { [Op.like]: `%${tax_id}%` };
+      if (tracking_no) where.tracking_no = tracking_no;
+      if (invoice_no) where.invoice_no = invoice_no;
+      if (payment_status) where.payment_status = payment_status;
 
       const invoices = await Invoice.findAll({
         where,
-        order: [['due_date', 'ASC']],
+        order: [['invoice_date', 'DESC']],
+        limit: parseInt(limit),
+        offset: parseInt(offset),
       });
 
       res.json(invoices);
@@ -117,31 +122,15 @@ const invoiceController = {
     try {
       const invoices = await Invoice.findAll({
         where: {
-          due_date: { [Op.lt]: new Date() },
+          payment_status: { [Op.in]: ['UNPAID', 'PARTIAL'] },
         },
-        order: [['due_date', 'ASC']],
+        order: [['invoice_date', 'ASC']],
       });
 
       res.json(invoices);
     } catch (error) {
       console.error('Get overdue invoices error:', error);
       res.status(500).json({ error: error.message || 'Failed to fetch overdue invoices' });
-    }
-  },
-
-  // Get invoices by customer
-  async getInvoicesByCustomer(req, res) {
-    try {
-      const { email } = req.params;
-      const invoices = await Invoice.findAll({
-        where: { customer_email: email },
-        order: [['invoice_date', 'DESC']],
-      });
-
-      res.json(invoices);
-    } catch (error) {
-      console.error('Get invoices by customer error:', error);
-      res.status(500).json({ error: error.message || 'Failed to fetch customer invoices' });
     }
   },
 };
