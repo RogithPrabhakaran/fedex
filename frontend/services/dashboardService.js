@@ -14,6 +14,6 @@ export const dashboardService = {
   },
 
   async fetchCasesSummary(query = '') {
-    return api.get(`/dca/cases-summary${query}`);
+    return api.get(`/dca-agencies/cases-summary${query}`);
   }
 };

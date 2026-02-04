@@ -20,6 +20,48 @@ const {
 } = require('./dcaAgencies');
 
 // Define associations
+
+// ===== NEW: User Role-Based Associations =====
+// User self-referential (DCA_AGENT -> DCA_ADMIN)
+User.hasMany(User, {
+  foreignKey: 'parent_dca_admin_id',
+  as: 'agents',
+  onDelete: 'SET NULL',
+});
+User.belongsTo(User, {
+  foreignKey: 'parent_dca_admin_id',
+  as: 'dcaAdmin',
+});
+
+// DcaAgency -> User (admin)
+DcaAgency.belongsTo(User, {
+  foreignKey: 'admin_user_id',
+  as: 'admin',
+});
+User.hasOne(DcaAgency, {
+  foreignKey: 'admin_user_id',
+  as: 'managedAgency',
+});
+
+// Case -> User (DCA Admin & Agent)
+Case.belongsTo(User, {
+  foreignKey: 'dca_admin_id',
+  as: 'dcaAdmin',
+});
+Case.belongsTo(User, {
+  foreignKey: 'agent_id',
+  as: 'agent',
+});
+User.hasMany(Case, {
+  foreignKey: 'dca_admin_id',
+  as: 'managedCases',
+});
+User.hasMany(Case, {
+  foreignKey: 'agent_id',
+  as: 'assignedCases',
+});
+
+// ===== Existing Associations =====
 Customer.hasMany(DcaAction, { foreignKey: 'customerId', as: 'actions' });
 DcaAction.belongsTo(Customer, { foreignKey: 'customerId', as: 'customer' });
 

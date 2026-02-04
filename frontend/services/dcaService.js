@@ -6,15 +6,15 @@ export const dcaService = {
   },
 
   async fetchAgencyPerformance(agencyId) {
-    return api.get(`/dca/agencies/${agencyId}/performance`);
+    return api.get(`/dca-agencies/agencies/${agencyId}/performance`);
   },
 
   async fetchPerformance(query = '') {
-    return api.get(`/dca/performance${query}`);
+    return api.get(`/dca-agencies/performance${query}`);
   },
 
   async fetchCasesSummary(query = '') {
-    return api.get(`/dca/cases-summary${query}`);
+    return api.get(`/dca-agencies/cases-summary${query}`);
   },
 
   async getAgency(id) {

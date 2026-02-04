@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UserRole } from '../types';
+import { dcaService } from '../services/dcaService';
 
 const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
   const [agents, setAgents] = useState([]);
@@ -7,6 +8,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -33,80 +35,29 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
     );
   }
 
-  // Mock data for agents
+  // Fetch agents from API
   useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
-      setAgents([
-        {
-          id: 1,
-          name: 'John Smith',
-          email: 'john.smith@dca.com',
-          company: 'ABC Recovery Corp',
-          status: 'Active',
-          assignedCases: 15,
-          recoveryStatus: 'In Progress',
-          deadline: '2026-02-15',
-          successRate: 78,
-          totalRecovered: '$45,000',
-          overdueCustomers: ['Acme Co', 'Beta LLC']
-        },
-        {
-          id: 2,
-          name: 'Sarah Johnson',
-          email: 'sarah.johnson@dca.com',
-          company: 'ABC Recovery Corp',
-          status: 'Active',
-          assignedCases: 12,
-          recoveryStatus: 'Closed',
-          deadline: '2026-02-20',
-          successRate: 85,
-          totalRecovered: '$52,500',
-          overdueCustomers: ['Zeta Inc']
-        },
-        {
-          id: 3,
-          name: 'Michael Chen',
-          email: 'michael.chen@dca.com',
-          company: 'XYZ Collections',
-          status: 'Active',
-          assignedCases: 18,
-          recoveryStatus: 'Behind Schedule',
-          deadline: '2026-02-10',
-          successRate: 72,
-          totalRecovered: '$38,000',
-          overdueCustomers: ['Omega Ltd', 'Gamma LLC', 'Delta Co']
-        },
-        {
-          id: 4,
-          name: 'Emily Rodriguez',
-          email: 'emily.rodriguez@dca.com',
-          company: 'XYZ Collections',
-          status: 'Inactive',
-          assignedCases: 0,
-          recoveryStatus: 'Closed',
-          deadline: 'N/A',
-          successRate: 0,
-          totalRecovered: '$0',
-          overdueCustomers: []
-        },
-        {
-          id: 5,
-          name: 'David Wilson',
-          email: 'david.wilson@dca.com',
-          company: 'Global Debt Solutions',
-          status: 'Active',
-          assignedCases: 20,
-          recoveryStatus: 'Closed',
-          deadline: '2026-02-25',
-          successRate: 92,
-          totalRecovered: '$68,000',
-          overdueCustomers: ['Global Industries']
-        }
-      ]);
-      setLoading(false);
-    }, 500);
-  }, []);
+    const fetchAgents = async () => {
+      if (!user?.agencyId) {
+        setError('No agency ID found for user');
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await dcaService.listAgents(user.agencyId);
+        setAgents(data || []);
+      } catch (err) {
+        console.error('Failed to load agents:', err);
+        setError(err.message || 'Failed to load agents');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAgents();
+  }, [user?.agencyId]);
 
   const filteredAgents = agents.filter(agent => {
     const matchesSearch = agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -116,20 +67,30 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
     return matchesSearch && matchesFilter;
   });
 
-  const handleAddAgent = (e) => {
+  const handleAddAgent = async (e) => {
     e.preventDefault();
-    const newAgent = {
-      id: agents.length + 1,
-      ...formData,
-      assignedCases: 0,
-      recoveryStatus: 'In Progress',
-      deadline: 'N/A',
-      successRate: 0,
-      totalRecovered: '$0'
-    };
-    setAgents([...agents, newAgent]);
-    setShowAddModal(false);
-    setFormData({ name: '', email: '', company: '', status: 'Active' });
+    
+    if (!user?.agencyId) {
+      alert('No agency ID found');
+      return;
+    }
+
+    try {
+      await dcaService.inviteAgent(user.agencyId, {
+        name: formData.name,
+        email: formData.email
+      });
+      
+      // Refresh the agents list
+      const updatedAgents = await dcaService.listAgents(user.agencyId);
+      setAgents(updatedAgents || []);
+      
+      setShowAddModal(false);
+      setFormData({ name: '', email: '', company: '', status: 'Active' });
+    } catch (err) {
+      console.error('Failed to add agent:', err);
+      alert(err.message || 'Failed to add agent');
+    }
   };
 
   const getStatusColor = (status) => {
@@ -157,6 +118,20 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
           <div className='animate-spin size-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4'></div>
           <p className='text-slate-900 dark:text-white font-bold'>Loading agents...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='flex flex-col items-center justify-center h-full p-20 text-center'>
+        <span className='material-symbols-outlined text-6xl text-red-500 mb-4'>
+          error
+        </span>
+        <h2 className='text-2xl font-bold text-slate-900 dark:text-white mb-2'>
+          Error Loading Agents
+        </h2>
+        <p className='text-slate-400'>{error}</p>
       </div>
     );
   }
@@ -265,33 +240,47 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
                         </div>
                       </td>
                       <td className='px-6 py-4'>
-                        <span className={`inline-block px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap ${getStatusColor(agent.status)}`}>
-                          {agent.status}
+                        <span className={`inline-block px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap ${getStatusColor(agent.status || 'Active')}`}>
+                          {agent.status || 'Active'}
                         </span>
                       </td>
                       <td className='px-6 py-4'>
-                        <p className='text-slate-900 dark:text-white font-bold text-center'>{agent.assignedCases}</p>
+                        <p className='text-slate-900 dark:text-white font-bold text-center'>{agent.assignedCases || 0}</p>
                       </td>
                       <td className='px-6 py-4'>
                         <div className='flex items-center gap-3'>
                           <div className='w-12 h-2 bg-slate-700 rounded-full overflow-hidden'>
                             <div 
                               className='h-full bg-primary transition-all'
-                              style={{ width: `${agent.successRate}%` }}
+                              style={{ width: `${agent.successRate || 0}%` }}
                             ></div>
                           </div>
-                          <p className='text-slate-900 dark:text-white font-bold'>{agent.successRate}%</p>
+                          <p className='text-slate-900 dark:text-white font-bold'>{agent.successRate || 0}%</p>
                         </div>
                       </td>
                       <td className='px-6 py-4'>
-                        <p className='text-slate-900 dark:text-white font-bold text-green-500'>{agent.totalRecovered}</p>
+                        <p className='text-slate-900 dark:text-white font-bold text-green-500'>{agent.totalRecovered || '$0'}</p>
                       </td>
                       <td className='px-6 py-4'>
                         <div className='flex gap-2'>
                           <button className='p-2 text-slate-400 hover:text-primary rounded-lg hover:bg-surface-border/50 transition-colors' title='Edit'>
                             <span className='material-symbols-outlined text-sm'>edit</span>
                           </button>
-                          <button className='p-2 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-500/10 transition-colors' title='Delete'>
+                          <button 
+                            onClick={async () => {
+                              if (confirm(`Remove agent ${agent.name}?`)) {
+                                try {
+                                  await dcaService.removeAgent(user.agencyId, agent.id);
+                                  const updatedAgents = await dcaService.listAgents(user.agencyId);
+                                  setAgents(updatedAgents || []);
+                                } catch (err) {
+                                  alert(err.message || 'Failed to remove agent');
+                                }
+                              }
+                            }}
+                            className='p-2 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-500/10 transition-colors' 
+                            title='Delete'
+                          >
                             <span className='material-symbols-outlined text-sm'>delete</span>
                           </button>
                         </div>

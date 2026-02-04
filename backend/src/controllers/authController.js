@@ -17,8 +17,8 @@ const authController = {
       }
 
       // Validate role
-      if (!['FEDEX_ADMIN', 'DCA_AGENT'].includes(role)) {
-        return res.status(400).json({ error: 'Invalid role. Must be FEDEX_ADMIN or DCA_AGENT' });
+      if (!['FEDEX_ADMIN', 'DCA_ADMIN', 'DCA_AGENT'].includes(role)) {
+        return res.status(400).json({ error: 'Invalid role. Must be FEDEX_ADMIN, DCA_ADMIN, or DCA_AGENT' });
       }
       
       const existingUser = await User.findOne({ where: { email } });
@@ -46,7 +46,10 @@ const authController = {
           name: user.name,
           role: user.role,
           avatar: user.avatar,
-          agencyId: user.agencyId,
+          agencyId: user.agencyId, // legacy
+          dca_id: user.dca_id,
+          parent_dca_admin_id: user.parent_dca_admin_id,
+          status: user.status,
         },
       });
     } catch (error) {
@@ -87,7 +90,10 @@ const authController = {
           name: user.name,
           role: user.role,
           avatar: user.avatar,
-          agencyId: user.agencyId,
+          agencyId: user.agencyId, // legacy
+          dca_id: user.dca_id,
+          parent_dca_admin_id: user.parent_dca_admin_id,
+          status: user.status,
         },
       });
     } catch (error) {

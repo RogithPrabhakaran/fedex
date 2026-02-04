@@ -23,6 +23,23 @@ const DcaAgency = sequelize.define(
     },
     agency_name: { type: DataTypes.STRING, allowNull: false },
     short_name: { type: DataTypes.STRING },
+    // DCA Admin Information (for role-based system)
+    admin_email: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      unique: true,
+      comment: 'DCA Admin email address',
+    },
+    admin_user_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      comment: 'Associated User ID of the DCA Admin',
+      references: {
+        model: 'users',
+        key: 'id',
+      },
+    },
+    // Contact & Operational Details
     specialization: { type: DataTypes.STRING },
     regions: { type: DataTypes.STRING },
     contact_person: { type: DataTypes.STRING },
@@ -35,8 +52,9 @@ const DcaAgency = sequelize.define(
     min_case_amount: { type: DataTypes.DECIMAL(10, 2) },
     max_case_amount: { type: DataTypes.DECIMAL(10, 2) },
     status: {
-      type: DataTypes.ENUM('ACTIVE', 'WARNING', 'SUSPENDED'),
+      type: DataTypes.ENUM('ACTIVE', 'PENDING_INVITE', 'WARNING', 'SUSPENDED', 'INACTIVE'),
       defaultValue: 'ACTIVE',
+      comment: 'Agency status: PENDING_INVITE for new agencies awaiting admin signup',
     },
     performance_score: { type: DataTypes.DECIMAL(3, 1) },
     sla_first_contact_hours: { type: DataTypes.INTEGER },
@@ -46,6 +64,17 @@ const DcaAgency = sequelize.define(
     api_endpoint: { type: DataTypes.STRING },
     api_auth_token: { type: DataTypes.STRING },
     is_preferred_partner: { type: DataTypes.BOOLEAN },
+    // Invite Token (for DCA Admin signup flow)
+    invite_token: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      comment: 'JWT invite token for admin signup',
+    },
+    invite_expires_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      comment: 'Invite token expiration timestamp',
+    },
     notes: { type: DataTypes.TEXT },
   },
   {

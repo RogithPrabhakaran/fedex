@@ -94,7 +94,25 @@ const Case = sequelize.define('Case', {
   dca_id: {
     type: DataTypes.STRING(20),
     allowNull: true,
-    comment: 'Assigned DCA identifier',
+    comment: 'Assigned DCA identifier (e.g., DCA-AGILE-24)',
+  },
+  dca_admin_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'DCA Admin who accepted/manages this case',
+    references: {
+      model: 'users',
+      key: 'id',
+    },
+  },
+  agent_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'Assigned DCA agent working on this case',
+    references: {
+      model: 'users',
+      key: 'id',
+    },
   },
   assigned_at: {
     type: DataTypes.DATE,

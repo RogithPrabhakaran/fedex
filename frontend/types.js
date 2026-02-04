@@ -1,6 +1,7 @@
 
 export const UserRole = {
   FEDEX_ADMIN: 'FEDEX_ADMIN',
+  DCA_ADMIN: 'DCA_ADMIN',
   DCA_AGENT: 'DCA_AGENT'
 };
 
