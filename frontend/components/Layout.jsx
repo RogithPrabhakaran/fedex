@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { UserRole } from '../types';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Layout = ({
   user,
@@ -12,6 +13,7 @@ const Layout = ({
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const menuRef = useRef(null);
+  const { theme, toggleTheme, isDark } = useTheme();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -42,8 +44,19 @@ const Layout = ({
           </h2>
         </div>
 
-        {/* Right side - Notifications and Profile */}
+        {/* Right side - Theme Toggle, Notifications and Profile */}
         <div className='flex items-center gap-4'>
+          {/* Theme Toggle */}
+          <button 
+            onClick={toggleTheme}
+            className='text-slate-400 hover:text-white transition-all p-2 rounded-lg hover:bg-surface-border/50 group'
+            title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
+          >
+            <span className='material-symbols-outlined transition-transform group-hover:rotate-180 duration-500'>
+              {isDark ? 'light_mode' : 'dark_mode'}
+            </span>
+          </button>
+          
           <button className='text-slate-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-surface-border/50'>
             <span className='material-symbols-outlined'>notifications</span>
           </button>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from './services/api';
 import { authService } from './services/authService';
 import { UserRole } from './types';
+import { ThemeProvider } from './contexts/ThemeContext';
 import Layout from './components/Layout';
 import LoginView from './views/LoginView';
 import DashboardView from './views/DashboardView';
@@ -154,15 +155,21 @@ const App = () => {
   };
 
   return (
-    <Layout
-      user={currentUser}
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-      onLogout={handleLogout}
-      navItems={currentTabs}
-    >
-      {renderContent()}
-    </Layout>
+    <ThemeProvider>
+      {!currentUser ? (
+        <LoginView onLogin={handleLogin} />
+      ) : (
+        <Layout
+          user={currentUser}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          onLogout={handleLogout}
+          navItems={currentTabs}
+        >
+          {renderContent()}
+        </Layout>
+      )}
+    </ThemeProvider>
   );
 };
 
