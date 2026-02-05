@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { userService } from '../services/userService';
+import { Translate } from '../hooks/useTranslation.jsx';
 
 const ProfileView = ({ user }) => {
     const [profile, setProfile] = useState(null);
@@ -111,7 +112,7 @@ const ProfileView = ({ user }) => {
             <div className="flex items-center justify-center h-full">
                 <div className="text-white flex flex-col items-center gap-4">
                     <div className="animate-spin size-12 border-4 border-primary border-t-transparent rounded-full"></div>
-                    <p className="text-slate-400">Loading profile...</p>
+                    <p className="text-slate-400"><Translate text="Loading profile..." /></p>
                 </div>
             </div>
         );
@@ -122,13 +123,13 @@ const ProfileView = ({ user }) => {
             <div className="flex items-center justify-center h-full">
                 <div className="text-center">
                     <span className="material-symbols-outlined text-6xl text-slate-600 mb-4">error</span>
-                    <p className="text-white font-bold text-xl mb-2">Failed to load profile</p>
+                    <p className="text-white font-bold text-xl mb-2"><Translate text="Failed to load profile" /></p>
                     <p className="text-slate-400">{error}</p>
                     <button
                         onClick={loadProfile}
                         className="mt-4 px-6 py-2 bg-primary text-white rounded-xl font-bold"
                     >
-                        Retry
+                        <Translate text="Retry" />
                     </button>
                 </div>
             </div>
@@ -142,9 +143,9 @@ const ProfileView = ({ user }) => {
                 <div className="flex justify-between items-center">
                     <div>
                         <h1 className="text-5xl font-black text-white tracking-tighter mb-2">
-                            My Profile
+                            <Translate text="My Profile" />
                         </h1>
-                        <p className="text-slate-400">Manage your account settings and preferences</p>
+                        <p className="text-slate-400"><Translate text="Manage your account settings and preferences" /></p>
                     </div>
                     {!editMode ? (
                         <button
@@ -152,7 +153,7 @@ const ProfileView = ({ user }) => {
                             className="flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-blue-600 transition-all"
                         >
                             <span className="material-symbols-outlined">edit</span>
-                            Edit Profile
+                            <Translate text="Edit Profile" />
                         </button>
                     ) : (
                         <button
@@ -168,7 +169,7 @@ const ProfileView = ({ user }) => {
                             className="flex items-center gap-2 px-6 py-3 bg-surface-dark text-slate-400 font-bold rounded-xl border border-surface-border hover:border-slate-500 transition-all"
                         >
                             <span className="material-symbols-outlined">close</span>
-                            Cancel
+                            <Translate text="Cancel" />
                         </button>
                     )}
                 </div>
@@ -192,7 +193,7 @@ const ProfileView = ({ user }) => {
                 <div className="bg-surface-dark border border-surface-border rounded-3xl p-8 space-y-6">
                     <h2 className="text-2xl font-black text-white flex items-center gap-3">
                         <span className="material-symbols-outlined">person</span>
-                        Personal Information
+                        <Translate text="Personal Information" />
                     </h2>
 
                     <form onSubmit={handleUpdateProfile} className="space-y-6">
@@ -211,7 +212,7 @@ const ProfileView = ({ user }) => {
                             {editMode && (
                                 <div className="flex-1">
                                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                                        Avatar URL
+                                        <Translate text="Avatar URL" />
                                     </label>
                                     <input
                                         type="url"
@@ -228,7 +229,7 @@ const ProfileView = ({ user }) => {
                         <div className="grid grid-cols-2 gap-6">
                             <div>
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">
-                                    Full Name
+                                    <Translate text="Full Name" />
                                 </label>
                                 {editMode ? (
                                     <input
@@ -246,7 +247,7 @@ const ProfileView = ({ user }) => {
                             {/* Email */}
                             <div>
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">
-                                    Email Address
+                                    <Translate text="Email Address" />
                                 </label>
                                 {editMode ? (
                                     <input
@@ -265,7 +266,7 @@ const ProfileView = ({ user }) => {
                         {/* Role (Read-only) */}
                         <div>
                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">
-                                Role
+                                <Translate text="Role" />
                             </label>
                             <p className="text-white font-bold text-lg flex items-center gap-2">
                                 <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm">
@@ -278,7 +279,7 @@ const ProfileView = ({ user }) => {
                         {profile.agency && (
                             <div>
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">
-                                    Company / Agency
+                                    <Translate text="Company / Agency" />
                                 </label>
                                 <div className="bg-[#111418] border border-surface-border rounded-xl p-4">
                                     <p className="text-white font-bold text-lg">{profile.agency.agency_name}</p>
@@ -298,7 +299,7 @@ const ProfileView = ({ user }) => {
                         {/* Member Since */}
                         <div>
                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">
-                                Member Since
+                                <Translate text="Member Since" />
                             </label>
                             <p className="text-white font-bold">
                                 {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('en-US', {
@@ -316,7 +317,7 @@ const ProfileView = ({ user }) => {
                                 className="w-full py-4 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/20 hover:bg-blue-600 transition-all flex items-center justify-center gap-2"
                             >
                                 <span className="material-symbols-outlined">save</span>
-                                Save Changes
+                                <Translate text="Save Changes" />
                             </button>
                         )}
                     </form>
@@ -326,19 +327,19 @@ const ProfileView = ({ user }) => {
                 <div className="bg-surface-dark border border-surface-border rounded-3xl p-8 space-y-6">
                     <h2 className="text-2xl font-black text-white flex items-center gap-3">
                         <span className="material-symbols-outlined">lock</span>
-                        Security
+                        <Translate text="Security" />
                     </h2>
 
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-white font-bold text-lg">Password</p>
-                            <p className="text-slate-400 text-sm">Change your account password</p>
+                            <p className="text-white font-bold text-lg"><Translate text="Password" /></p>
+                            <p className="text-slate-400 text-sm"><Translate text="Change your account password" /></p>
                         </div>
                         <button
                             onClick={() => setShowPasswordModal(true)}
                             className="px-6 py-3 bg-[#111418] text-white font-bold rounded-xl border border-surface-border hover:border-primary transition-all"
                         >
-                            Change Password
+                            <Translate text="Change Password" />
                         </button>
                     </div>
                 </div>
@@ -349,7 +350,7 @@ const ProfileView = ({ user }) => {
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                     <div className="bg-surface-dark border border-surface-border rounded-3xl p-8 max-w-md w-full space-y-6">
                         <div className="flex justify-between items-center">
-                            <h3 className="text-2xl font-black text-white">Change Password</h3>
+                            <h3 className="text-2xl font-black text-white"><Translate text="Change Password" /></h3>
                             <button
                                 onClick={() => {
                                     setShowPasswordModal(false);
@@ -369,7 +370,7 @@ const ProfileView = ({ user }) => {
                         <form onSubmit={handleChangePassword} className="space-y-4">
                             <div>
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">
-                                    Current Password
+                                    <Translate text="Current Password" />
                                 </label>
                                 <input
                                     type="password"
@@ -384,7 +385,7 @@ const ProfileView = ({ user }) => {
 
                             <div>
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">
-                                    New Password
+                                    <Translate text="New Password" />
                                 </label>
                                 <input
                                     type="password"
@@ -400,7 +401,7 @@ const ProfileView = ({ user }) => {
 
                             <div>
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">
-                                    Confirm New Password
+                                    <Translate text="Confirm New Password" />
                                 </label>
                                 <input
                                     type="password"
@@ -419,7 +420,7 @@ const ProfileView = ({ user }) => {
                                 className="w-full py-4 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/20 hover:bg-blue-600 transition-all flex items-center justify-center gap-2"
                             >
                                 <span className="material-symbols-outlined">lock_reset</span>
-                                Update Password
+                                <Translate text="Update Password" />
                             </button>
                         </form>
                     </div>

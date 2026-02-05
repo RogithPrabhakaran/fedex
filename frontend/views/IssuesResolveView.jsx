@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { issuesService } from '../services/issuesService';
+import { Translate } from '../hooks/useTranslation.jsx';
 
 const IssueRow = ({ issue, onResolve, onView, onAssign }) => (
   <tr className='border-t border-slate-200 dark:border-surface-border'>
@@ -11,8 +12,8 @@ const IssueRow = ({ issue, onResolve, onView, onAssign }) => (
     <td className='py-3 text-slate-300'>{new Date(issue.created_at).toLocaleString()}</td>
     <td className='py-3'>
       <div className='flex gap-2'>
-        {issue.status !== 'RESOLVED' && <button onClick={() => onResolve(issue)} className='px-3 py-1 bg-primary rounded-md text-white'>Resolve</button>}
-        <button onClick={() => onView(issue)} className='px-3 py-1 bg-[#111418] rounded-md text-white border border-slate-200 dark:border-surface-border'>View</button>
+        {issue.status !== 'RESOLVED' && <button onClick={() => onResolve(issue)} className='px-3 py-1 bg-primary rounded-md text-white'><Translate text="Resolve" /></button>}
+        <button onClick={() => onView(issue)} className='px-3 py-1 bg-[#111418] rounded-md text-white border border-slate-200 dark:border-surface-border'><Translate text="View" /></button>
       </div>
     </td>
   </tr>
@@ -61,7 +62,7 @@ const IssuesResolveView = () => {
     const highCount = issues.filter(i => i.priority === 'HIGH').length;
 
     const resolvedWithDates = issues.filter(i => i.status === 'RESOLVED' && i.created_at && i.updated_at);
-    const avgDays = resolvedWithDates.length === 0 ? '—' : (resolvedWithDates.reduce((s, it) => s + ((new Date(it.updated_at) - new Date(it.created_at)) / (1000*60*60*24)), 0) / resolvedWithDates.length).toFixed(1);
+    const avgDays = resolvedWithDates.length === 0 ? '—' : (resolvedWithDates.reduce((s, it) => s + ((new Date(it.updated_at) - new Date(it.created_at)) / (1000 * 60 * 60 * 24)), 0) / resolvedWithDates.length).toFixed(1);
 
     const openPct = total ? Math.round((open / total) * 100) : 0;
     const inPct = total ? Math.round((inProgress / total) * 100) : 0;
@@ -99,11 +100,11 @@ const IssuesResolveView = () => {
     <div className='p-6 max-w-6xl mx-auto'>
       <div className='flex items-center justify-between mb-6'>
         <div>
-          <h1 className='text-3xl font-black text-slate-900 dark:text-white'>Issues & Complaints</h1>
-          <p className='text-slate-400'>Resolve and manage complaints lodged by agents or customers.</p>
+          <h1 className='text-3xl font-black text-slate-900 dark:text-white'><Translate text="Issues & Complaints" /></h1>
+          <p className='text-slate-400'><Translate text="Resolve and manage complaints lodged by agents or customers." /></p>
         </div>
         <div>
-          <button onClick={load} className='px-4 py-2 bg-[#111418] text-white rounded-md border border-slate-200 dark:border-surface-border'>Refresh</button>
+          <button onClick={load} className='px-4 py-2 bg-[#111418] text-white rounded-md border border-slate-200 dark:border-surface-border'><Translate text="Refresh" /></button>
         </div>
       </div>
 
@@ -169,22 +170,22 @@ const IssuesResolveView = () => {
         <table className='w-full text-sm'>
           <thead className='text-slate-400 text-xs text-left'>
             <tr>
-              <th className='py-2'>ID</th>
-              <th className='py-2'>Title</th>
-              <th className='py-2'>Priority</th>
-              <th className='py-2'>Status</th>
-              <th className='py-2'>Reported By</th>
-              <th className='py-2'>Created</th>
-              <th className='py-2'>Actions</th>
+              <th className='py-2'><Translate text="ID" /></th>
+              <th className='py-2'><Translate text="Title" /></th>
+              <th className='py-2'><Translate text="Priority" /></th>
+              <th className='py-2'><Translate text="Status" /></th>
+              <th className='py-2'><Translate text="Reported By" /></th>
+              <th className='py-2'><Translate text="Created" /></th>
+              <th className='py-2'><Translate text="Actions" /></th>
             </tr>
           </thead>
           <tbody>
             {loading && (
-              <tr><td colSpan={7} className='py-6 text-center text-slate-400'>Loading...</td></tr>
+              <tr><td colSpan={7} className='py-6 text-center text-slate-400'><Translate text="Loading..." /></td></tr>
             )}
 
             {!loading && filtered.length === 0 && (
-              <tr><td colSpan={7} className='py-6 text-center text-slate-500'>No issues found</td></tr>
+              <tr><td colSpan={7} className='py-6 text-center text-slate-500'><Translate text="No issues found" /></td></tr>
             )}
 
             {!loading && filtered.map(i => (
@@ -241,8 +242,8 @@ const IssueModal = ({ issue, onClose }) => {
         <div className='flex justify-between items-center mb-4'>
           <h3 className='text-xl font-bold text-slate-900 dark:text-white'>{isNew ? 'Create Issue' : `Issue #${issue.id}`}</h3>
           <div className='flex gap-2'>
-            {!isNew && <button onClick={handleDelete} className='px-3 py-1 bg-rose-600 text-white rounded-md'>Delete</button>}
-            <button onClick={onClose} className='px-3 py-1 bg-[#111418] rounded-md text-white'>Close</button>
+            {!isNew && <button onClick={handleDelete} className='px-3 py-1 bg-rose-600 text-white rounded-md'><Translate text="Delete" /></button>}
+            <button onClick={onClose} className='px-3 py-1 bg-[#111418] rounded-md text-white'><Translate text="Close" /></button>
           </div>
         </div>
 
@@ -274,7 +275,7 @@ const IssueModal = ({ issue, onClose }) => {
           </div>
 
           <div className='flex justify-end gap-3'>
-            <button onClick={handleSave} className='px-6 py-2 bg-primary text-white rounded-md'>Save</button>
+            <button onClick={handleSave} className='px-6 py-2 bg-primary text-white rounded-md'><Translate text="Save" /></button>
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { dashboardService } from '../services/dashboardService';
+import { Translate } from '../hooks/useTranslation.jsx';
 
 const numberFormat = (v) => (v ? `$${Number(v).toLocaleString()}` : '$0');
 
@@ -60,14 +61,14 @@ const DcaLeaderboardView = () => {
     <div className='p-6 max-w-6xl mx-auto'>
       <div className='flex items-center justify-between mb-6'>
         <div>
-          <h1 className='text-3xl font-black text-slate-900 dark:text-white'>DCA Leaderboard</h1>
-          <p className='text-slate-400'>Ranking of DCA partners and quick stats for actions this month.</p>
+          <h1 className='text-3xl font-black text-slate-900 dark:text-white'><Translate text="DCA Leaderboard" /></h1>
+          <p className='text-slate-400'><Translate text="Ranking of DCA partners and quick stats for actions this month." /></p>
         </div>
       </div>
 
       {/* Stat cards */}
       <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-6'>
-        <StatCard title='Top Performing DCA (This Month)' value={topPerforming[0] ? `${topPerforming[0].name || topPerforming[0].agency_name}` : '—'} subtitle={topPerforming[0] ? `${numberFormat(topPerforming[0].recovered_amount || topPerforming[0].recovered_amount) } • ${(topPerforming[0].recovery_rate || 0).toFixed(1)}%` : ''} />
+        <StatCard title='Top Performing DCA (This Month)' value={topPerforming[0] ? `${topPerforming[0].name || topPerforming[0].agency_name}` : '—'} subtitle={topPerforming[0] ? `${numberFormat(topPerforming[0].recovered_amount || topPerforming[0].recovered_amount)} • ${(topPerforming[0].recovery_rate || 0).toFixed(1)}%` : ''} />
         <StatCard title='Total Recovered (All DCAs)' value={numberFormat(agencies.reduce((s, a) => s + (Number(a.recovered_amount) || 0), 0))} subtitle={`${agencies.length} agencies`} />
         <StatCard title='Average Recovery Days' value={agencies.length ? `${Math.round(agencies.reduce((s, a) => s + (Number(a.avg_days_to_recovery) || 0), 0) / agencies.length)} days` : '—'} />
       </div>
@@ -105,25 +106,25 @@ const DcaLeaderboardView = () => {
         <table className='w-full text-sm'>
           <thead className='text-slate-400 text-xs text-left'>
             <tr>
-              <th className='py-2'>#</th>
-              <th className='py-2'>Name</th>
-              <th className='py-2'>Region</th>
-              <th className='py-2'>Recovery Rate</th>
-              <th className='py-2'>Recovered</th>
-              <th className='py-2'>Cases</th>
-              <th className='py-2'>Avg Days</th>
-              <th className='py-2'>Status</th>
-              <th className='py-2'>Commission %</th>
-              <th className='py-2'>Actions</th>
+              <th className='py-2'><Translate text="#" /></th>
+              <th className='py-2'><Translate text="Name" /></th>
+              <th className='py-2'><Translate text="Region" /></th>
+              <th className='py-2'><Translate text="Recovery Rate" /></th>
+              <th className='py-2'><Translate text="Recovered" /></th>
+              <th className='py-2'><Translate text="Cases" /></th>
+              <th className='py-2'><Translate text="Avg Days" /></th>
+              <th className='py-2'><Translate text="Status" /></th>
+              <th className='py-2'><Translate text="Commission %" /></th>
+              <th className='py-2'><Translate text="Actions" /></th>
             </tr>
           </thead>
           <tbody>
             {loading && (
-              <tr><td colSpan={10} className='py-6 text-center text-slate-400'>Loading...</td></tr>
+              <tr><td colSpan={10} className='py-6 text-center text-slate-400'><Translate text="Loading..." /></td></tr>
             )}
 
             {!loading && filtered.length === 0 && (
-              <tr><td colSpan={10} className='py-6 text-center text-slate-500'>No agencies found</td></tr>
+              <tr><td colSpan={10} className='py-6 text-center text-slate-500'><Translate text="No agencies found" /></td></tr>
             )}
 
             {!loading && filtered.map((a, idx) => (

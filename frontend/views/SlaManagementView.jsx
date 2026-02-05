@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../services/api';
+import { Translate } from '../hooks/useTranslation.jsx';
 
 const emptySla = { name: '', target_hours: 48, description: '' };
 
@@ -82,11 +83,11 @@ const SlaManagementView = () => {
     <div className='p-6 max-w-4xl mx-auto'>
       <div className='flex items-center justify-between mb-6'>
         <div>
-          <h1 className='text-3xl font-black text-slate-900 dark:text-white'>SLA Management</h1>
-          <p className='text-slate-400'>Configure Service Level Agreement definitions used across the platform.</p>
+          <h1 className='text-3xl font-black text-slate-900 dark:text-white'><Translate text="SLA Management" /></h1>
+          <p className='text-slate-400'><Translate text="Configure Service Level Agreement definitions used across the platform." /></p>
         </div>
         <div>
-          <button onClick={load} className='px-4 py-2 bg-[#111418] rounded-md text-white border border-slate-200 dark:border-surface-border'>Refresh</button>
+          <button onClick={load} className='px-4 py-2 bg-[#111418] rounded-md text-white border border-slate-200 dark:border-surface-border'><Translate text="Refresh" /></button>
         </div>
       </div>
 
@@ -103,18 +104,18 @@ const SlaManagementView = () => {
         </div>
 
         {loading ? (
-          <div className='text-slate-400'>Loading...</div>
+          <div className='text-slate-400'><Translate text="Loading..." /></div>
         ) : (
           <div>
             {slas.map((s, i) => (
               <SlaRow key={i} sla={s} idx={i} onChange={(v) => updateRow(i, v)} onRemove={() => removeRow(i)} />
             ))}
 
-            {slas.length === 0 && <div className='text-slate-500'>No SLAs defined. Add a new one.</div>}
+            {slas.length === 0 && <div className='text-slate-500'><Translate text="No SLAs defined. Add a new one." /></div>}
 
             <div className='mt-4 flex gap-3'>
-              <button onClick={addRow} className='px-4 py-2 bg-primary rounded-md text-white'>Add SLA</button>
-              <button onClick={handleSave} className='px-4 py-2 bg-green-600 rounded-md text-white' disabled={saving}>{saving ? 'Saving...' : 'Save Changes'}</button>
+              <button onClick={addRow} className='px-4 py-2 bg-primary rounded-md text-white'><Translate text="Add SLA" /></button>
+              <button onClick={handleSave} className='px-4 py-2 bg-green-600 rounded-md text-white' disabled={saving}>{saving ? <Translate text="Saving..." /> : <Translate text="Save Changes" />}</button>
             </div>
           </div>
         )}

@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { customerService } from '../services/customerService';
 import ReactApexChart from 'react-apexcharts';
+import { Translate } from '../hooks/useTranslation.jsx';
 
 const DashboardView = () => {
   const [customers, setCustomers] = useState([]);
@@ -256,10 +257,10 @@ const DashboardView = () => {
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-widest">
             <span className="material-symbols-outlined text-[18px]">admin_panel_settings</span>
-            FedEx Internal / Recovery Oversight
+            <Translate text="FedEx Internal / Recovery Oversight" />
           </div>
-          <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">Oversight Dashboard</h1>
-          <p className="text-slate-600 dark:text-slate-400 text-lg">Tracking performance and Agency progress for all outstanding accounts.</p>
+          <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight"><Translate text="Oversight Dashboard" /></h1>
+          <p className="text-slate-600 dark:text-slate-400 text-lg"><Translate text="Tracking performance and Agency progress for all outstanding accounts." /></p>
         </div>
       </div>
 
@@ -267,17 +268,17 @@ const DashboardView = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="flex flex-col gap-4 rounded-2xl p-8 border border-slate-200 dark:border-surface-border bg-white dark:bg-surface-dark shadow-sm">
           <div className="flex justify-between items-start">
-            <p className="text-slate-500 dark:text-slate-400 text-sm font-black uppercase tracking-widest">Agency Assignments</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm font-black uppercase tracking-widest"><Translate text="Agency Assignments" /></p>
             <span className="material-symbols-outlined text-primary text-3xl">hub</span>
           </div>
           <div className="flex items-end gap-3">
-            <h3 className="text-4xl font-black text-slate-900 dark:text-white">{stats.dcaCount} Cases</h3>
-            <span className="text-slate-600 dark:text-slate-400 text-sm font-bold mb-1.5">Active External</span>
+            <h3 className="text-4xl font-black text-slate-900 dark:text-white">{stats.dcaCount} <Translate text="Cases" /></h3>
+            <span className="text-slate-600 dark:text-slate-400 text-sm font-bold mb-1.5"><Translate text="Active External" /></span>
           </div>
         </div>
         <div className="flex flex-col gap-4 rounded-2xl p-8 border border-slate-200 dark:border-surface-border bg-white dark:bg-surface-dark shadow-sm">
           <div className="flex justify-between items-start">
-            <p className="text-slate-500 dark:text-slate-400 text-sm font-black uppercase tracking-widest">Total Value at Risk</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm font-black uppercase tracking-widest"><Translate text="Total Value at Risk" /></p>
             <span className="material-symbols-outlined text-fedex-orange text-3xl">monetization_on</span>
           </div>
           <div className="flex items-end gap-3">
@@ -286,7 +287,7 @@ const DashboardView = () => {
         </div>
         <div className="flex flex-col gap-4 rounded-2xl p-8 border border-slate-200 dark:border-surface-border bg-white dark:bg-surface-dark shadow-sm">
           <div className="flex justify-between items-start">
-            <p className="text-slate-500 dark:text-slate-400 text-sm font-black uppercase tracking-widest">DCA Recovery Rate</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm font-black uppercase tracking-widest"><Translate text="DCA Recovery Rate" /></p>
             <span className="material-symbols-outlined text-emerald-500 text-3xl">speed</span>
           </div>
           <div className="flex items-end gap-3">
@@ -305,7 +306,7 @@ const DashboardView = () => {
         <div className="flex flex-col rounded-2xl border border-slate-200 dark:border-surface-border bg-white dark:bg-surface-dark p-6 min-h-[450px] lg:col-span-1">
           <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
             <span className="material-symbols-outlined text-slate-500 dark:text-slate-400">donut_large</span>
-            Risk Portfolio
+            <Translate text="Risk Portfolio" />
           </h3>
           <div className="flex-1 w-full min-h-0 flex items-center justify-center">
             <ReactApexChart
@@ -322,7 +323,7 @@ const DashboardView = () => {
         <div className="flex flex-col rounded-2xl border border-slate-200 dark:border-surface-border bg-white dark:bg-surface-dark p-6 min-h-[450px] lg:col-span-1">
           <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
             <span className="material-symbols-outlined text-slate-500 dark:text-slate-400">bar_chart</span>
-            Agency Assignments
+            <Translate text="Agency Assignments" />
           </h3>
           <div className="flex-1 w-full min-h-0">
             <ReactApexChart
@@ -339,7 +340,7 @@ const DashboardView = () => {
         <div className="flex flex-col rounded-2xl border border-slate-200 dark:border-surface-border bg-white dark:bg-surface-dark p-6 min-h-[450px] lg:col-span-1">
           <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
             <span className="material-symbols-outlined text-yellow-400">emoji_events</span>
-            Top Performers
+            <Translate text="Top Performers" />
           </h3>
           <div className="flex-1 w-full min-h-0">
             <ReactApexChart
@@ -349,7 +350,7 @@ const DashboardView = () => {
               height={350}
               width={'100%'}
             />
-            <p className="text-center text-xs text-slate-500 mt-2">Ranked by Total Recovered Amount</p>
+            <p className="text-center text-xs text-slate-500 mt-2"><Translate text="Ranked by Total Recovered Amount" /></p>
           </div>
         </div>
 

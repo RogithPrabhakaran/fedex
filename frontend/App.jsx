@@ -3,6 +3,7 @@ import { api } from './services/api';
 import { authService } from './services/authService';
 import { UserRole } from './types';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 import Layout from './components/Layout';
 import LoginView from './views/LoginView';
 import DashboardView from './views/DashboardView';
@@ -197,11 +198,12 @@ const App = () => {
   };
 
   return (
-    <ThemeProvider>
-      {!currentUser ? (
-        <LoginView onLogin={handleLogin} />
-      ) : currentUser.role === UserRole.DCA_ADMIN ? (
-        // DCA Admin gets new Sidebar layout
+    <LanguageProvider>
+      <ThemeProvider>
+        {!currentUser ? (
+          <LoginView onLogin={handleLogin} />
+        ) : currentUser.role === UserRole.DCA_ADMIN ? (
+          // DCA Admin gets new Sidebar layout
         <div className="flex h-screen w-full overflow-hidden bg-background-light dark:bg-background-dark">
           <Sidebar
             activeTab={activeTab}
@@ -215,16 +217,17 @@ const App = () => {
       ) : (
         // Other roles use existing Layout
         <Layout
-          user={currentUser}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          onLogout={handleLogout}
-          navItems={currentTabs}
-        >
-          {renderContent()}
-        </Layout>
-      )}
-    </ThemeProvider>
+            user={currentUser}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            onLogout={handleLogout}
+            navItems={currentTabs}
+          >
+            {renderContent()}
+          </Layout>
+        )}
+      </ThemeProvider>
+    </LanguageProvider>
   );
 };
 
