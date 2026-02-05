@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { MOCK_CUSTOMERS, EMAIL_TEMPLATES } from '../constants';
+import { Translate } from '../hooks/useTranslation.jsx';
 
 const CampaignView = () => {
   // Default to Payment Reminder, no selection needed
@@ -55,8 +56,8 @@ const CampaignView = () => {
       <aside className="w-[400px] border-r border-slate-200 dark:border-surface-border bg-white dark:bg-surface-dark flex flex-col shrink-0">
         <div className="p-8 pb-4 flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Select Audience</h2>
-            <p className="text-slate-400 text-sm">Target customers for this automated reminder.</p>
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight"><Translate text="Select Audience" /></h2>
+            <p className="text-slate-400 text-sm"><Translate text="Target customers for this automated reminder." /></p>
           </div>
 
           <div className="flex flex-col gap-4">
@@ -84,7 +85,7 @@ const CampaignView = () => {
         <div className="flex-1 overflow-y-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4 px-4">
             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{MOCK_CUSTOMERS.length} Customers Found</span>
-            <button onClick={() => setSelectedCustomers(MOCK_CUSTOMERS.map(c => c.id))} className="text-xs text-primary font-bold hover:underline">Select All</button>
+            <button onClick={() => setSelectedCustomers(MOCK_CUSTOMERS.map(c => c.id))} className="text-xs text-primary font-bold hover:underline"><Translate text="Select All" /></button>
           </div>
           <div className="flex flex-col gap-2">
             {MOCK_CUSTOMERS.map(c => (
@@ -130,8 +131,8 @@ const CampaignView = () => {
               </React.Fragment>
             ))}
             <div className="ml-4">
-              <h2 className="text-2xl font-black text-slate-900 dark:text-white">Compose Reminder</h2>
-              <p className="text-slate-400">Design your email template and AI messaging.</p>
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white"><Translate text="Compose Reminder" /></h2>
+              <p className="text-slate-400"><Translate text="Design your email template and AI messaging." /></p>
             </div>
           </div>
 
@@ -179,7 +180,7 @@ const CampaignView = () => {
       {/* Action Bar */}
       <aside className="w-[340px] border-l border-slate-200 dark:border-surface-border bg-white dark:bg-surface-dark p-8 flex flex-col shrink-0 gap-8">
         <div className="flex flex-col gap-6 flex-1">
-          <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Summary</h3>
+          <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight"><Translate text="Summary" /></h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="p-4 rounded-xl bg-[#111418] border border-slate-200 dark:border-surface-border">
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Recipients</p>
@@ -226,7 +227,7 @@ const CampaignView = () => {
             {isSending ? 'Sending...' : 'Send Reminders'}
             <span className="material-symbols-outlined">send</span>
           </button>
-          <button className="w-full py-2 text-sm font-bold text-slate-400 hover:text-slate-900 dark:text-white transition-colors">Save as Draft</button>
+          <button className="w-full py-2 text-sm font-bold text-slate-400 hover:text-slate-900 dark:text-white transition-colors"><Translate text="Save as Draft" /></button>
         </div>
       </aside>
     </div>

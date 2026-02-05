@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import { userService } from '../services/userService';
+import { Translate } from '../hooks/useTranslation.jsx';
 
 const AdminSettingsView = ({ user }) => {
   const [settings, setSettings] = useState(null);
@@ -44,18 +45,18 @@ const AdminSettingsView = ({ user }) => {
     }
   };
 
-  if (loading) return <div className='p-6'>Loading settings...</div>;
+  if (loading) return <div className='p-6'><Translate text="Loading settings..." /></div>;
   if (error) return <div className='p-6 text-red-400'>{error}</div>;
 
   return (
     <div className='p-6 max-w-4xl'>
-      <h1 className='text-3xl font-black text-white mb-4'>FedEx Admin Settings</h1>
-      <p className='text-slate-400 mb-6'>Configure application-wide settings, risk model thresholds, DCA & financial defaults, and notification rules.</p>
+      <h1 className='text-3xl font-black text-white mb-4'><Translate text="FedEx Admin Settings" /></h1>
+      <p className='text-slate-400 mb-6'><Translate text="Configure application-wide settings, risk model thresholds, DCA & financial defaults, and notification rules." /></p>
 
       {/* Profile Management */}
       <div className='bg-surface-dark p-6 rounded-2xl border border-surface-border mb-6'>
-        <h3 className='font-bold text-white mb-3'>Profile Management</h3>
-        <p className='text-slate-400 text-sm mb-4'>Update Name, Avatar URL, and change password.</p>
+        <h3 className='font-bold text-white mb-3'><Translate text="Profile Management" /></h3>
+        <p className='text-slate-400 text-sm mb-4'><Translate text="Update Name, Avatar URL, and change password." /></p>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div>
@@ -81,14 +82,14 @@ const AdminSettingsView = ({ user }) => {
                 console.error('Password change failed', err);
                 alert('Failed to change password');
               }
-            }}>Change Password</button>
+            }}><Translate text="Change Password" /></button>
           </div>
         </div>
       </div>
 
       {/* General */}
       <div className='bg-surface-dark p-6 rounded-2xl border border-surface-border mb-6'>
-        <h3 className='font-bold text-white mb-3'>General Application</h3>
+        <h3 className='font-bold text-white mb-3'><Translate text="General Application" /></h3>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div>
@@ -98,13 +99,13 @@ const AdminSettingsView = ({ user }) => {
 
           <div>
             <label className='text-sm text-slate-400'>Notification: Large debt threshold ($)</label>
-            <input type='number' value={(settings.notification_rules?.large_debt_threshold || 50000)} onChange={(e) => setSettings({ ...settings, notification_rules: { ...(settings.notification_rules||{}), large_debt_threshold: Number(e.target.value) } })} className='w-full mt-2 p-3 rounded-md bg-[#0f1316] text-white' />
+            <input type='number' value={(settings.notification_rules?.large_debt_threshold || 50000)} onChange={(e) => setSettings({ ...settings, notification_rules: { ...(settings.notification_rules || {}), large_debt_threshold: Number(e.target.value) } })} className='w-full mt-2 p-3 rounded-md bg-[#0f1316] text-white' />
           </div>
 
           <div className='md:col-span-2'>
             <label className='text-sm text-slate-400'>Notification on DCA SLA breach</label>
             <div className='flex items-center gap-3 mt-2'>
-              <input type='checkbox' checked={!!settings.notification_rules?.sla_breach} onChange={(e) => setSettings({ ...settings, notification_rules: { ...(settings.notification_rules||{}), sla_breach: e.target.checked } })} />
+              <input type='checkbox' checked={!!settings.notification_rules?.sla_breach} onChange={(e) => setSettings({ ...settings, notification_rules: { ...(settings.notification_rules || {}), sla_breach: e.target.checked } })} />
               <span className='text-slate-300'>Notify on SLA breach</span>
             </div>
           </div>
@@ -119,25 +120,25 @@ const AdminSettingsView = ({ user }) => {
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
           <div>
             <label className='text-sm text-slate-400'>Low risk max (%)</label>
-            <input type='number' value={Math.round((settings.risk_thresholds?.low_max || 0.3) * 100)} onChange={(e) => setSettings({ ...settings, risk_thresholds: { ...(settings.risk_thresholds || {}), low_max: Number(e.target.value)/100 } })} className='w-full mt-2 p-3 rounded-md bg-[#0f1316] text-white' />
+            <input type='number' value={Math.round((settings.risk_thresholds?.low_max || 0.3) * 100)} onChange={(e) => setSettings({ ...settings, risk_thresholds: { ...(settings.risk_thresholds || {}), low_max: Number(e.target.value) / 100 } })} className='w-full mt-2 p-3 rounded-md bg-[#0f1316] text-white' />
           </div>
           <div>
             <label className='text-sm text-slate-400'>Medium risk min (%)</label>
-            <input type='number' value={Math.round((settings.risk_thresholds?.med_min || 0.31) * 100)} onChange={(e) => setSettings({ ...settings, risk_thresholds: { ...(settings.risk_thresholds || {}), med_min: Number(e.target.value)/100 } })} className='w-full mt-2 p-3 rounded-md bg-[#0f1316] text-white' />
+            <input type='number' value={Math.round((settings.risk_thresholds?.med_min || 0.31) * 100)} onChange={(e) => setSettings({ ...settings, risk_thresholds: { ...(settings.risk_thresholds || {}), med_min: Number(e.target.value) / 100 } })} className='w-full mt-2 p-3 rounded-md bg-[#0f1316] text-white' />
           </div>
           <div>
             <label className='text-sm text-slate-400'>Medium risk max (%)</label>
-            <input type='number' value={Math.round((settings.risk_thresholds?.med_max || 0.7) * 100)} onChange={(e) => setSettings({ ...settings, risk_thresholds: { ...(settings.risk_thresholds || {}), med_max: Number(e.target.value)/100 } })} className='w-full mt-2 p-3 rounded-md bg-[#0f1316] text-white' />
+            <input type='number' value={Math.round((settings.risk_thresholds?.med_max || 0.7) * 100)} onChange={(e) => setSettings({ ...settings, risk_thresholds: { ...(settings.risk_thresholds || {}), med_max: Number(e.target.value) / 100 } })} className='w-full mt-2 p-3 rounded-md bg-[#0f1316] text-white' />
           </div>
 
           <div>
             <label className='text-sm text-slate-400'>High risk min (%)</label>
-            <input type='number' value={Math.round((settings.risk_thresholds?.high_min || 0.71) * 100)} onChange={(e) => setSettings({ ...settings, risk_thresholds: { ...(settings.risk_thresholds || {}), high_min: Number(e.target.value)/100 } })} className='w-full mt-2 p-3 rounded-md bg-[#0f1316] text-white' />
+            <input type='number' value={Math.round((settings.risk_thresholds?.high_min || 0.71) * 100)} onChange={(e) => setSettings({ ...settings, risk_thresholds: { ...(settings.risk_thresholds || {}), high_min: Number(e.target.value) / 100 } })} className='w-full mt-2 p-3 rounded-md bg-[#0f1316] text-white' />
           </div>
 
           <div className='md:col-span-2'>
             <label className='text-sm text-slate-400'>Auto-action rules (simple description)</label>
-            <textarea value={settings.auto_actions?.description || 'If Propensity > 90% → Auto-send "Gentle Reminder" Email\nIf Propensity < 20% → Auto-assign to "High Volume" DCA'} onChange={(e) => setSettings({ ...settings, auto_actions: { ...(settings.auto_actions||{}), description: e.target.value } })} className='w-full mt-2 p-3 rounded-md bg-[#0f1316] text-white min-h-[80px]' />
+            <textarea value={settings.auto_actions?.description || 'If Propensity > 90% → Auto-send "Gentle Reminder" Email\nIf Propensity < 20% → Auto-assign to "High Volume" DCA'} onChange={(e) => setSettings({ ...settings, auto_actions: { ...(settings.auto_actions || {}), description: e.target.value } })} className='w-full mt-2 p-3 rounded-md bg-[#0f1316] text-white min-h-[80px]' />
           </div>
         </div>
       </div>
@@ -154,7 +155,7 @@ const AdminSettingsView = ({ user }) => {
 
           <div>
             <label className='text-sm text-slate-400'>SLA - First contact hours</label>
-            <input type='number' value={(settings.sla_definitions?.first_contact_hours || 48)} onChange={(e) => setSettings({ ...settings, sla_definitions: { ...(settings.sla_definitions||{}), first_contact_hours: Number(e.target.value) } })} className='w-full mt-2 p-3 rounded-md bg-[#0f1316] text-white' />
+            <input type='number' value={(settings.sla_definitions?.first_contact_hours || 48)} onChange={(e) => setSettings({ ...settings, sla_definitions: { ...(settings.sla_definitions || {}), first_contact_hours: Number(e.target.value) } })} className='w-full mt-2 p-3 rounded-md bg-[#0f1316] text-white' />
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { dcaService } from '../services/dcaService';
+import { Translate } from '../hooks/useTranslation.jsx';
 
 const AgentSettingsView = ({ user }) => {
   const [agency, setAgency] = useState(null);
@@ -78,13 +79,13 @@ const AgentSettingsView = ({ user }) => {
     }
   };
 
-  if (loading) return <div className='p-6'>Loading agency settings...</div>;
-  if (!agency) return <div className='p-6 text-slate-400'>No agency linked to your account</div>;
+  if (loading) return <div className='p-6'><Translate text="Loading agency settings..." /></div>;
+  if (!agency) return <div className='p-6 text-slate-400'><Translate text="No agency linked to your account" /></div>;
 
   return (
     <div className='p-6 max-w-3xl'>
-      <h1 className='text-2xl font-bold text-white mb-4'>Agency Settings</h1>
-      <p className='text-slate-400 mb-6'>Update your agency profile, webhook, API key, team, and payment details.</p>
+      <h1 className='text-2xl font-bold text-white mb-4'><Translate text="Agency Settings" /></h1>
+      <p className='text-slate-400 mb-6'><Translate text="Update your agency profile, webhook, API key, team, and payment details." /></p>
 
       <form onSubmit={handleSave} className='space-y-6 bg-surface-dark p-6 rounded-2xl border border-surface-border'>
         <div>

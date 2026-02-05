@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { dashboardService } from '../services/dashboardService';
+import { Translate } from '../hooks/useTranslation.jsx';
 
 const numberFormat = (v) => v ? `$${Number(v).toLocaleString()}` : '$0';
 
@@ -64,7 +65,7 @@ const DcaAdminDashboard = () => {
     chart: { toolbar: { show: false }, background: 'transparent' },
     stroke: { curve: 'smooth' },
     xaxis: { categories: monthlyCategories },
-    yaxis: { labels: { formatter: v => `$${(v/1000).toFixed(0)}k` } },
+    yaxis: { labels: { formatter: v => `$${(v / 1000).toFixed(0)}k` } },
     colors: ['#00E396'],
     grid: { borderColor: '#334155' },
     tooltip: { y: { formatter: v => `$${Number(v).toLocaleString()}` } }
@@ -74,8 +75,8 @@ const DcaAdminDashboard = () => {
     <div className="p-4 md:p-10 max-w-[1400px] mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white">DCA Admin Dashboard</h1>
-          <p className="text-slate-400">Overview of agency performance, recovery progress, and top accounts.</p>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white"><Translate text="DCA Admin Dashboard" /></h1>
+          <p className="text-slate-400"><Translate text="Overview of agency performance, recovery progress, and top accounts." /></p>
         </div>
       </div>
 
@@ -107,7 +108,7 @@ const DcaAdminDashboard = () => {
         {/* Left Column - Top 3 Agencies + Leaderboard */}
         <div className="col-span-1 space-y-6">
           <div className="p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl">
-            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3">Top 3 Agents</h3>
+            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3"><Translate text="Top 3 Agents" /></h3>
             <div className="space-y-3">
               {top3Agencies.map(a => (
                 <div key={a.dca_id} className="flex justify-between items-center p-3 rounded-xl bg-[#0f1316] border border-slate-200 dark:border-surface-border">
@@ -126,7 +127,7 @@ const DcaAdminDashboard = () => {
           </div>
 
           <div className="p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl overflow-auto">
-            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3">Top Customers</h3>
+            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3"><Translate text="Top Customers" /></h3>
             <table className="w-full text-sm table-auto">
               <thead>
                 <tr className="text-slate-400 text-xs text-left">
@@ -154,7 +155,7 @@ const DcaAdminDashboard = () => {
         {/* Middle Column - Monthly Recovered Trend */}
         <div className="col-span-1">
           <div className="p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl min-h-[420px]">
-            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3">Recovered - Last 12 Months</h3>
+            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3"><Translate text="Recovered - Last 12 Months" /></h3>
             <div className="h-[320px]">
               <ReactApexChart options={monthlyOptions} series={monthlySeries} type="area" height={320} />
             </div>
@@ -164,7 +165,7 @@ const DcaAdminDashboard = () => {
         {/* Right Column - Quick Metrics & Agency Distribution */}
         <div className="col-span-1 space-y-6">
           <div className="p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl">
-            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3">Agents Distribution</h3>
+            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3"><Translate text="Agents Distribution" /></h3>
             <div className="space-y-2">
               {agencies.map(a => (
                 <div key={a.dca_id} className="flex items-center justify-between text-sm text-slate-300 py-2">
@@ -183,7 +184,7 @@ const DcaAdminDashboard = () => {
           </div>
 
           <div className="p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl">
-            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3">Quick Actions</h3>
+            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3"><Translate text="Quick Actions" /></h3>
             <div className="flex gap-2">
               <button className="px-4 py-2 bg-primary rounded-lg text-white font-bold">Export CSV</button>
               <button className="px-4 py-2 border border-slate-200 dark:border-surface-border rounded-lg text-slate-900 dark:text-white">Refresh</button>

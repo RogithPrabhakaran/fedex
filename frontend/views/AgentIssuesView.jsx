@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { issuesService } from '../services/issuesService';
+import { Translate } from '../hooks/useTranslation.jsx';
 
 const Message = ({ c }) => (
   <div className='mb-3 p-3 bg-[#0b1113] border border-surface-border rounded-lg'>
     <div className='flex items-center gap-3 mb-2'>
-      <div className='size-8 rounded-full bg-surface-border flex items-center justify-center text-white text-xs'>{(c.author_name || 'U').slice(0,1)}</div>
+      <div className='size-8 rounded-full bg-surface-border flex items-center justify-center text-white text-xs'>{(c.author_name || 'U').slice(0, 1)}</div>
       <div className='text-sm'>
         <div className='text-white font-bold'>{c.author_name || 'Unknown'}</div>
         <div className='text-slate-400 text-xs'>{new Date(c.created_at).toLocaleString()}</div>
@@ -67,8 +68,8 @@ const AgentIssuesView = ({ user }) => {
     <div className='p-6 max-w-6xl mx-auto'>
       <div className='flex items-center justify-between mb-6'>
         <div>
-          <h1 className='text-3xl font-black text-white'>Community Forum (Issues)</h1>
-          <p className='text-slate-400'>Lodge and discuss issues with the FedEx support team — forum-style.</p>
+          <h1 className='text-3xl font-black text-white'><Translate text="Community Forum (Issues)" /></h1>
+          <p className='text-slate-400'><Translate text="Lodge and discuss issues with the FedEx support team — forum-style." /></p>
         </div>
       </div>
 
@@ -78,11 +79,11 @@ const AgentIssuesView = ({ user }) => {
           <div className='bg-surface-dark p-4 rounded-2xl border border-surface-border mb-4'>
             <div className='flex items-center gap-2 mb-3'>
               <input placeholder='Search threads' className='flex-1 p-2 rounded-md bg-[#0f1316] text-white' />
-              <button onClick={load} className='px-3 py-2 bg-[#111418] rounded-md text-white border border-surface-border'>Refresh</button>
+              <button onClick={load} className='px-3 py-2 bg-[#111418] rounded-md text-white border border-surface-border'><Translate text="Refresh" /></button>
             </div>
 
             <div className='space-y-3 max-h-[480px] overflow-auto'>
-              {loading && <div className='text-slate-400'>Loading...</div>}
+              {loading && <div className='text-slate-400'><Translate text="Loading..." /></div>}
               {!loading && threads.map(t => (
                 <div key={t.id} onClick={() => openThread(t)} className='p-3 bg-[#081013] hover:bg-[#0c1517] cursor-pointer rounded-lg border border-surface-border'>
                   <div className='flex items-center justify-between'>
@@ -96,7 +97,7 @@ const AgentIssuesView = ({ user }) => {
                 </div>
               ))}
 
-              {!loading && threads.length === 0 && <div className='text-slate-500'>No threads. Create one below.</div>}
+              {!loading && threads.length === 0 && <div className='text-slate-500'><Translate text="No threads. Create one below." /></div>}
             </div>
 
             {/* Create new thread */}
@@ -104,7 +105,7 @@ const AgentIssuesView = ({ user }) => {
               <input placeholder='Thread title' value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className='w-full p-2 rounded-md bg-[#0f1416] text-white mb-2' />
               <textarea placeholder='Describe your issue' value={newDesc} onChange={(e) => setNewDesc(e.target.value)} className='w-full p-2 rounded-md bg-[#0f1416] text-white min-h-[80px]' />
               <div className='flex justify-end mt-2'>
-                <button onClick={createThread} className='px-4 py-2 bg-primary rounded-md text-white'>Create Thread</button>
+                <button onClick={createThread} className='px-4 py-2 bg-primary rounded-md text-white'><Translate text="Create Thread" /></button>
               </div>
             </div>
           </div>

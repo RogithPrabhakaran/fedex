@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import CustomerTable from '../components/CustomerTable';
 import { customerService } from '../services/customerService';
+import { Translate } from '../hooks/useTranslation.jsx';
 
 const DcaAssignmentsView = () => {
   const [customers, setCustomers] = useState([]);
@@ -50,11 +51,11 @@ const DcaAssignmentsView = () => {
     <div className="flex flex-col gap-8 p-4 md:p-10 max-w-[1600px] mx-auto w-full">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-black text-white tracking-tight">DCA Assignments</h1>
-          <p className="text-slate-400 mt-1">Customers currently submitted to external DCA agencies.</p>
+          <h1 className="text-4xl font-black text-white tracking-tight"><Translate text="DCA Assignments" /></h1>
+          <p className="text-slate-400 mt-1"><Translate text="Customers currently submitted to external DCA agencies." /></p>
         </div>
         <div className="flex gap-3">
-          <button onClick={reassignSelected} className="rounded-xl bg-primary px-6 py-3 text-white font-black shadow-xl hover:bg-blue-600">Reassign Selected</button>
+          <button onClick={reassignSelected} className="rounded-xl bg-primary px-6 py-3 text-white font-black shadow-xl hover:bg-blue-600"><Translate text="Reassign Selected" /></button>
         </div>
       </div>
 
@@ -63,7 +64,7 @@ const DcaAssignmentsView = () => {
         selectedIds={selectedIds}
         onToggleSelect={handleToggleSelect}
         onToggleAll={handleToggleAll}
-        onEdit={() => {}}
+        onEdit={() => { }}
       />
     </div>
   );

@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { UserRole } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
+import LanguageDropdown from './LanguageDropdown';
+import { Translate } from '../hooks/useTranslation.jsx';
 
 const Layout = ({
   user,
@@ -39,15 +41,15 @@ const Layout = ({
           <div className='h-6 w-px bg-slate-200 dark:bg-surface-border'></div>
           <h2 className='text-slate-900 dark:text-white text-sm font-bold hidden sm:block'>
             {user.role === UserRole.FEDEX_ADMIN
-              ? 'DCA Manager'
-              : 'Agent Portal'}
+              ? <Translate text="DCA Manager" />
+              : <Translate text="Agent Portal" />}
           </h2>
         </div>
 
         {/* Right side - Theme Toggle, Notifications and Profile */}
         <div className='flex items-center gap-4'>
           {/* Theme Toggle */}
-          <button 
+          <button
             onClick={toggleTheme}
             className='text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-border/50 group'
             title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
@@ -56,7 +58,10 @@ const Layout = ({
               {isDark ? 'light_mode' : 'dark_mode'}
             </span>
           </button>
-          
+
+          {/* Language dropdown - integrated with translation system */}
+          <LanguageDropdown />
+
           <button className='text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-border/50'>
             <span className='material-symbols-outlined'>notifications</span>
           </button>
@@ -86,7 +91,7 @@ const Layout = ({
                   <p className='text-slate-500 dark:text-slate-400 text-xs'>{user.email}</p>
                 </div>
                 <div className='py-2'>
-                  <button 
+                  <button
                     onClick={() => {
                       setShowProfileMenu(false);
                       setActiveTab('Profile');
@@ -94,9 +99,9 @@ const Layout = ({
                     className='w-full flex items-center gap-3 px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-primary/10 hover:text-primary transition-colors text-sm font-medium'
                   >
                     <span className='material-symbols-outlined text-[18px]'>person</span>
-                    Profile
+                    <Translate text="Profile" />
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       setShowProfileMenu(false);
                       // Navigate to role-specific settings
@@ -111,10 +116,10 @@ const Layout = ({
                     className='w-full flex items-center gap-3 px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-primary/10 hover:text-primary transition-colors text-sm font-medium'
                   >
                     <span className='material-symbols-outlined text-[18px]'>settings</span>
-                    Settings
+                    <Translate text="Settings" />
                   </button>
                   <div className='h-px bg-slate-200 dark:bg-surface-border my-1'></div>
-                  <button 
+                  <button
                     onClick={() => {
                       setShowProfileMenu(false);
                       onLogout();
@@ -122,7 +127,7 @@ const Layout = ({
                     className='w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-500/10 transition-colors text-sm font-medium'
                   >
                     <span className='material-symbols-outlined text-[18px]'>logout</span>
-                    Logout
+                    <Translate text="Logout" />
                   </button>
                 </div>
               </div>
@@ -134,9 +139,8 @@ const Layout = ({
       {/* Main Content Wrapper */}
       <div className='flex flex-1 overflow-hidden'>
         {/* Left Sidebar Navigation */}
-        <aside className={`bg-white dark:bg-[#111418] border-r border-slate-200 dark:border-surface-border flex flex-col shrink-0 transition-all duration-300 ${
-          sidebarOpen ? 'w-64' : 'w-20'
-        }`}>
+        <aside className={`bg-white dark:bg-[#111418] border-r border-slate-200 dark:border-surface-border flex flex-col shrink-0 transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-20'
+          }`}>
           {/* Toggle Button */}
           <div className='p-4 border-b border-slate-200 dark:border-surface-border flex justify-center'>
             <button
@@ -156,15 +160,14 @@ const Layout = ({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
-                  activeTab === tab.id
-                    ? 'bg-primary text-white shadow-lg shadow-primary/30'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-border/50'
-                } ${!sidebarOpen && 'justify-center'}`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${activeTab === tab.id
+                  ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-border/50'
+                  } ${!sidebarOpen && 'justify-center'}`}
                 title={!sidebarOpen ? tab.label : ''}
               >
                 <span className='material-symbols-outlined text-[20px] shrink-0'>{tab.icon}</span>
-                {sidebarOpen && <span className='text-sm'>{tab.label}</span>}
+                {sidebarOpen && <span className='text-sm'><Translate text={tab.label} /></span>}
               </button>
             ))}
           </nav>

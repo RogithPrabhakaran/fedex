@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { UserRole } from '../types';
 import { dcaService } from '../services/dcaService';
+import { Translate } from '../hooks/useTranslation.jsx';
 
 const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
   const [agents, setAgents] = useState([]);
@@ -26,10 +27,10 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
           lock
         </span>
         <h2 className='text-2xl font-bold text-slate-900 dark:text-white mb-2'>
-          Access Restricted
+          <Translate text="Access Restricted" />
         </h2>
         <p className='text-slate-400'>
-          Only DCA Agents can manage team members. You don't have the required permissions.
+          <Translate text="Only DCA Agents can manage team members. You don't have the required permissions." />
         </p>
       </div>
     );
@@ -61,15 +62,15 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
 
   const filteredAgents = agents.filter(agent => {
     const matchesSearch = agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          agent.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          agent.company.toLowerCase().includes(searchTerm.toLowerCase());
+      agent.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      agent.company.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === 'all' || agent.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
 
   const handleAddAgent = async (e) => {
     e.preventDefault();
-    
+
     if (!user?.agencyId) {
       alert('No agency ID found');
       return;
@@ -80,11 +81,11 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
         name: formData.name,
         email: formData.email
       });
-      
+
       // Refresh the agents list
       const updatedAgents = await dcaService.listAgents(user.agencyId);
       setAgents(updatedAgents || []);
-      
+
       setShowAddModal(false);
       setFormData({ name: '', email: '', company: '', status: 'Active' });
     } catch (err) {
@@ -94,7 +95,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
   };
 
   const getStatusColor = (status) => {
-    switch(status) {
+    switch (status) {
       case 'Active': return 'bg-green-500/20 text-green-500';
       case 'Inactive': return 'bg-slate-500/20 text-slate-400';
       case 'On Leave': return 'bg-amber-500/20 text-amber-500';
@@ -103,7 +104,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
   };
 
   const getRecoveryStatusColor = (status) => {
-    switch(status) {
+    switch (status) {
       case 'In Progress': return 'bg-amber-500/20 text-amber-500';
       case 'Closed': return 'bg-green-500/20 text-green-500';
       case 'Behind Schedule': return 'bg-red-500/20 text-red-500';
@@ -116,7 +117,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
       <div className='flex items-center justify-center h-full'>
         <div className='text-center'>
           <div className='animate-spin size-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4'></div>
-          <p className='text-slate-900 dark:text-white font-bold'>Loading agents...</p>
+          <p className='text-slate-900 dark:text-white font-bold'><Translate text="Loading agents..." /></p>
         </div>
       </div>
     );
@@ -129,7 +130,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
           error
         </span>
         <h2 className='text-2xl font-bold text-slate-900 dark:text-white mb-2'>
-          Error Loading Agents
+          <Translate text="Error Loading Agents" />
         </h2>
         <p className='text-slate-400'>{error}</p>
       </div>
@@ -142,15 +143,15 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
         {/* Header */}
         <div className='flex justify-between items-center'>
           <div>
-            <h1 className='text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-2'>Manage Agents</h1>
-            <p className='text-slate-400'>Monitor and manage your DCA agents performance and assignments</p>
+            <h1 className='text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-2'><Translate text="Manage Agents" /></h1>
+            <p className='text-slate-400'><Translate text="Monitor and manage your DCA agents performance and assignments" /></p>
           </div>
           <button
             onClick={() => setShowAddModal(true)}
             className='flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-blue-600 transition-all shadow-lg shadow-primary/20'
           >
             <span className='material-symbols-outlined'>add</span>
-            Add Agent
+            <Translate text="Add Agent" />
           </button>
         </div>
 
@@ -171,10 +172,10 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
             onChange={(e) => setFilterStatus(e.target.value)}
             className='bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-xl text-white px-4 py-3 focus:border-primary focus:ring-2 focus:ring-primary/20'
           >
-            <option value='all'>All Status</option>
-            <option value='Active'>Active</option>
-            <option value='Inactive'>Inactive</option>
-            <option value='On Leave'>On Leave</option>
+            <option value='all'><Translate text="All Status" /></option>
+            <option value='Active'><Translate text="Active" /></option>
+            <option value='Inactive'><Translate text="Inactive" /></option>
+            <option value='On Leave'><Translate text="On Leave" /></option>
           </select>
         </div>
 
@@ -218,7 +219,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
                     <td colSpan='6' className='px-6 py-12 text-center'>
                       <div className='flex flex-col items-center justify-center'>
                         <span className='material-symbols-outlined text-5xl text-slate-600 mb-4'>people_alt</span>
-                        <p className='text-slate-400 font-bold'>No agents found</p>
+                        <p className='text-slate-400 font-bold'><Translate text="No agents found" /></p>
                       </div>
                     </td>
                   </tr>
@@ -250,7 +251,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
                       <td className='px-6 py-4'>
                         <div className='flex items-center gap-3'>
                           <div className='w-12 h-2 bg-slate-700 rounded-full overflow-hidden'>
-                            <div 
+                            <div
                               className='h-full bg-primary transition-all'
                               style={{ width: `${agent.successRate || 0}%` }}
                             ></div>
@@ -266,7 +267,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
                           <button className='p-2 text-slate-400 hover:text-primary rounded-lg hover:bg-surface-border/50 transition-colors' title='Edit'>
                             <span className='material-symbols-outlined text-sm'>edit</span>
                           </button>
-                          <button 
+                          <button
                             onClick={async () => {
                               if (confirm(`Remove agent ${agent.name}?`)) {
                                 try {
@@ -278,7 +279,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
                                 }
                               }
                             }}
-                            className='p-2 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-500/10 transition-colors' 
+                            className='p-2 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-500/10 transition-colors'
                             title='Delete'
                           >
                             <span className='material-symbols-outlined text-sm'>delete</span>
@@ -299,7 +300,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
         <div className='fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
           <div className='bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl p-8 max-w-md w-full space-y-6'>
             <div className='flex justify-between items-center'>
-              <h2 className='text-2xl font-black text-slate-900 dark:text-white'>Add New Agent</h2>
+              <h2 className='text-2xl font-black text-slate-900 dark:text-white'><Translate text="Add New Agent" /></h2>
               <button
                 onClick={() => setShowAddModal(false)}
                 className='text-slate-400 hover:text-slate-900 dark:text-white transition-colors'
@@ -362,7 +363,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
                 type='submit'
                 className='w-full py-3 bg-primary text-white font-black rounded-xl shadow-lg shadow-primary/20 hover:bg-blue-600 transition-all'
               >
-                Add Agent
+                <Translate text="Add Agent" />
               </button>
             </form>
           </div>
