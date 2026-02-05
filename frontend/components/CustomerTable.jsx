@@ -44,6 +44,8 @@ const CustomerTable = ({
               <th className="px-6 py-4">Account ID</th>
               <th className="px-6 py-4">Status</th>
               <th className="px-6 py-4">Assigned Agency</th>
+              <th className="px-6 py-4">SLA Status</th>
+              <th className="px-6 py-4">SOP %</th>
               <th className="px-6 py-4">Total Debt</th>
               <th className="px-6 py-4">Days Overdue</th>
               <th className="px-6 py-4 w-[240px]">Repayment Prob.</th>
@@ -81,14 +83,27 @@ const CustomerTable = ({
                 <td className="px-6 py-4 text-slate-300 font-medium">
                   {customer.assignedToDcaId ? (
                     <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-[16px] text-blue-400">gavel</span>
-                      {customer.assignedToDcaId === 'agency_alpha' ? 'Alpha Collections' :
+                       <span className="material-symbols-outlined text-[16px] text-blue-400">gavel</span>
+                       {customer.assignedToDcaId === 'agency_alpha' ? 'Alpha Collections' :
                         customer.assignedToDcaId === 'agency_beta' ? 'Beta Recovery' :
                           customer.assignedToDcaId}
                     </div>
                   ) : (
                     <span className="text-slate-500 italic">In-House</span>
                   )}
+                </td>
+                <td className="px-6 py-4">
+                    {customer.slaStatus ? (
+                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wide
+                            ${customer.slaStatus === 'BREACHED' ? 'bg-red-500/10 text-red-500 border-red-500/20' : 
+                              customer.slaStatus === 'WARNING' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 
+                              'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
+                            {customer.slaStatus === 'BREACHED' ? 'BREACH' : customer.slaStatus}
+                         </span>
+                    ) : <span className="text-slate-600">-</span>}
+                </td>
+                <td className="px-6 py-4 font-mono font-bold text-blue-400">
+                    {customer.sopComplianceScore ? `${customer.sopComplianceScore}%` : '-'}
                 </td>
                 <td className="px-6 py-4 font-bold">
                   ${customer.totalDebt.toLocaleString(undefined, { minimumFractionDigits: 2 })}
