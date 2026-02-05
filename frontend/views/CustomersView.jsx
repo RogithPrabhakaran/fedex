@@ -42,9 +42,10 @@ const CustomersView = () => {
             setLoading(true);
             try {
                 const data = await customerService.fetchAll();
-                setCustomers(data);
+                setCustomers(Array.isArray(data) ? data : []);
             } catch (err) {
                 console.error('Failed to load customers', err);
+                setCustomers([]);
             } finally {
                 setLoading(false);
             }
@@ -52,9 +53,11 @@ const CustomersView = () => {
         load();
     }, []);
 
+    const safeCustomers = useMemo(() => Array.isArray(customers) ? customers : [], [customers]);
+
     // Polling for background analysis updates
     useEffect(() => {
-        const hasProcessing = customers.some(c => c.analysis_status === 'PROCESSING' || c.analysis_status === 'PENDING');
+        const hasProcessing = safeCustomers.some(c => c?.analysis_status === 'PROCESSING' || c?.analysis_status === 'PENDING');
         if (!hasProcessing) return;
 
         const interval = setInterval(async () => {
@@ -71,38 +74,38 @@ const CustomersView = () => {
     }, [customers]);
 
     const filteredCustomers = useMemo(() => {
-        let list = customers.filter(c =>
-            c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            c.accountId.toLowerCase().includes(searchTerm.toLowerCase())
+        let list = safeCustomers.filter(c =>
+            (c?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (c?.accountId || '').toLowerCase().includes(searchTerm.toLowerCase())
         );
 
         if (statusFilter && statusFilter !== 'ALL') {
-            list = list.filter(c => c.status === statusFilter);
+            list = list.filter(c => c?.status === statusFilter);
         }
 
         if (minOverdue && !Number.isNaN(Number(minOverdue))) {
             const min = Number(minOverdue);
-            list = list.filter(c => Number(c.daysOverdue) >= min);
+            list = list.filter(c => Number(c?.daysOverdue) >= min);
         }
 
         if (sortBy === 'daysOverdue') {
-            list = list.slice().sort((a, b) => {
-                const diff = Number(a.daysOverdue) - Number(b.daysOverdue);
+            list = [...list].sort((a, b) => {
+                const diff = (Number(a?.daysOverdue) || 0) - (Number(b?.daysOverdue) || 0);
                 return sortDir === 'asc' ? diff : -diff;
             });
         }
 
         // Always push Closed and Legal Action to the bottom
-        list = list.slice().sort((a, b) => {
-            const isClosedA = ['Closed', 'Legal Action'].includes(a.status);
-            const isClosedB = ['Closed', 'Legal Action'].includes(b.status);
+        list = [...list].sort((a, b) => {
+            const isClosedA = ['Closed', 'Legal Action'].includes(a?.status);
+            const isClosedB = ['Closed', 'Legal Action'].includes(b?.status);
             if (isClosedA && !isClosedB) return 1;
             if (!isClosedA && isClosedB) return -1;
             return 0;
         });
 
         return list;
-    }, [customers, searchTerm, statusFilter, minOverdue, sortBy, sortDir]);
+    }, [safeCustomers, searchTerm, statusFilter, minOverdue, sortBy, sortDir]);
 
     const handleToggleSelect = (id) => {
         setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);

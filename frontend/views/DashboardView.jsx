@@ -12,9 +12,10 @@ const DashboardView = () => {
       setLoading(true);
       try {
         const data = await customerService.fetchAll();
-        setCustomers(data);
+        setCustomers(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Failed to load customers for stats', err);
+        setCustomers([]);
       } finally {
         setLoading(false);
       }
@@ -22,19 +23,21 @@ const DashboardView = () => {
     load();
   }, []);
 
+  const safeCustomers = useMemo(() => Array.isArray(customers) ? customers : [], [customers]);
+
   const stats = useMemo(() => {
-    const totalDebt = customers.reduce((acc, c) => acc + (Number(c.totalDebt) || 0), 0);
-    const highProb = customers.filter(c => (c.repaymentProbability || 0) > 70).reduce((acc, c) => acc + (Number(c.totalDebt) || 0), 0);
-    const dcaCount = customers.filter(c => !!c.assignedToDcaId).length;
+    const totalDebt = safeCustomers.reduce((acc, c) => acc + (Number(c?.totalDebt) || 0), 0);
+    const highProb = safeCustomers.filter(c => (Number(c?.repaymentProbability) || 0) > 70).reduce((acc, c) => acc + (Number(c?.totalDebt) || 0), 0);
+    const dcaCount = safeCustomers.filter(c => !!c?.assignedToDcaId).length;
     return { totalDebt, highProb, dcaCount };
-  }, [customers]);
+  }, [safeCustomers]);
 
   // Chart Data Preparation
   const { riskSeries, riskOptions, agencySeries, agencyOptions, leaderboardSeries, leaderboardOptions } = useMemo(() => {
     // 1. Risk Distribution Data
     let low = 0, medium = 0, high = 0;
-    customers.forEach(c => {
-      const prob = c.repaymentProbability || 0;
+    safeCustomers.forEach(c => {
+      const prob = Number(c?.repaymentProbability) || 0;
       if (prob >= 70) low++;
       else if (prob >= 30) medium++;
       else high++;
@@ -115,18 +118,18 @@ const DashboardView = () => {
       return id;
     };
 
-    customers.forEach(c => {
-      const agencyId = c.assignedToDcaId;
+    safeCustomers.forEach(c => {
+      const agencyId = c?.assignedToDcaId;
       const agencyName = getAgencyName(agencyId);
 
       if (!agencyCounts[agencyName]) agencyCounts[agencyName] = { active: 0, closed: 0 };
       if (!agencyPerformance[agencyName]) agencyPerformance[agencyName] = 0;
 
-      const isClosed = ['PAID_IN_FULL', 'SETTLED', 'CLOSED', 'LEGAL_ACTION', 'Closed', 'Legal Action'].includes(c.status);
+      const isClosed = ['PAID_IN_FULL', 'SETTLED', 'CLOSED', 'LEGAL_ACTION', 'Closed', 'Legal Action'].includes(c?.status);
       if (isClosed) {
         agencyCounts[agencyName].closed++;
         // Rough estimate: we assume closed means recovered for this demo since we lack transaction table access here
-        agencyPerformance[agencyName] += (Number(c.totalDebt) || 0);
+        agencyPerformance[agencyName] += (Number(c?.totalDebt) || 0);
       } else {
         agencyCounts[agencyName].active++;
       }
@@ -235,7 +238,16 @@ const DashboardView = () => {
     };
 
     return { riskSeries, riskOptions, agencySeries, agencyOptions, leaderboardSeries, leaderboardOptions };
-  }, [customers]);
+  }, [safeCustomers]);
+
+  if (loading && safeCustomers.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <p className="text-slate-500 font-medium">Crunching dashboard data...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8 p-4 md:p-10 max-w-[1600px] mx-auto w-full">

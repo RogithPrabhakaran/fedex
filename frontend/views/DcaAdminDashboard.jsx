@@ -21,44 +21,52 @@ const DcaAdminDashboard = () => {
           dashboardService.fetchCases(),
           dashboardService.fetchCasesSummary()
         ]);
-        setAgencies(a);
-        setCustomers(c);
-        setCases(cs);
-        setCasesSummary(summary);
+        setAgencies(Array.isArray(a) ? a : []);
+        setCustomers(Array.isArray(c) ? c : []);
+        setCases(Array.isArray(cs) ? cs : []);
+        setCasesSummary(Array.isArray(summary) ? summary : []);
       } catch (err) {
         console.error('Failed to load dashboard data', err);
+        setAgencies([]);
+        setCustomers([]);
+        setCases([]);
+        setCasesSummary([]);
       } finally { setLoading(false); }
     };
     load();
   }, []);
 
+  const safeAgencies = useMemo(() => Array.isArray(agencies) ? agencies : [], [agencies]);
+  const safeCustomers = useMemo(() => Array.isArray(customers) ? customers : [], [customers]);
+  const safeCases = useMemo(() => Array.isArray(cases) ? cases : [], [cases]);
+  const safeSummary = useMemo(() => Array.isArray(casesSummary) ? casesSummary : [], [casesSummary]);
+
   const top3Agencies = useMemo(() => {
-    return agencies.sort((x, y) => (y.recovery_rate || 0) - (x.recovery_rate || 0)).slice(0, 3);
-  }, [agencies]);
+    return [...safeAgencies].sort((x, y) => (y?.recovery_rate || 0) - (x?.recovery_rate || 0)).slice(0, 3);
+  }, [safeAgencies]);
 
   const totals = useMemo(() => {
-    const totalPaymentDue = customers.reduce((s, cu) => s + (Number(cu.totalDebt) || 0), 0);
-    const totalRecovered = cases.reduce((s, cs) => s + (Number(cs.amount_recovered) || 0), 0);
-    const closed = cases.filter(c => c.life_cycle_status === 'CLOSED').length;
-    const open = cases.length - closed;
+    const totalPaymentDue = safeCustomers.reduce((s, cu) => s + (Number(cu?.totalDebt) || 0), 0);
+    const totalRecovered = safeCases.reduce((s, cs) => s + (Number(cs?.amount_recovered) || 0), 0);
+    const closed = safeCases.filter(c => c?.life_cycle_status === 'CLOSED').length;
+    const open = safeCases.length - closed;
 
     // Top customers by outstanding debt
-    const topCustomers = [...customers].sort((a, b) => (Number(b.totalDebt) || 0) - (Number(a.totalDebt) || 0)).slice(0, 8);
+    const topCustomers = [...safeCustomers].sort((a, b) => (Number(b?.totalDebt) || 0) - (Number(a?.totalDebt) || 0)).slice(0, 8);
 
     return { totalPaymentDue, totalRecovered, closed, open, topCustomers };
-  }, [customers, cases]);
+  }, [safeCustomers, safeCases]);
 
   // Prepare a monthly recovered line chart if casesSummary available
   const monthlySeries = useMemo(() => {
-    // casesSummary expected to contain { month_year: '2024-07', recovered_amount: '1234' }
-    const sorted = [...casesSummary].sort((a, b) => new Date(a.month_year) - new Date(b.month_year));
-    return [{ name: 'Recovered', data: sorted.map(r => Number(r.recovered_amount) || 0) }];
-  }, [casesSummary]);
+    const sorted = [...safeSummary].sort((a, b) => new Date(a?.month_year) - new Date(b?.month_year));
+    return [{ name: 'Recovered', data: sorted.map(r => Number(r?.recovered_amount) || 0) }];
+  }, [safeSummary]);
 
   const monthlyCategories = useMemo(() => {
-    const sorted = [...casesSummary].sort((a, b) => new Date(a.month_year) - new Date(b.month_year));
-    return sorted.map(r => r.month_year);
-  }, [casesSummary]);
+    const sorted = [...safeSummary].sort((a, b) => new Date(a?.month_year) - new Date(b?.month_year));
+    return sorted.map(r => r?.month_year || 'N/A');
+  }, [safeSummary]);
 
   const monthlyOptions = {
     chart: { toolbar: { show: false }, background: 'transparent' },
@@ -109,15 +117,15 @@ const DcaAdminDashboard = () => {
           <div className="p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl">
             <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3">Top 3 Agents</h3>
             <div className="space-y-3">
-              {top3Agencies.map(a => (
-                <div key={a.dca_id} className="flex justify-between items-center p-3 rounded-xl bg-[#0f1316] border border-slate-200 dark:border-surface-border">
+               {top3Agencies.map(a => (
+                <div key={a?.dca_id || a?.id} className="flex justify-between items-center p-3 rounded-xl bg-[#0f1316] border border-slate-200 dark:border-surface-border">
                   <div>
-                    <div className="text-slate-900 dark:text-white font-bold">{a.name}</div>
-                    <div className="text-slate-500 text-xs">{a.regions || 'Global'}</div>
+                    <div className="text-slate-900 dark:text-white font-bold">{a?.name || 'Unknown Agent'}</div>
+                    <div className="text-slate-500 text-xs">{a?.regions || 'Global'}</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-slate-900 dark:text-white font-black">{numberFormat(a.recovered_amount)}</div>
-                    <div className="text-slate-400 text-xs">{(a.recovery_rate || 0).toFixed(1)}% recovery</div>
+                    <div className="text-slate-900 dark:text-white font-black">{numberFormat(a?.recovered_amount)}</div>
+                    <div className="text-slate-400 text-xs">{(Number(a?.recovery_rate) || 0).toFixed(1)}% recovery</div>
                   </div>
                 </div>
               ))}
@@ -136,11 +144,11 @@ const DcaAdminDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {totals.topCustomers.map(cu => (
-                  <tr key={cu.id} className="border-t border-slate-200 dark:border-surface-border">
-                    <td className="py-3 text-slate-900 dark:text-white font-bold">{cu.name}</td>
-                    <td className="py-3 text-slate-300">{numberFormat(cu.totalDebt)}</td>
-                    <td className="py-3 text-slate-400">{cu.region}</td>
+                 {totals.topCustomers.map(cu => (
+                  <tr key={cu?.id} className="border-t border-slate-200 dark:border-surface-border">
+                    <td className="py-3 text-slate-900 dark:text-white font-bold">{cu?.name || 'Unknown'}</td>
+                    <td className="py-3 text-slate-300">{numberFormat(cu?.totalDebt)}</td>
+                    <td className="py-3 text-slate-400">{cu?.region || 'Global'}</td>
                   </tr>
                 ))}
                 {totals.topCustomers.length === 0 && (
@@ -166,15 +174,15 @@ const DcaAdminDashboard = () => {
           <div className="p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl">
             <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3">Agents Distribution</h3>
             <div className="space-y-2">
-              {agencies.map(a => (
-                <div key={a.dca_id} className="flex items-center justify-between text-sm text-slate-300 py-2">
+               {safeAgencies.map(a => (
+                <div key={a?.dca_id || a?.id} className="flex items-center justify-between text-sm text-slate-300 py-2">
                   <div className="w-2/3">
-                    <div className="font-bold text-slate-900 dark:text-white">{a.name}</div>
-                    <div className="text-xs text-slate-500">{a.regions || 'Global'}</div>
+                    <div className="font-bold text-slate-900 dark:text-white">{a?.name || 'Unknown Agent'}</div>
+                    <div className="text-xs text-slate-500">{a?.regions || 'Global'}</div>
                   </div>
                   <div className="text-right w-1/3">
-                    <div className="text-slate-900 dark:text-white">{numberFormat(a.recovered_amount)}</div>
-                    <div className="text-slate-400 text-xs">{(a.recovery_rate || 0).toFixed(0)}%</div>
+                    <div className="text-slate-900 dark:text-white">{numberFormat(a?.recovered_amount)}</div>
+                    <div className="text-slate-400 text-xs">{(Number(a?.recovery_rate) || 0).toFixed(0)}%</div>
                   </div>
                 </div>
               ))}

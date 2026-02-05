@@ -9,8 +9,7 @@
     "migrate": "npx sequelize-cli db:migrate",
     "seed": "npx sequelize-cli db:seed:all",
     "add-customer-fields": "node scripts/addCustomerFields.js",
-    "check-seed": "node scripts/checkAndSeed.js",
-    "seed-full": "node runSeeds.js"
+    "seed-all": "node seedAll.js"
   },
   "dependencies": {
     "axios": "^1.6.2",

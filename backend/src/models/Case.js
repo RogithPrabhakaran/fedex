@@ -67,6 +67,12 @@ const Case = sequelize.define('Case', {
     allowNull: true,
     comment: 'Total case amount',
   },
+  amount_recovered: {
+    type: DataTypes.DECIMAL(12, 2),
+    allowNull: true,
+    defaultValue: 0.00,
+    comment: 'Amount recovered so far',
+  },
   dpd: {
     type: DataTypes.INTEGER,
     allowNull: true,
@@ -106,11 +112,11 @@ const Case = sequelize.define('Case', {
     },
   },
   agent_id: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: true,
-    comment: 'Assigned DCA agent working on this case',
+    comment: 'Assigned DCA agent working on this case (references dca_agents table)',
     references: {
-      model: 'users',
+      model: 'dca_agents',
       key: 'id',
     },
   },

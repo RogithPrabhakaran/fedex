@@ -15,23 +15,26 @@ const AgencyDashboard = ({ user }) => {
       setLoading(true);
       try {
         const data = await customerService.fetchAll();
-        setCustomers(data);
+        setCustomers(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Failed to load customers', err);
+        setCustomers([]);
       } finally { setLoading(false); }
     };
 
     load();
   }, []);
 
+  const safeCustomers = useMemo(() => Array.isArray(customers) ? customers : [], [customers]);
+
   // DCA Agents only see customers assigned to them or those that are defaulted
   const myCases = useMemo(() => {
-    return customers.filter(c => 
-      c.assignedToDcaId === user.agencyId || 
-      c.status === CustomerStatus.DEFAULTED || 
-      c.status === CustomerStatus.LEGAL_ACTION
+    return safeCustomers.filter(c => 
+      c?.assignedToDcaId === user?.agencyId || 
+      c?.status === CustomerStatus.DEFAULTED || 
+      c?.status === CustomerStatus.LEGAL_ACTION
     );
-  }, [customers, user.agencyId]);
+  }, [safeCustomers, user?.agencyId]);
 
   const handleLogAction = async (e) => {
     e.preventDefault();
@@ -83,6 +86,11 @@ const AgencyDashboard = ({ user }) => {
         </div>
         
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {myCases.length === 0 && !loading && (
+            <div className="p-8 text-center bg-[#111418] border border-dashed border-surface-border rounded-2xl text-slate-500">
+              No cases in your queue.
+            </div>
+          )}
           {myCases.map(c => (
             <div 
               key={c.id}
@@ -95,23 +103,23 @@ const AgencyDashboard = ({ user }) => {
             >
               <div className="flex justify-between items-start mb-3">
                 <div className="flex flex-col">
-                  <span className="text-white font-bold text-lg">{c.name}</span>
-                  <span className="text-slate-500 font-mono text-xs">{c.accountId}</span>
+                  <span className="text-white font-bold text-lg">{c?.name || 'Unknown'}</span>
+                  <span className="text-slate-500 font-mono text-xs">{c?.accountId || 'N/A'}</span>
                 </div>
                 <span className={`px-2 py-1 rounded text-[10px] font-black uppercase ${
-                  c.status === CustomerStatus.LEGAL_ACTION ? 'bg-red-500/20 text-red-500 animate-pulse' : 'bg-amber-500/20 text-amber-500'
+                  c?.status === CustomerStatus.LEGAL_ACTION ? 'bg-red-500/20 text-red-500 animate-pulse' : 'bg-amber-500/20 text-amber-500'
                 }`}>
-                  {c.status}
+                  {c?.status || 'N/A'}
                 </span>
               </div>
               <div className="flex justify-between items-end">
                 <div className="flex flex-col">
                   <span className="text-slate-400 text-[10px] font-bold uppercase">Debt Amount</span>
-                  <span className="text-white font-black text-xl">${c.totalDebt.toLocaleString()}</span>
+                  <span className="text-white font-black text-xl">${(Number(c?.totalDebt) || 0).toLocaleString()}</span>
                 </div>
                 <div className="text-right">
                    <span className="text-slate-400 text-[10px] font-bold uppercase">Overdue</span>
-                   <p className="text-white font-bold">{c.daysOverdue} Days</p>
+                   <p className="text-white font-bold">{c?.daysOverdue || 0} Days</p>
                 </div>
               </div>
             </div>
@@ -148,23 +156,23 @@ const AgencyDashboard = ({ user }) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                <div className="bg-[#111418] border border-surface-border rounded-3xl p-8">
                   <span className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Recovery Probability</span>
                   <div className="mt-4 flex items-center gap-4">
-                    <div className="text-4xl font-black text-white">{selectedCase.repaymentProbability}%</div>
+                    <div className="text-4xl font-black text-white">{selectedCase?.repaymentProbability || 0}%</div>
                     <div className="flex-1 h-3 bg-slate-800 rounded-full overflow-hidden">
-                       <div className="h-full bg-primary" style={{ width: `${selectedCase.repaymentProbability}%` }} />
+                       <div className="h-full bg-primary" style={{ width: `${selectedCase?.repaymentProbability || 0}%` }} />
                     </div>
                   </div>
                </div>
                <div className="bg-[#111418] border border-surface-border rounded-3xl p-8">
                   <span className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Last Activity</span>
-                  <div className="mt-4 text-2xl font-black text-white">{selectedCase.lastUpdated}</div>
+                  <div className="mt-4 text-2xl font-black text-white">{selectedCase?.lastUpdated || 'N/A'}</div>
                </div>
                <div className="bg-[#111418] border border-surface-border rounded-3xl p-8">
                   <span className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Total Actions</span>
-                  <div className="mt-4 text-2xl font-black text-white">{selectedCase.actions.length} Logs</div>
+                  <div className="mt-4 text-2xl font-black text-white">{Array.isArray(selectedCase?.actions) ? selectedCase.actions.length : 0} Logs</div>
                </div>
             </div>
 
@@ -227,26 +235,26 @@ const AgencyDashboard = ({ user }) => {
               </div>
 
               {/* Activity History */}
-              <div className="space-y-6">
+               <div className="space-y-6">
                 <h3 className="text-2xl font-black text-white">Action History</h3>
                 <div className="space-y-4">
-                  {selectedCase.actions.length === 0 ? (
+                  {!Array.isArray(selectedCase?.actions) || selectedCase.actions.length === 0 ? (
                     <div className="text-center p-12 bg-surface-dark border border-dashed border-surface-border rounded-3xl text-slate-500">
                       No activity logged yet for this case.
                     </div>
                   ) : selectedCase.actions.map(action => (
-                    <div key={action.id} className="relative pl-8 pb-8 last:pb-0 group">
+                    <div key={action?.id} className="relative pl-8 pb-8 last:pb-0 group">
                       <div className="absolute left-0 top-1.5 bottom-0 w-px bg-surface-border group-last:bg-transparent"></div>
                       <div className="absolute left-[-4px] top-1.5 size-2 rounded-full bg-primary ring-4 ring-primary/20"></div>
                       <div className="bg-surface-dark border border-surface-border rounded-2xl p-6">
                         <div className="flex justify-between items-start mb-2">
                            <div className="flex items-center gap-3">
-                              <span className="text-white font-black text-sm uppercase">{action.type.replace('_', ' ')}</span>
-                              <span className="text-slate-500 text-[10px] font-bold">{action.date}</span>
+                              <span className="text-white font-black text-sm uppercase">{(action?.type || 'UNKNOWN').replace('_', ' ')}</span>
+                              <span className="text-slate-500 text-[10px] font-bold">{action?.date || 'N/A'}</span>
                            </div>
-                           <span className="text-[10px] text-slate-400">By {action.performedBy}</span>
+                           <span className="text-[10px] text-slate-400">By {action?.performedBy || 'N/A'}</span>
                         </div>
-                        <p className="text-slate-300 text-sm leading-relaxed">{action.notes}</p>
+                        <p className="text-slate-300 text-sm leading-relaxed">{action?.notes || 'No description provided.'}</p>
                       </div>
                     </div>
                   ))}

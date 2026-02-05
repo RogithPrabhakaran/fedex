@@ -47,10 +47,11 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
       setError(null);
       try {
         const data = await dcaService.listAgents(user.agencyId);
-        setAgents(data || []);
+        setAgents(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Failed to load agents:', err);
         setError(err.message || 'Failed to load agents');
+        setAgents([]);
       } finally {
         setLoading(false);
       }
@@ -59,11 +60,13 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
     fetchAgents();
   }, [user?.agencyId]);
 
-  const filteredAgents = agents.filter(agent => {
-    const matchesSearch = agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          agent.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          agent.company.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || agent.status === filterStatus;
+  const safeAgents = Array.isArray(agents) ? agents : [];
+
+  const filteredAgents = safeAgents.filter(agent => {
+    const matchesSearch = (agent?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (agent?.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (agent?.company || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filterStatus === 'all' || agent?.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
 
@@ -182,19 +185,22 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
         <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
           <div className='bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl p-6'>
             <span className='text-slate-400 text-xs font-black uppercase'>Total Agents</span>
-            <p className='text-3xl font-black text-slate-900 dark:text-white mt-2'>{agents.length}</p>
+            <p className='text-3xl font-black text-slate-900 dark:text-white mt-2'>{safeAgents.length}</p>
           </div>
           <div className='bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl p-6'>
             <span className='text-slate-400 text-xs font-black uppercase'>Active</span>
-            <p className='text-3xl font-black text-green-500 mt-2'>{agents.filter(a => a.status === 'Active').length}</p>
+            <p className='text-3xl font-black text-green-500 mt-2'>{safeAgents.filter(a => a?.status === 'Active').length}</p>
           </div>
           <div className='bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl p-6'>
             <span className='text-slate-400 text-xs font-black uppercase'>Total Assigned Cases</span>
-            <p className='text-3xl font-black text-primary mt-2'>{agents.reduce((sum, a) => sum + a.assignedCases, 0)}</p>
+            <p className='text-3xl font-black text-primary mt-2'>{safeAgents.reduce((sum, a) => sum + (Number(a?.assignedCases) || 0), 0)}</p>
           </div>
           <div className='bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl p-6'>
             <span className='text-slate-400 text-xs font-black uppercase'>Total Recovered</span>
-            <p className='text-3xl font-black text-amber-500 mt-2'>${agents.reduce((sum, a) => sum + parseInt(a.totalRecovered.replace(/[$,]/g, '')), 0).toLocaleString()}</p>
+            <p className='text-3xl font-black text-amber-500 mt-2'>${safeAgents.reduce((sum, a) => {
+              const val = String(a?.totalRecovered || '0').replace(/[$,]/g, '');
+              return sum + (parseInt(val) || 0);
+            }, 0).toLocaleString()}</p>
           </div>
         </div>
 

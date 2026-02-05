@@ -11,6 +11,7 @@ const SlaEvent = require('./SlaEvent');
 const AppSettings = require('./AppSettings');
 const Issue = require('./Issue');
 const IssueComment = require('./IssueComment');
+const DcaAgent = require('./DcaAgent');
 
 const {
   DcaAgency,
@@ -33,6 +34,20 @@ User.belongsTo(User, {
   as: 'dcaAdmin',
 });
 
+// DcaAgent -> User associations
+DcaAgent.belongsTo(User, {
+  foreignKey: 'dca_admin_id',
+  as: 'dcaAdmin',
+});
+DcaAgent.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'userAccount',
+});
+User.hasMany(DcaAgent, {
+  foreignKey: 'dca_admin_id',
+  as: 'managedAgents',
+});
+
 // DcaAgency -> User (admin)
 DcaAgency.belongsTo(User, {
   foreignKey: 'admin_user_id',
@@ -43,22 +58,24 @@ User.hasOne(DcaAgency, {
   as: 'managedAgency',
 });
 
-// Case -> User (DCA Admin & Agent)
+// Case -> DcaAgent (NEW: Cases reference DcaAgent, not User)
+Case.belongsTo(DcaAgent, {
+  foreignKey: 'agent_id',
+  as: 'agent',
+});
+DcaAgent.hasMany(Case, {
+  foreignKey: 'agent_id',
+  as: 'assignedCases',
+});
+
+// Case -> User (DCA Admin)
 Case.belongsTo(User, {
   foreignKey: 'dca_admin_id',
   as: 'dcaAdmin',
 });
-Case.belongsTo(User, {
-  foreignKey: 'agent_id',
-  as: 'agent',
-});
 User.hasMany(Case, {
   foreignKey: 'dca_admin_id',
   as: 'managedCases',
-});
-User.hasMany(Case, {
-  foreignKey: 'agent_id',
-  as: 'assignedCases',
 });
 
 // ===== Existing Associations =====
@@ -105,4 +122,5 @@ module.exports = {
   AppSettings,
   Issue,
   IssueComment,
+  DcaAgent,
 };
