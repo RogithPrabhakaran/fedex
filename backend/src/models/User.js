@@ -1,7 +1,7 @@
 /**
  * User model
  *
- * Represents application users in the 3-tier DCA role system.
+ * Represents application users in the 4-tier role system.
  * Passwords stored in `password` MUST be hashed before creating the record;
  * controllers that create users currently use bcrypt for hashing.
  *
@@ -9,6 +9,7 @@
  * - FEDEX_ADMIN: Full access to all cases and DCAs
  * - DCA_ADMIN: Manages one DCA agency and its agents (1 per agency)
  * - DCA_AGENT: Works on individually assigned cases
+ * - CUSTOMER: Customer users who can view payment info and request discounts
  */
 
 const { DataTypes } = require('sequelize');
@@ -37,9 +38,9 @@ const User = sequelize.define('User', {
     allowNull: false,
   },
   role: {
-    type: DataTypes.ENUM('FEDEX_ADMIN', 'DCA_ADMIN', 'DCA_AGENT'),
+    type: DataTypes.ENUM('FEDEX_ADMIN', 'DCA_ADMIN', 'DCA_AGENT', 'CUSTOMER'),
     allowNull: false,
-    comment: 'User role: FEDEX_ADMIN (full access), DCA_ADMIN (1 per agency), DCA_AGENT (works on assigned cases)',
+    comment: 'User role: FEDEX_ADMIN (full access), DCA_ADMIN (1 per agency), DCA_AGENT (works on assigned cases), CUSTOMER (customer portal access)',
   },
   avatar: {
     type: DataTypes.STRING,

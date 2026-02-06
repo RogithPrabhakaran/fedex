@@ -16,6 +16,7 @@ import DashboardView from '../views/DashboardView';
 import CustomersView from '../views/CustomersView';
 import DcaAgentsView from '../views/DcaAgentsView';
 import ProfileView from '../views/ProfileView';
+import CustomerPaymentView from '../views/CustomerPaymentView';
 
 // New Pages
 import SlaMonitor from './pages/SlaMonitor';
@@ -47,56 +48,39 @@ const AppContent = ({ user, onLogout }) => {
 
     return (
         <div className="flex flex-col h-screen bg-slate-50 dark:bg-slate-900 overflow-hidden">
-            {/* Top Bar for Role Switching & Agents */}
-            <AgentStatusBar />
 
             <div className="flex flex-1 overflow-hidden relative">
                 {/* Main Content Area */}
                 <main className="flex-1 overflow-y-auto relative">
-                    {/* Navigation Header (Mock) */}
-                     <header className="bg-white dark:bg-surface-dark border-b border-slate-200 dark:border-surface-border px-6 py-3 flex items-center gap-6 sticky top-0 z-40 shadow-sm">
+                    {/* Simplified Navigation Header */}
+                    <header className="bg-white dark:bg-surface-dark border-b border-slate-200 dark:border-surface-border px-6 py-3 flex items-center gap-6 sticky top-0 z-40 shadow-sm">
                         <div className="font-black text-2xl italic tracking-tighter text-slate-900 dark:text-white">FedEx <span className="text-fedex-orange">SMART</span></div>
                         <nav className="flex items-center gap-1">
-                            <NavItem to="/" label="Dashboard" active={location.pathname === '/' || location.pathname === '/dashboard'} />
-                            <NavItem to="/customers" label="Debtors" active={location.pathname === '/customers'} />
-                            <NavItem to="/agents" label="Agencies" active={location.pathname === '/agents'} />
-                            <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-2"></div>
-                             {/* Role Specific Nav Items */}
-                             <NavItem to="/sla-monitor" label="SLA Monitor" active={location.pathname === '/sla-monitor'} badge="Live" />
-                             <NavItem to="/sop-compliance" label="SOP Compliance" active={location.pathname === '/sop-compliance'} />
-                             <NavItem to="/audit-logs" label="Audit Logs" active={location.pathname === '/audit-logs'} />
+                            <NavItem to="/customer-payment" label="Customer Payments" active={location.pathname === '/customer-payment'} />
                         </nav>
                         <div className="ml-auto flex items-center gap-4">
                             <div className="text-right">
-                                <div className="text-sm font-bold dark:text-white">{user.name || 'Admin User'}</div>
-                                <div className="text-xs text-slate-500">{activeRole}</div>
+                                <div className="text-sm font-bold dark:text-white">{user.name || 'Customer User'}</div>
+                                <div className="text-xs text-slate-500">Customer</div>
                             </div>
-                           <button onClick={onLogout} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-                               <span className="material-symbols-outlined text-slate-500">logout</span>
-                           </button>
+                            <button onClick={onLogout} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+                                <span className="material-symbols-outlined text-slate-500">logout</span>
+                            </button>
                         </div>
                     </header>
 
+
                     <div className="p-0">
                         <Routes>
-                            <Route path="/" element={
-                                <div className="relative">
-                                     <DashboardView />
-                                     {/* Inject Live Alerts Panel into Dashboard */}
-                                     <div className="fixed bottom-6 right-6 w-80 h-64 z-50 pointer-events-auto transform transition-transform hover:scale-105">
-                                         <LiveAlertsPanel />
-                                     </div>
-                                </div>
-                            } />
-                            <Route path="/dashboard" element={<Navigate to="/" />} />
-                            <Route path="/customers" element={<CustomersView />} />
-                            <Route path="/agents" element={<DcaAgentsView />} />
-                            <Route path="/profile" element={<ProfileView />} />
-                            
-                            {/* New Feature Routes */}
-                            <Route path="/sla-monitor" element={<SlaMonitor />} />
-                            <Route path="/sop-compliance" element={<SopCompliance />} />
-                            <Route path="/audit-logs" element={<AuditLogs />} />
+                            {/* Default route - redirect to customer payment */}
+                            <Route path="/" element={<Navigate to="/customer-payment" replace />} />
+                            <Route path="/dashboard" element={<Navigate to="/customer-payment" replace />} />
+
+                            {/* Only Customer Payment page */}
+                            <Route path="/customer-payment" element={<CustomerPaymentView />} />
+
+                            {/* Catch all - redirect to customer payment */}
+                            <Route path="*" element={<Navigate to="/customer-payment" replace />} />
                         </Routes>
                     </div>
                 </main>
@@ -139,10 +123,9 @@ const App = () => {
                 <LanguageProvider>
                     <BrowserRouter>
                         <Routes>
-                            <Route path="/login" element={ user ? <Navigate to="/" /> : <LoginView onLogin={handleLogin} /> } />
+                            <Route path="/login" element={user ? <Navigate to="/" /> : <LoginView onLogin={handleLogin} />} />
                             <Route path="*" element={<AppContent user={user} onLogout={handleLogout} />} />
                         </Routes>
-                        <Toaster position="top-right" theme="dark" richColors />
                     </BrowserRouter>
                 </LanguageProvider>
             </AppProvider>

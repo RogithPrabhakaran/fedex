@@ -12,6 +12,7 @@ const AppSettings = require('./AppSettings');
 const Issue = require('./Issue');
 const IssueComment = require('./IssueComment');
 const DcaAgent = require('./DcaAgent');
+const DiscountRequest = require('./DiscountRequest');
 
 const {
   DcaAgency,
@@ -82,6 +83,10 @@ User.hasMany(Case, {
 Customer.hasMany(DcaAction, { foreignKey: 'customerId', as: 'actions' });
 DcaAction.belongsTo(Customer, { foreignKey: 'customerId', as: 'customer' });
 
+// Customer --> DiscountRequest associations
+Customer.hasMany(DiscountRequest, { foreignKey: 'customerId', as: 'discountRequests' });
+DiscountRequest.belongsTo(Customer, { foreignKey: 'customerId', as: 'customer' });
+
 DcaAgency.hasMany(DcaPerformanceByType, { foreignKey: 'dca_id' });
 DcaPerformanceByType.belongsTo(DcaAgency, { foreignKey: 'dca_id' });
 
@@ -123,4 +128,5 @@ module.exports = {
   Issue,
   IssueComment,
   DcaAgent,
+  DiscountRequest,
 };
