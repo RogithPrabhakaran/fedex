@@ -14,16 +14,61 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
     name: '',
     email: '',
     company: '',
-    status: 'Active'
+    status: 'Active',
   });
 
   // Mock agents data for demonstration
   const mockAgents = [
-    { id: 1, name: 'Rajesh Kumar', email: 'rajesh.kumar@dca.in', company: 'Field Collections', status: 'Active', joinDate: '2025-06-15', successRate: 87, recoveredAmount: 450000 },
-    { id: 2, name: 'Priya Sharma', email: 'priya.sharma@dca.in', company: 'Field Collections', status: 'Active', joinDate: '2025-07-20', successRate: 92, recoveredAmount: 580000 },
-    { id: 3, name: 'Amit Patel', email: 'amit.patel@dca.in', company: 'Field Collections', status: 'Active', joinDate: '2025-08-10', successRate: 78, recoveredAmount: 320000 },
-    { id: 4, name: 'Sneha Gupta', email: 'sneha.gupta@dca.in', company: 'Field Collections', status: 'On Leave', joinDate: '2025-05-22', successRate: 85, recoveredAmount: 420000 },
-    { id: 5, name: 'Vikram Singh', email: 'vikram.singh@dca.in', company: 'Field Collections', status: 'Active', joinDate: '2025-09-05', successRate: 80, recoveredAmount: 380000 },
+    {
+      id: 1,
+      name: 'Rajesh Kumar',
+      email: 'rajesh.kumar@dca.in',
+      company: 'Field Collections',
+      status: 'Active',
+      joinDate: '2025-06-15',
+      successRate: 87,
+      recoveredAmount: 450000,
+    },
+    {
+      id: 2,
+      name: 'Priya Sharma',
+      email: 'priya.sharma@dca.in',
+      company: 'Field Collections',
+      status: 'Active',
+      joinDate: '2025-07-20',
+      successRate: 92,
+      recoveredAmount: 580000,
+    },
+    {
+      id: 3,
+      name: 'Amit Patel',
+      email: 'amit.patel@dca.in',
+      company: 'Field Collections',
+      status: 'Active',
+      joinDate: '2025-08-10',
+      successRate: 78,
+      recoveredAmount: 320000,
+    },
+    {
+      id: 4,
+      name: 'Sneha Gupta',
+      email: 'sneha.gupta@dca.in',
+      company: 'Field Collections',
+      status: 'On Leave',
+      joinDate: '2025-05-22',
+      successRate: 85,
+      recoveredAmount: 420000,
+    },
+    {
+      id: 5,
+      name: 'Vikram Singh',
+      email: 'vikram.singh@dca.in',
+      company: 'Field Collections',
+      status: 'Active',
+      joinDate: '2025-09-05',
+      successRate: 80,
+      recoveredAmount: 380000,
+    },
   ];
 
   // Fetch agents from API with fallback to mock data
@@ -51,11 +96,13 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
 
   const safeAgents = Array.isArray(agents) ? agents : [];
 
-  const filteredAgents = safeAgents.filter(agent => {
-    const matchesSearch = (agent?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (agent?.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (agent?.company || '').toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || agent?.status === filterStatus;
+  const filteredAgents = safeAgents.filter((agent) => {
+    const matchesSearch =
+      (agent?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (agent?.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (agent?.company || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter =
+      filterStatus === 'all' || agent?.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
 
@@ -70,7 +117,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
     try {
       await dcaService.inviteAgent(user.agencyId, {
         name: formData.name,
-        email: formData.email
+        email: formData.email,
       });
 
       // Refresh the agents list
@@ -87,19 +134,27 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Active': return 'bg-green-500/20 text-green-500';
-      case 'Inactive': return 'bg-slate-500/20 text-slate-400';
-      case 'On Leave': return 'bg-amber-500/20 text-amber-500';
-      default: return 'bg-slate-500/20 text-slate-400';
+      case 'Active':
+        return 'bg-green-500/20 text-green-500';
+      case 'Inactive':
+        return 'bg-slate-500/20 text-slate-400';
+      case 'On Leave':
+        return 'bg-amber-500/20 text-amber-500';
+      default:
+        return 'bg-slate-500/20 text-slate-400';
     }
   };
 
   const getRecoveryStatusColor = (status) => {
     switch (status) {
-      case 'In Progress': return 'bg-amber-500/20 text-amber-500';
-      case 'Closed': return 'bg-green-500/20 text-green-500';
-      case 'Behind Schedule': return 'bg-red-500/20 text-red-500';
-      default: return 'bg-slate-500/20 text-slate-400';
+      case 'In Progress':
+        return 'bg-amber-500/20 text-amber-500';
+      case 'Closed':
+        return 'bg-green-500/20 text-green-500';
+      case 'Behind Schedule':
+        return 'bg-red-500/20 text-red-500';
+      default:
+        return 'bg-slate-500/20 text-slate-400';
     }
   };
 
@@ -108,7 +163,9 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
       <div className='flex items-center justify-center h-full'>
         <div className='text-center'>
           <div className='animate-spin size-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4'></div>
-          <p className='text-slate-900 dark:text-white font-bold'><Translate text="Loading agents..." /></p>
+          <p className='text-slate-900 dark:text-white font-bold'>
+            <Translate text='Loading agents...' />
+          </p>
         </div>
       </div>
     );
@@ -121,7 +178,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
           error
         </span>
         <h2 className='text-2xl font-bold text-slate-900 dark:text-white mb-2'>
-          <Translate text="Error Loading Agents" />
+          <Translate text='Error Loading Agents' />
         </h2>
         <p className='text-slate-400'>{error}</p>
       </div>
@@ -134,15 +191,19 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
         {/* Header */}
         <div className='flex justify-between items-center'>
           <div>
-            <h1 className='text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-2'><Translate text="Manage Agents" /></h1>
-            <p className='text-slate-400'><Translate text="Monitor and manage your DCA agents performance and assignments" /></p>
+            <h1 className='text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-2'>
+              <Translate text='Manage Agents' />
+            </h1>
+            <p className='text-slate-400'>
+              <Translate text='Monitor and manage your DCA agents performance and assignments' />
+            </p>
           </div>
           <button
             onClick={() => setShowAddModal(true)}
             className='flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-blue-600 transition-all shadow-lg shadow-primary/20'
           >
             <span className='material-symbols-outlined'>add</span>
-            <Translate text="Add Agent" />
+            <Translate text='Add Agent' />
           </button>
         </div>
 
@@ -156,40 +217,75 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
               placeholder='Search by name, email, or company...'
               className='w-full bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-xl text-white px-4 py-3 pl-12 focus:border-primary focus:ring-2 focus:ring-primary/20'
             />
-            <span className='material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400'>search</span>
+            <span className='material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400'>
+              search
+            </span>
           </div>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
             className='bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-xl text-white px-4 py-3 focus:border-primary focus:ring-2 focus:ring-primary/20'
           >
-            <option value='all'><Translate text="All Status" /></option>
-            <option value='Active'><Translate text="Active" /></option>
-            <option value='Inactive'><Translate text="Inactive" /></option>
-            <option value='On Leave'><Translate text="On Leave" /></option>
+            <option value='all'>
+              <Translate text='All Status' />
+            </option>
+            <option value='Active'>
+              <Translate text='Active' />
+            </option>
+            <option value='Inactive'>
+              <Translate text='Inactive' />
+            </option>
+            <option value='On Leave'>
+              <Translate text='On Leave' />
+            </option>
           </select>
         </div>
 
         {/* Stats Cards */}
         <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
           <div className='bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl p-6'>
-            <span className='text-slate-400 text-xs font-black uppercase'>Total Agents</span>
-            <p className='text-3xl font-black text-slate-900 dark:text-white mt-2'>{safeAgents.length}</p>
+            <span className='text-slate-400 text-xs font-black uppercase'>
+              Total Agents
+            </span>
+            <p className='text-3xl font-black text-slate-900 dark:text-white mt-2'>
+              {safeAgents.length}
+            </p>
           </div>
           <div className='bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl p-6'>
-            <span className='text-slate-400 text-xs font-black uppercase'>Active</span>
-            <p className='text-3xl font-black text-green-500 mt-2'>{safeAgents.filter(a => a?.status === 'Active').length}</p>
+            <span className='text-slate-400 text-xs font-black uppercase'>
+              Active
+            </span>
+            <p className='text-3xl font-black text-green-500 mt-2'>
+              {safeAgents.filter((a) => a?.status === 'Active').length}
+            </p>
           </div>
           <div className='bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl p-6'>
-            <span className='text-slate-400 text-xs font-black uppercase'>Total Assigned Cases</span>
-            <p className='text-3xl font-black text-primary mt-2'>{safeAgents.reduce((sum, a) => sum + (Number(a?.assignedCases) || 0), 0)}</p>
+            <span className='text-slate-400 text-xs font-black uppercase'>
+              Total Assigned Cases
+            </span>
+            <p className='text-3xl font-black text-primary mt-2'>
+              {safeAgents.reduce(
+                (sum, a) => sum + (Number(a?.assignedCases) || 0),
+                0
+              )}
+            </p>
           </div>
           <div className='bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl p-6'>
-            <span className='text-slate-400 text-xs font-black uppercase'>Total Recovered</span>
-            <p className='text-3xl font-black text-amber-500 mt-2'>${safeAgents.reduce((sum, a) => {
-              const val = String(a?.totalRecovered || '0').replace(/[$,]/g, '');
-              return sum + (parseInt(val) || 0);
-            }, 0).toLocaleString()}</p>
+            <span className='text-slate-400 text-xs font-black uppercase'>
+              Total Recovered
+            </span>
+            <p className='text-3xl font-black text-amber-500 mt-2'>
+              $
+              {safeAgents
+                .reduce((sum, a) => {
+                  const val = String(a?.totalRecovered || '0').replace(
+                    /[$,]/g,
+                    ''
+                  );
+                  return sum + (parseInt(val) || 0);
+                }, 0)
+                .toLocaleString()}
+            </p>
           </div>
         </div>
 
@@ -199,12 +295,24 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
             <table className='w-full'>
               <thead className='bg-[#111418] border-b border-slate-200 dark:border-surface-border'>
                 <tr>
-                  <th className='px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider'>Name</th>
-                  <th className='px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider'>Status</th>
-                  <th className='px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider'>Assigned Cases</th>
-                  <th className='px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider'>Success Rate</th>
-                  <th className='px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider'>Total Recovered</th>
-                  <th className='px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider'>Actions</th>
+                  <th className='px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider'>
+                    Name
+                  </th>
+                  <th className='px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider'>
+                    Status
+                  </th>
+                  <th className='px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider'>
+                    Assigned Cases
+                  </th>
+                  <th className='px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider'>
+                    Success Rate
+                  </th>
+                  <th className='px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider'>
+                    Total Recovered
+                  </th>
+                  <th className='px-6 py-4 text-left text-xs font-black text-slate-400 uppercase tracking-wider'>
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className='divide-y divide-surface-border'>
@@ -212,14 +320,21 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
                   <tr>
                     <td colSpan='6' className='px-6 py-12 text-center'>
                       <div className='flex flex-col items-center justify-center'>
-                        <span className='material-symbols-outlined text-5xl text-slate-600 mb-4'>people_alt</span>
-                        <p className='text-slate-400 font-bold'><Translate text="No agents found" /></p>
+                        <span className='material-symbols-outlined text-5xl text-slate-600 mb-4'>
+                          people_alt
+                        </span>
+                        <p className='text-slate-400 font-bold'>
+                          <Translate text='No agents found' />
+                        </p>
                       </div>
                     </td>
                   </tr>
                 ) : (
                   filteredAgents.map((agent) => (
-                    <tr key={agent.id} className='hover:bg-[#111418] transition-colors'>
+                    <tr
+                      key={agent.id}
+                      className='hover:bg-[#111418] transition-colors'
+                    >
                       <td className='px-6 py-4'>
                         <div>
                           <button
@@ -229,18 +344,28 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
                             }}
                             className='text-left'
                           >
-                            <p className='text-slate-900 dark:text-white font-bold underline hover:text-primary'>{agent.name}</p>
-                            <p className='text-slate-400 text-sm'>{agent.email}</p>
+                            <p className='text-slate-900 dark:text-white font-bold underline hover:text-primary'>
+                              {agent.name}
+                            </p>
+                            <p className='text-slate-400 text-sm'>
+                              {agent.email}
+                            </p>
                           </button>
                         </div>
                       </td>
                       <td className='px-6 py-4'>
-                        <span className={`inline-block px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap ${getStatusColor(agent.status || 'Active')}`}>
+                        <span
+                          className={`inline-block px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap ${getStatusColor(
+                            agent.status || 'Active'
+                          )}`}
+                        >
                           {agent.status || 'Active'}
                         </span>
                       </td>
                       <td className='px-6 py-4'>
-                        <p className='text-slate-900 dark:text-white font-bold text-center'>{agent.assignedCases || 0}</p>
+                        <p className='text-slate-900 dark:text-white font-bold text-center'>
+                          {agent.assignedCases || 0}
+                        </p>
                       </td>
                       <td className='px-6 py-4'>
                         <div className='flex items-center gap-3'>
@@ -250,33 +375,50 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
                               style={{ width: `${agent.successRate || 0}%` }}
                             ></div>
                           </div>
-                          <p className='text-slate-900 dark:text-white font-bold'>{agent.successRate || 0}%</p>
+                          <p className='text-slate-900 dark:text-white font-bold'>
+                            {agent.successRate || 0}%
+                          </p>
                         </div>
                       </td>
                       <td className='px-6 py-4'>
-                        <p className='text-slate-900 dark:text-white font-bold text-green-500'>{agent.totalRecovered || '$0'}</p>
+                        <p className='text-slate-900 dark:text-white font-bold text-green-500'>
+                          {agent.totalRecovered || '$0'}
+                        </p>
                       </td>
                       <td className='px-6 py-4'>
                         <div className='flex gap-2'>
-                          <button className='p-2 text-slate-400 hover:text-primary rounded-lg hover:bg-surface-border/50 transition-colors' title='Edit'>
-                            <span className='material-symbols-outlined text-sm'>edit</span>
+                          <button
+                            className='p-2 text-slate-400 hover:text-primary rounded-lg hover:bg-surface-border/50 transition-colors'
+                            title='Edit'
+                          >
+                            <span className='material-symbols-outlined text-sm'>
+                              edit
+                            </span>
                           </button>
                           <button
                             onClick={async () => {
                               if (confirm(`Remove agent ${agent.name}?`)) {
                                 try {
-                                  await dcaService.removeAgent(user.agencyId, agent.id);
-                                  const updatedAgents = await dcaService.listAgents(user.agencyId);
+                                  await dcaService.removeAgent(
+                                    user.agencyId,
+                                    agent.id
+                                  );
+                                  const updatedAgents =
+                                    await dcaService.listAgents(user.agencyId);
                                   setAgents(updatedAgents || []);
                                 } catch (err) {
-                                  alert(err.message || 'Failed to remove agent');
+                                  alert(
+                                    err.message || 'Failed to remove agent'
+                                  );
                                 }
                               }
                             }}
                             className='p-2 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-500/10 transition-colors'
                             title='Delete'
                           >
-                            <span className='material-symbols-outlined text-sm'>delete</span>
+                            <span className='material-symbols-outlined text-sm'>
+                              delete
+                            </span>
                           </button>
                         </div>
                       </td>
@@ -294,7 +436,9 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
         <div className='fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
           <div className='bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-2xl p-8 max-w-md w-full space-y-6'>
             <div className='flex justify-between items-center'>
-              <h2 className='text-2xl font-black text-slate-900 dark:text-white'><Translate text="Add New Agent" /></h2>
+              <h2 className='text-2xl font-black text-slate-900 dark:text-white'>
+                <Translate text='Add New Agent' />
+              </h2>
               <button
                 onClick={() => setShowAddModal(false)}
                 className='text-slate-400 hover:text-slate-900 dark:text-white transition-colors'
@@ -305,11 +449,15 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
 
             <form onSubmit={handleAddAgent} className='space-y-4'>
               <div>
-                <label className='text-xs font-black text-slate-400 uppercase block mb-2'>Name</label>
+                <label className='text-xs font-black text-slate-400 uppercase block mb-2'>
+                  Name
+                </label>
                 <input
                   type='text'
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   className='w-full bg-[#111418] border border-slate-200 dark:border-surface-border rounded-xl text-white px-4 py-3 focus:border-primary focus:ring-2 focus:ring-primary/20'
                   placeholder='Agent name'
                   required
@@ -317,11 +465,15 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
               </div>
 
               <div>
-                <label className='text-xs font-black text-slate-400 uppercase block mb-2'>Email</label>
+                <label className='text-xs font-black text-slate-400 uppercase block mb-2'>
+                  Email
+                </label>
                 <input
                   type='email'
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className='w-full bg-[#111418] border border-slate-200 dark:border-surface-border rounded-xl text-white px-4 py-3 focus:border-primary focus:ring-2 focus:ring-primary/20'
                   placeholder='agent@dca.com'
                   required
@@ -329,11 +481,15 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
               </div>
 
               <div>
-                <label className='text-xs font-black text-slate-400 uppercase block mb-2'>Company</label>
+                <label className='text-xs font-black text-slate-400 uppercase block mb-2'>
+                  Company
+                </label>
                 <input
                   type='text'
                   value={formData.company}
-                  onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, company: e.target.value })
+                  }
                   className='w-full bg-[#111418] border border-slate-200 dark:border-surface-border rounded-xl text-white px-4 py-3 focus:border-primary focus:ring-2 focus:ring-primary/20'
                   placeholder='Company name'
                   required
@@ -341,10 +497,14 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
               </div>
 
               <div>
-                <label className='text-xs font-black text-slate-400 uppercase block mb-2'>Status</label>
+                <label className='text-xs font-black text-slate-400 uppercase block mb-2'>
+                  Status
+                </label>
                 <select
                   value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, status: e.target.value })
+                  }
                   className='w-full bg-[#111418] border border-slate-200 dark:border-surface-border rounded-xl text-white px-4 py-3 focus:border-primary focus:ring-2 focus:ring-primary/20'
                 >
                   <option value='Active'>Active</option>
@@ -357,7 +517,7 @@ const DcaAgentsView = ({ user, setActiveTab, setSelectedAgent }) => {
                 type='submit'
                 className='w-full py-3 bg-primary text-white font-black rounded-xl shadow-lg shadow-primary/20 hover:bg-blue-600 transition-all'
               >
-                <Translate text="Add Agent" />
+                <Translate text='Add Agent' />
               </button>
             </form>
           </div>

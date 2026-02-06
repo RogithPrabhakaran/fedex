@@ -31,8 +31,8 @@ const Layout = ({
   return (
     <div className='flex flex-col h-screen w-full overflow-hidden'>
       {/* Google Translate Widget Container */}
-      <div id="google_translate_element" style={{ display: 'none' }}></div>
-      
+      <div id='google_translate_element' style={{ display: 'none' }}></div>
+
       {/* Top Navigation Bar */}
       <header className='bg-white dark:bg-[#111418] border-b border-slate-200 dark:border-surface-border shrink-0 px-6 py-4 flex items-center justify-between shadow-sm'>
         {/* Left side - Logo and Designation */}
@@ -43,9 +43,11 @@ const Layout = ({
           </div>
           <div className='h-6 w-px bg-slate-200 dark:bg-surface-border'></div>
           <h2 className='text-slate-900 dark:text-white text-sm font-bold hidden sm:block'>
-            {user.role === UserRole.FEDEX_ADMIN
-              ? <Translate text="DCA Manager" />
-              : <Translate text="Agent Portal" />}
+            {user.role === UserRole.FEDEX_ADMIN ? (
+              <Translate text='DCA Manager' />
+            ) : (
+              <Translate text='Agent Portal' />
+            )}
           </h2>
         </div>
 
@@ -90,8 +92,12 @@ const Layout = ({
             {showProfileMenu && (
               <div className='absolute right-0 top-full mt-2 w-48 bg-white dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-xl shadow-lg z-50 overflow-hidden animate-in fade-in duration-200'>
                 <div className='p-3 border-b border-slate-200 dark:border-surface-border'>
-                  <p className='text-slate-900 dark:text-white font-bold text-sm'>{user.name}</p>
-                  <p className='text-slate-500 dark:text-slate-400 text-xs'>{user.email}</p>
+                  <p className='text-slate-900 dark:text-white font-bold text-sm'>
+                    {user.name}
+                  </p>
+                  <p className='text-slate-500 dark:text-slate-400 text-xs'>
+                    {user.email}
+                  </p>
                 </div>
                 <div className='py-2'>
                   <button
@@ -101,8 +107,10 @@ const Layout = ({
                     }}
                     className='w-full flex items-center gap-3 px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-primary/10 hover:text-primary transition-colors text-sm font-medium'
                   >
-                    <span className='material-symbols-outlined text-[18px]'>person</span>
-                    <Translate text="Profile" />
+                    <span className='material-symbols-outlined text-[18px]'>
+                      person
+                    </span>
+                    <Translate text='Profile' />
                   </button>
                   <button
                     onClick={() => {
@@ -118,8 +126,10 @@ const Layout = ({
                     }}
                     className='w-full flex items-center gap-3 px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-primary/10 hover:text-primary transition-colors text-sm font-medium'
                   >
-                    <span className='material-symbols-outlined text-[18px]'>settings</span>
-                    <Translate text="Settings" />
+                    <span className='material-symbols-outlined text-[18px]'>
+                      settings
+                    </span>
+                    <Translate text='Settings' />
                   </button>
                   <div className='h-px bg-slate-200 dark:bg-surface-border my-1'></div>
                   <button
@@ -129,8 +139,10 @@ const Layout = ({
                     }}
                     className='w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-500/10 transition-colors text-sm font-medium'
                   >
-                    <span className='material-symbols-outlined text-[18px]'>logout</span>
-                    <Translate text="Logout" />
+                    <span className='material-symbols-outlined text-[18px]'>
+                      logout
+                    </span>
+                    <Translate text='Logout' />
                   </button>
                 </div>
               </div>
@@ -142,8 +154,11 @@ const Layout = ({
       {/* Main Content Wrapper */}
       <div className='flex flex-1 overflow-hidden'>
         {/* Left Sidebar Navigation */}
-        <aside className={`bg-white dark:bg-[#111418] border-r border-slate-200 dark:border-surface-border flex flex-col shrink-0 transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-20'
-          }`}>
+        <aside
+          className={`bg-white dark:bg-[#111418] border-r border-slate-200 dark:border-surface-border flex flex-col shrink-0 transition-all duration-300 ${
+            sidebarOpen ? 'w-64' : 'w-20'
+          }`}
+        >
           {/* Toggle Button */}
           <div className='p-4 border-b border-slate-200 dark:border-surface-border flex justify-center'>
             <button
@@ -163,14 +178,21 @@ const Layout = ({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${activeTab === tab.id
-                  ? 'bg-primary text-white shadow-lg shadow-primary/30'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-border/50'
-                  } ${!sidebarOpen && 'justify-center'}`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
+                  activeTab === tab.id
+                    ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-border/50'
+                } ${!sidebarOpen && 'justify-center'}`}
                 title={!sidebarOpen ? tab.label : ''}
               >
-                <span className='material-symbols-outlined text-[20px] shrink-0'>{tab.icon}</span>
-                {sidebarOpen && <span className='text-sm'><Translate text={tab.label} /></span>}
+                <span className='material-symbols-outlined text-[20px] shrink-0'>
+                  {tab.icon}
+                </span>
+                {sidebarOpen && (
+                  <span className='text-sm'>
+                    <Translate text={tab.label} />
+                  </span>
+                )}
               </button>
             ))}
           </nav>
