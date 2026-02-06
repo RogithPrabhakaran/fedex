@@ -30,6 +30,9 @@ const Layout = ({
 
   return (
     <div className='flex flex-col h-screen w-full overflow-hidden'>
+      {/* Google Translate Widget Container */}
+      <div id="google_translate_element" style={{ display: 'none' }}></div>
+      
       {/* Top Navigation Bar */}
       <header className='bg-white dark:bg-[#111418] border-b border-slate-200 dark:border-surface-border shrink-0 px-6 py-4 flex items-center justify-between shadow-sm'>
         {/* Left side - Logo and Designation */}

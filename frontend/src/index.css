@@ -7,3 +7,111 @@
     @apply bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white;
   }
 }
+
+/* Light Mode Fixes */
+.light {
+  background-color: #f6f7f8 !important;
+  color: #1f2937 !important;
+}
+
+.light input,
+.light textarea,
+.light select {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+  border-color: #e2e8f0 !important;
+}
+
+.light input:focus,
+.light textarea:focus,
+.light select:focus {
+  border-color: #137fec !important;
+  box-shadow: 0 0 0 3px rgba(19, 127, 236, 0.1) !important;
+}
+
+.light button {
+  color: #1f2937 !important;
+}
+
+.light .bg-surface-dark {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+.light .border-surface-border {
+  border-color: #e2e8f0 !important;
+}
+
+.light .text-slate-400 {
+  color: #6b7280 !important;
+}
+
+.light .text-slate-500 {
+  color: #6b7280 !important;
+}
+
+.light .hover\:bg-slate-100:hover {
+  background-color: #f3f4f6 !important;
+}
+
+/* Google Translate Widget Styling */
+.goog-te-banner-frame {
+  display: none !important;
+}
+
+.goog-te-gadget {
+  font-family: inherit;
+}
+
+.goog-te-gadget .goog-te-combo {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  color: #1f2937;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.dark .goog-te-gadget .goog-te-combo {
+  background-color: #1c252e;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.goog-te-gadget .goog-te-combo:hover {
+  background-color: #f3f4f6;
+}
+
+.dark .goog-te-gadget .goog-te-combo:hover {
+  background-color: #334155;
+}
+
+/* Fix for translated content in light mode */
+.light body {
+  color: #1f2937 !important;
+}
+
+.light p,
+.light span,
+.light div {
+  color: inherit;
+}
+
+.light h1,
+.light h2,
+.light h3,
+.light h4,
+.light h5,
+.light h6 {
+  color: #1f2937;
+}
+
+/* Ensure proper contrast in light mode */
+.light .bg-white {
+  background-color: #ffffff;
+}
+
+.light .text-white {
+  color: #1f2937;
+}

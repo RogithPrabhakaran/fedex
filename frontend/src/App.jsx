@@ -16,6 +16,9 @@ import DashboardView from '../views/DashboardView';
 import CustomersView from '../views/CustomersView';
 import DcaAgentsView from '../views/DcaAgentsView';
 import ProfileView from '../views/ProfileView';
+import DcaLeaderboardView from '../views/DcaLeaderboardView';
+import DcaAdminDashboard from '../views/DcaAdminDashboard';
+import AgencyDashboard from '../views/AgencyDashboard';
 
 // New Pages
 import SlaMonitor from './pages/SlaMonitor';
@@ -59,12 +62,17 @@ const AppContent = ({ user, onLogout }) => {
                         <nav className="flex items-center gap-1">
                             <NavItem to="/" label="Dashboard" active={location.pathname === '/' || location.pathname === '/dashboard'} />
                             <NavItem to="/customers" label="Debtors" active={location.pathname === '/customers'} />
-                            <NavItem to="/agents" label="Agencies" active={location.pathname === '/agents'} />
-                            <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-2"></div>
-                             {/* Role Specific Nav Items */}
-                             <NavItem to="/sla-monitor" label="SLA Monitor" active={location.pathname === '/sla-monitor'} badge="Live" />
-                             <NavItem to="/sop-compliance" label="SOP Compliance" active={location.pathname === '/sop-compliance'} />
-                             <NavItem to="/audit-logs" label="Audit Logs" active={location.pathname === '/audit-logs'} />
+                            <NavItem to="/agents" label={activeRole === ROLES.FEDEX_ADMIN ? 'Agencies' : 'Agents'} active={location.pathname === '/agents'} />
+                            
+                            {/* Role Specific Nav Items - Only show for FEDEX_ADMIN */}
+                            {activeRole === ROLES.FEDEX_ADMIN && (
+                                <>
+                                    <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-2"></div>
+                                    <NavItem to="/sla-monitor" label="SLA Monitor" active={location.pathname === '/sla-monitor'} badge="Live" />
+                                    <NavItem to="/sop-compliance" label="SOP Compliance" active={location.pathname === '/sop-compliance'} />
+                                    <NavItem to="/audit-logs" label="Audit Logs" active={location.pathname === '/audit-logs'} />
+                                </>
+                            )}
                         </nav>
                         <div className="ml-auto flex items-center gap-4">
                             <div className="text-right">
@@ -81,22 +89,33 @@ const AppContent = ({ user, onLogout }) => {
                         <Routes>
                             <Route path="/" element={
                                 <div className="relative">
-                                     <DashboardView />
-                                     {/* Inject Live Alerts Panel into Dashboard */}
-                                     <div className="fixed bottom-6 right-6 w-80 h-64 z-50 pointer-events-auto transform transition-transform hover:scale-105">
-                                         <LiveAlertsPanel />
-                                     </div>
+                                     {activeRole === ROLES.FEDEX_ADMIN && (
+                                        <div>
+                                            <DashboardView />
+                                            <div className="fixed bottom-6 right-6 w-80 h-64 z-50 pointer-events-auto transform transition-transform hover:scale-105">
+                                                <LiveAlertsPanel />
+                                            </div>
+                                        </div>
+                                     )}
+                                     {activeRole === ROLES.DCA_ADMIN && <DcaAdminDashboard />}
+                                     {activeRole === ROLES.DCA_AGENT && <AgencyDashboard user={user} />}
                                 </div>
                             } />
                             <Route path="/dashboard" element={<Navigate to="/" />} />
                             <Route path="/customers" element={<CustomersView />} />
-                            <Route path="/agents" element={<DcaAgentsView />} />
+                            <Route path="/agents" element={
+                                activeRole === ROLES.FEDEX_ADMIN ? <DcaLeaderboardView /> : <DcaAgentsView user={user} />
+                            } />
                             <Route path="/profile" element={<ProfileView />} />
                             
-                            {/* New Feature Routes */}
-                            <Route path="/sla-monitor" element={<SlaMonitor />} />
-                            <Route path="/sop-compliance" element={<SopCompliance />} />
-                            <Route path="/audit-logs" element={<AuditLogs />} />
+                            {/* FedEx Admin Only Routes */}
+                            {activeRole === ROLES.FEDEX_ADMIN && (
+                                <>
+                                    <Route path="/sla-monitor" element={<SlaMonitor />} />
+                                    <Route path="/sop-compliance" element={<SopCompliance />} />
+                                    <Route path="/audit-logs" element={<AuditLogs />} />
+                                </>
+                            )}
                         </Routes>
                     </div>
                 </main>
@@ -142,7 +161,7 @@ const App = () => {
                             <Route path="/login" element={ user ? <Navigate to="/" /> : <LoginView onLogin={handleLogin} /> } />
                             <Route path="*" element={<AppContent user={user} onLogout={handleLogout} />} />
                         </Routes>
-                        <Toaster position="top-right" theme="dark" richColors />
+                        <Toaster position="top-right" theme="dark" richColors closeButton />
                     </BrowserRouter>
                 </LanguageProvider>
             </AppProvider>
